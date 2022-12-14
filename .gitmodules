@@ -1,0 +1,6 @@
+[submodule "deps/lua-headers"]
+	path = deps/lua-headers
+	url = git@github.com:luapower/lua-headers.git
+[submodule "deps/sol"]
+	path = deps/sol
+	url = git@github.com:Rapptz/sol.git
