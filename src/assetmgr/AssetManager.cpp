@@ -1,12 +1,11 @@
 #include "AssetManager.h"
 #include "../log/log.h"
+#include "../scripting/lua_manager.h"
 #include "SDL_opengl.h"
 #include <glm/glm.hpp>
-#include "../scripting/lua_manager.h"
 
 std::map<std::string, int> textures;
 std::map<std::string, int> fonts;
-std::vector<std::string> loadedTexutes;
 
 CommancheRenderer* renderer;
 
@@ -18,10 +17,15 @@ void AssetManager::Initialize(CommancheRenderer* render) {
 
 void AssetManager::AddTexture(const std::string& assetId, const std::string& path) {
     int textureId = renderer->LoadTexture(path);
+
+    if (!renderer->IsTextureValid(textureId)) {
+        Log::Warn("Texture with invalid ID (" + std::to_string(textureId) + ") has tried to load");
+        return;
+    }
+
     CommancheTextureInfo inf = renderer->GetTextureInfo(textureId);
     Log::Inf("Texture has loaded id: " + assetId + " size: " + std::to_string(inf.width) + "x" + std::to_string(inf.height));
     textures.insert(std::make_pair(assetId, textureId));
-    loadedTexutes.push_back(assetId);
 }
 
 void AssetManager::AddFont(const std::string& assetId, const std::string& path, int fontSize) {
@@ -30,7 +34,12 @@ void AssetManager::AddFont(const std::string& assetId, const std::string& path, 
 }
 
 std::vector<std::string> AssetManager::GetLoadedTextures() {
-  return loadedTexutes;
+    std::vector<std::string> loadedTextures;
+    for (std::map<std::string, int>::iterator it = textures.begin(); it != textures.end(); ++it) {
+        loadedTextures.push_back(it->first);
+    }
+
+    return loadedTextures;
 }
 
 int AssetManager::GetFont(const std::string& assetId) {
@@ -44,15 +53,20 @@ int AssetManager::GetFont(const std::string& assetId) {
 }
 
 int AssetManager::GetTexture(const std::string& assetId) {
+    if (textures.find(assetId) == textures.end()) {
+        Log::Err("texture: " + assetId + " couldn't found in the registry");
+        return -1;
+    }
+
     return textures.at(assetId);
 }
 
-std::string AssetManager::GetTexture(int textureId){
-  for (auto it = textures.begin(); it != textures.end(); ++it)
-    if (it->second == textureId)
-        return it->first;
+std::string AssetManager::GetTexture(int textureId) {
+    for (auto it = textures.begin(); it != textures.end(); ++it)
+        if (it->second == textureId)
+            return it->first;
 
-  return std::string();
+    return std::string();
 }
 
 
