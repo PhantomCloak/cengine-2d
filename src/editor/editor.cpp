@@ -13,10 +13,13 @@
 #include <stdio.h>
 
 #define EDITOR_SHOW_MAP_EDITOR 1
+#define EDITOR_SHOW_SAVE_DIALOG 2
+#define EDITOR_SHOW_LOAD_DIALOG 3
 
 std::unordered_map<int, bool> windowFlags;
 std::shared_ptr<World> worldRef;
 SDL_Rect* cam;
+EngineSerializer* serializer;
 Map* mp;
 bool tileSetIsInit = false;
 
@@ -44,6 +47,7 @@ void Editor::Init(CommancheRenderer* renderer, Map* map, std::shared_ptr<World> 
     ImGui_ImplOpenGL2_Init();
 
     bus->SubscribeEvent(this, &Editor::onMousePressed);
+    serializer = new EngineSerializer(world);
 }
 
 Transform* draggableTransform;
@@ -58,13 +62,10 @@ void Editor::onMousePressed(MousePressedEvent& event) {
 void FileMenu() {
     if (ImGui::BeginMenu("File")) {
         if (ImGui::MenuItem("Save Map")) {
-            auto entities = worldRef->GetEntitiesByGroup("tiles");
-            MapLuaSerializer* ser = new MapLuaSerializer();
-
-            std::vector<std::string> lst = ser->EntityToEntry(entities);
-            ser->SaveEntry("aa", lst);
+            windowFlags[EDITOR_SHOW_SAVE_DIALOG] = true;
         }
         if (ImGui::MenuItem("Load Map")) {
+            windowFlags[EDITOR_SHOW_LOAD_DIALOG] = true;
         }
         ImGui::EndMenu();
     }
@@ -90,6 +91,35 @@ float pixelCordToUvX2(float x, int width) {
 void SelectMapTile(std::string mapName) {
 }
 
+void SaveDialog() {
+
+    ImGui::Begin("Save Menu");
+    static char* mapNameBuff = (char*)malloc(128);
+    ImGui::Text("Map Name: ");
+    ImGui::SameLine();
+    ImGui::InputText("##", mapNameBuff, 128);
+    ImGui::Spacing();
+    ImGui::Spacing();
+    if (ImGui::Button("OK")) {
+        serializer->SerializeWorldToFile("./assets/maps/" + std::string(mapNameBuff) + ".json");
+        windowFlags[EDITOR_SHOW_SAVE_DIALOG] = false;
+    }
+    ImGui::End();
+}
+
+void LoadDialog() {
+    ImGui::Begin("Load Menu");
+    static char* mapNameBuff = (char*)malloc(128);
+    ImGui::InputText("Map Name: ", mapNameBuff, 128);
+    ImGui::Spacing();
+    ImGui::Spacing();
+    if (ImGui::Button("OK")) {
+        serializer->DeserializeFileToWorld("./assets/maps/" + std::string(mapNameBuff) + ".json");
+        windowFlags[EDITOR_SHOW_LOAD_DIALOG] = false;
+    }
+    ImGui::End();
+}
+
 void MapEditor() {
     const int gridSize = 9;
     int currentGrid = 0;
@@ -104,12 +134,7 @@ void MapEditor() {
     ImGui::Text("atlas size = %d x %d", selectedMafInf.width, selectedMafInf.height);
     ImGui::Text("grid size = %d x %d", 64, 64);
 
-
-    static bool colliderUp = false;
-    static bool colliderDown = false;
-    static bool colliderRight = false;
-    static bool colliderLeft = false;
-    static bool colliderAll = false;
+    static bool collider = false;
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -132,12 +157,7 @@ void MapEditor() {
     }
     ImGui::Spacing();
     ImGui::Spacing();
-    ImGui::Checkbox("Collider Up   ", &colliderUp);
-    ImGui::SameLine();
-    ImGui::Checkbox("Collider Left", &colliderLeft);
-    ImGui::Checkbox("Collider Right", &colliderRight);
-    ImGui::SameLine();
-    ImGui::Checkbox("Collider Down", &colliderDown);
+    ImGui::Checkbox("Collider   ", &collider);
     ImGui::Spacing();
     ImGui::Spacing();
     int tileSize = 16;
@@ -162,21 +182,16 @@ void MapEditor() {
             pixelCordToUvY2(start.y + tileSize, selectedMafInf.height)))) {
 
 
-            Entity piece = Game::Instance->world->CreateEntity();
+            Entity piece = worldRef->CreateEntity();
             piece.Group("tiles");
 
             piece.AddComponent<Sprite>(selectedTextureId, 16, 16, zIndexStart, start.x, start.y);
+            piece.AddComponent<Serializable>();
             piece.AddComponent<Transform>(glm::vec2(100, 100), glm::vec2(4, 4), 0);
             piece.AddComponent<MapTile>(i);
 
-            if(colliderUp)
-            {
-              piece.AddComponent<BoxCollider>(1,16);
-            }
-
-            if(colliderDown)
-            {
-              piece.AddComponent<BoxCollider>(16,1);
+            if (collider) {
+                piece.AddComponent<BoxCollider>(16, 16);
             }
 
             draggableTransform = &piece.GetComponent<Transform>();
@@ -221,6 +236,12 @@ void Editor::Render() {
 
     if (windowFlags[EDITOR_SHOW_MAP_EDITOR]) {
         MapEditor();
+    }
+    if (windowFlags[EDITOR_SHOW_SAVE_DIALOG]) {
+        SaveDialog();
+    }
+    if (windowFlags[EDITOR_SHOW_LOAD_DIALOG]) {
+        LoadDialog();
     }
 
     if (draggableTransform != nullptr) {

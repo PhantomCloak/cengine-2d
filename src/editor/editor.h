@@ -22,5 +22,4 @@ class Editor {
     private:
     void onMousePressed(MousePressedEvent& event);
     std::shared_ptr<World> world;
-
 };
