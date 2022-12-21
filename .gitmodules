@@ -4,3 +4,9 @@
 [submodule "deps/sol"]
 	path = deps/sol
 	url = git@github.com:Rapptz/sol.git
+[submodule "libs/json"]
+	path = libs/json
+	url = https://github.com/taocpp/json.git
+[submodule "libs/box2d"]
+	path = libs/box2d
+	url = git@github.com:erincatto/box2d.git

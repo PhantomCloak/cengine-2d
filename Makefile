@@ -4,9 +4,11 @@ COMPILER_FLAGS = -Wall -Wfatal-errors -g
 INCLUDE_PATHS = -I"./libs" \
 		-I"./libs/lua" \
 		-I"./libs/imgui" \
+		-I"./libs/SimpleJSON" \
+		-I"./libs/box2d/include" \
 		-I"./libs/imgui/backends" \
 		-I/opt/homebrew/include 
-LIBRARY_PATHS = -L/opt/homebrew/lib 
+LIBRARY_PATHS = -L/opt/homebrew/lib
 SRC_FILES = ./src/*.cpp \
 	    ./src/game/*.cpp \
 	    ./src/ecs/*.cpp \
@@ -16,6 +18,7 @@ SRC_FILES = ./src/*.cpp \
 	    ./src/scripting/*.cpp \
 	    ./src/render/*.cpp \
 	    ./libs/imgui/*.cpp \
+	    ./libs/box2d/src/*/*.cpp \
 	    ./libs/imgui/backends/imgui_impl_sdl.cpp \
 	    ./libs/imgui/backends/imgui_impl_opengl2.cpp
 LINKER_FLAGS = `sdl2-config --cflags` `sdl2-config --libs` -lSDL2_ttf -lSDL2_image -llua -framework OpenGL
