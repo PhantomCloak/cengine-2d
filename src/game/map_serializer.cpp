@@ -17,6 +17,18 @@ std::vector<std::string> MapLuaSerializer::EntityToEntry(std::vector<Entity> ent
         entries.push_back("table.insert(tiles, addTile(\"" + AssetManager::GetTexture(sprite->texture) + "\"," + std::to_string((int)transform->pos.x) + "," + std::to_string((int)transform->pos.y) + "," + std::to_string(sprite->zIndex) + "," + std::to_string(tile->tileIndex) + "))");
     }
 
+    entries.push_back("colliders = {}");
+    for (auto entity : entities) {
+      if(entity.HasComponent<BoxCollider>() && entity.HasComponent<MapTile>()){
+        entries.push_back("table.insert(colliders, " + std::to_string(entity.GetId()) + ")");
+      }
+    }
+
+    entries.push_back("for colliderCtx = 1, #colliders do");
+    entries.push_back(" addCollider(collider[colliderCtx], 16)");
+    entries.push_back("end");
+
+
     return entries;
 }
 
