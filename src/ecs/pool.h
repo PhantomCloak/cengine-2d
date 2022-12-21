@@ -4,8 +4,8 @@
 #include <vector>
 
 class IPool {
-  public:
-    virtual ~IPool() {};
+    public:
+    virtual ~IPool(){};
 };
 
 template <typename T>
@@ -34,19 +34,19 @@ class Pool : public IPool {
     }
 
     void Add(int index, T component) {
-      components.push_back(component);
+        components.push_back(component);
     }
 
     void Set(int index, T component) {
-      components[index] = component;
+        components[index] = component;
     }
 
-    T& Get(int index){
-      return static_cast<T&>(components[index]);
+    T& Get(int index) {
+        return static_cast<T&>(components[index]);
     }
 
-    T& operator [] (int index){
-      return static_cast<T&>(components[index]);
+    T& operator[](int index) {
+        return static_cast<T&>(components[index]);
     }
 };
 #endif

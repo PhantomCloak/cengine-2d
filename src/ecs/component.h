@@ -1,5 +1,4 @@
-#ifndef COMPONENT_H
-#define COMPONENT_H
+#pragma once
 
 struct ComponentBase {
   protected:
@@ -13,6 +12,4 @@ public:
     static auto id = nextId++;
     return id;
   }
-
 };
-#endif
