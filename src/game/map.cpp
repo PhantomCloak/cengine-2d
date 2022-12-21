@@ -14,13 +14,25 @@ int mapWidth = 0;
 int mapHeight = 0;
 
 std::string tileAssetId;
-const int tileSize = 16;
-const float tileScale = 4;
 
-Map::Map(std::shared_ptr<World> world) {
+Map::Map(std::shared_ptr<World> world, int tileSize, float tileScale) {
     this->world = world;
-    LuaManager::RegisterCppToLuaFunc("addTile", &Map::PlaceTile, this);
+    this->tileSize = tileSize;
+    this->tileScale = tileScale;
+
     isInitialized = world->GetEntitiesByGroup("tiles").size() > 0;
+}
+
+
+int Map::GetEntityFromTileIndex(int tileIndex){
+    auto entities = world->GetEntitiesByGroup("tiles");
+
+    for(auto entity : entities){
+      if(entity.GetComponent<MapTile>().tileIndex == tileIndex)
+        return entity.GetId();
+    }
+
+    return 0;
 }
 
 void Map::Init(std::string assetId, int tileSize, int tileScale) {
