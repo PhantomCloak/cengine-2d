@@ -195,6 +195,10 @@ void CommancheRenderer::DrawImage(int textureId, int x, int y, int width, int he
     glDisable(GL_TEXTURE_2D);
 }
 
+bool CommancheRenderer::IsTextureValid(int textureId){
+  return glIsTexture(textureId);
+}
+
 void CommancheRenderer::DrawText(int fontId, std::string message, int x, int y, int size, CommancheColorRGB color) {
 
     int textureToDraw = GenerateTextureFromText(message, fontId, color);
@@ -237,7 +241,7 @@ int CommancheRenderer::LoadTexture(std::string path) {
     GLenum texture_format = NULL;
 
     if (surface == NULL) {
-        Log::Err("An error occured while trying to load image");
+        Log::Err("An error occured while trying to load image " + path);
         return -1;
     }
 
@@ -256,7 +260,7 @@ int CommancheRenderer::LoadTexture(std::string path) {
         else
             texture_format = GL_BGR;
     } else {
-        printf("warning: the image is not truecolor...this will break ");
+        Log::Warn("warning: the " + path + " is not truecolor...this will break ");
     }
 
     glGenTextures(1, &texture);
