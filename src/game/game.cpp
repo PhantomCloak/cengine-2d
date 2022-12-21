@@ -1,12 +1,13 @@
 #include "game.h"
 #include "../log/log.h"
 #include "../scripting/lua_manager.h"
+#include "wapper.h"
 #include <filesystem>
 #include <iostream>
 
 int Game::mapHeight = 0;
 int Game::mapWidth = 0;
-Game* Game::Instance = nullptr;
+Wrapper* wrapper;
 glm::vec2 Game::cursor;
 
 Game::Game() {
@@ -16,9 +17,19 @@ Game::Game() {
     renderer = new CommancheRenderer();
     editor = new Editor();
     AssetManager::Initialize(renderer);
-    Instance = this;
     Log::Inf("Game Constructor Called");
 
+    wrapper = new Wrapper(world);
+
+    LuaManager::InitSandbox();
+
+    LuaManager::RegisterCppToLuaFunc("addTile", &Map::PlaceTile, map);
+    LuaManager::RegisterCppToLuaFunc("getEntityFromTileIndex", &Map::GetEntityFromTileIndex, map);
+    LuaManager::RegisterCppToLuaFunc("addCollider", &Wrapper::AddCollider, wrapper);
+
+    LuaManager::LoadLuaFile("./assets/scripts/config.lua");
+    sol::table initCfg = LuaManager::LoadLuaTable("config");
+    this->map = new Map(world, initCfg["map"]["tile_size"], initCfg["map"]["tile_scale"]);
 }
 
 Game::~Game() {
@@ -31,16 +42,13 @@ void Game::Initialize() {
         printf("Error: %s\n", SDL_GetError());
     }
 
-    //sol::table cfg = LuaManager::LoadLuaTable("config");
+    sol::table displayCfg = LuaManager::LoadLuaTable("config");
 
-    //int screenW = cfg["resolution"]["width"];
-    //int screenH = cfg["resolution"]["height"];
+    int screenW = displayCfg["resolution"]["width"];
+    int screenH = displayCfg["resolution"]["height"];
 
-    int screenW = 1920;
-    int screenH = 1080;
-    this->lvl = new Map(world);
     renderer->Initialize("Twelve Villages", screenW, screenH);
-    editor->Init(renderer, lvl, world, &camera, world->eventBus);
+    editor->Init(renderer, map, world, &camera, world->eventBus);
 
     isRunning = true;
 
@@ -48,14 +56,12 @@ void Game::Initialize() {
     camera.y = 0;
     camera.w = screenW;
     camera.h = screenH;
-
-    LuaManager::InitSandbox();
-    LuaManager::LoadLuaFilesInDirectory("./assets/scripts/pre_load");
 }
 
 
 void Game::Setup() {
     // Setup Systems
+    LuaManager::LoadLuaFilesInDirectory("./assets/scripts/pre_load");
     Log::Warn("Engine is starting");
 
     // Setup Assets
@@ -71,7 +77,7 @@ void Game::Setup() {
     world->AddSystem<CollisionResolver>(world->eventBus);
     world->AddSystem<DamageSystem>(world->eventBus);
     world->AddSystem<CharacterSystem>(world->eventBus);
-    world->AddSystem<CameraSystem>(&camera, lvl);
+    world->AddSystem<CameraSystem>(&camera, map);
     world->AddSystem<ProjectileSystem>();
     world->AddSystem<ProjectileEmitterSystem>(world, world->eventBus);
 
@@ -84,14 +90,17 @@ void Game::Setup() {
     chopper.AddComponent<Sprite>(AssetManager::GetTexture("chopper"), 32, 32, 1);
     chopper.AddComponent<Animation>(2, 25, true);
     chopper.AddComponent<Camera>();
-    chopper.AddComponent<Health>(100);
+    //chopper.AddComponent<Health>(100);
     chopper.AddComponent<BoxCollider>(32, 32);
     chopper.AddComponent<CharacterController>(80);
     chopper.AddComponent<ProjectileEmitter>(true, glm::vec2(200, 200), 10000, 1500, 10);
 
     Entity text = world->CreateEntity();
     const SDL_Color& color = { 255, 255, 255 };
+    text.AddComponent<Health>();
     text.AddComponent<Label>(glm::vec2(1920 / 2 - 120, 200), "CENGINE-2D", "charriot-font", color);
+
+    std::vector<Entity> ent = world->GetComponentEntities<Health>();
 }
 
 void Game::Update() {

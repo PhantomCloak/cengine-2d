@@ -39,7 +39,6 @@ class Game {
     static glm::vec2 cursor;
     static int mapHeight;
     static int mapWidth;
-    static Game* Instance;
     std::shared_ptr<World> world;
 
     SDL_Rect camera;
@@ -50,7 +49,7 @@ class Game {
     int windowHeight;
     int tickLastFrame;
     sol::state lua;
-    Map* lvl;
+    Map* map;
 
 #if EDITOR
     Editor* editor;
