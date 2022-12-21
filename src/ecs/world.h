@@ -5,9 +5,12 @@
 #include "../log/log.h"
 #include "entity.h"
 #include "pool.h"
+#include "serializer.h"
 #include "system.h"
 #include "wstorage.h"
+#include <algorithm>
 #include <deque>
+#include <iostream>
 #include <set>
 #include <typeindex>
 #include <unordered_map>
@@ -30,9 +33,12 @@ class World {
     WorldStorage* storage;
     World();
     Entity CreateEntity();
+    Entity GetEntity(int entityId);
     void KillEntity(Entity& entity);
     void Update();
 
+    template <typename TComponent>
+    std::vector<Entity> GetComponentEntities();
     // Tag Management
     void TagEntity(Entity entity, const std::string& tag);
     bool EntityHasTag(Entity entity, const std::string& tag) const;
@@ -61,6 +67,28 @@ class World {
     void RemoveEntityFromSystems(Entity entity);
     ~World() = default;
 };
+
+
+template <typename TComponent>
+std::vector<Entity> World::GetComponentEntities() {
+    std::vector<Entity> entityList;
+    const int componentId = Component<TComponent>::GetId();
+
+    for (int entityId = 0; entityId < storage->entityComponentRegistry.size(); entityId++) {
+        bool entityIsActive = std::find(freeIds.begin(), freeIds.end(), entityId) == freeIds.end();
+        if (!entityIsActive)
+            continue;
+
+        bool hasComponent = storage->entityComponentRegistry[entityId].test(componentId);
+        if (!hasComponent)
+            continue;
+        Entity entity = Entity(entityId);
+        entity.SetOwner(this);
+        entityList.push_back(entity);
+    }
+
+    return entityList;
+}
 
 template <typename TSystem, typename... TArgs>
 void World::AddSystem(TArgs&&... args) {

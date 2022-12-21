@@ -43,6 +43,10 @@ void World::KillEntity(Entity& entity) {
     entityRemoveQueue.insert(entity);
 }
 
+Entity World::GetEntity(int entityId){
+  return Entity(entityId);
+};
+
 void World::AddEntityToSystems(Entity entity) {
     const auto entityId = entity.GetId();
     const auto& entityEnabledComponents = storage->entityComponentRegistry[entityId];
@@ -118,6 +122,12 @@ void World::RemoveEntityGroup(Entity entity) {
 }
 
 bool World::EntityIsInGroup(Entity entity, const std::string& group) const {
+
+    auto groupToEntitiesIterator = groupToEntitiesMap.find(group);
+    if (groupToEntitiesIterator == groupToEntitiesMap.end()) {
+        return false;
+    }
+
     auto entityIterator = groupToEntitiesMap.at(group);
     return entityIterator.find(entity.GetId()) != entityIterator.end();
 }
