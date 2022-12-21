@@ -1,0 +1,12 @@
+#pragma once
+#include "../systems/CameraSystem.h"
+#include "../systems/CollisionResolver.h"
+#include "../systems/ProjectileEmitterSystem.h"
+#include "../systems/Animator.h"
+#include "../systems/CharacterSystem.h"
+#include "../systems/DamageSystem.h"
+#include "../systems/Movement.h"
+#include "../systems/Render2D.h"
+#include "../systems/RenderDebug.h"
+#include "../systems/ProjectileSystem.h"
+#include "../systems/RenderText2D.h"
