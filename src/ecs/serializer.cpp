@@ -2,6 +2,7 @@
 #include "../assetmgr/AssetManager.h"
 #include "../ecs/world.h"
 #include "../game/components.h"
+#include "../render/render_primitives.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -12,12 +13,12 @@ EngineSerializer::EngineSerializer(std::shared_ptr<World> worldRef) {
     world = worldRef;
 }
 
-giri::json::JSON SerializeType(SDL_Rect rect) {
+giri::json::JSON SerializeType(CommancheRect rect) {
     giri::json::JSON selfJson = giri::json::JSON();
     selfJson["x"] = rect.x;
     selfJson["y"] = rect.y;
-    selfJson["h"] = rect.h;
-    selfJson["w"] = rect.w;
+    selfJson["h"] = rect.height;
+    selfJson["w"] = rect.width;
     return selfJson;
 }
 
@@ -32,12 +33,12 @@ glm::vec2 DeserializeVec2Type(giri::json::JSON json) {
     return glm::vec2(json["x"].ToFloat(), json["y"].ToFloat());
 }
 
-SDL_Rect DeserializeSDLRectType(giri::json::JSON json) {
-    SDL_Rect rect;
+CommancheRect DeserializeSDLRectType(giri::json::JSON json) {
+    CommancheRect rect;
     rect.x = json["x"].ToInt();
     rect.y = json["y"].ToInt();
-    rect.w = json["w"].ToInt();
-    rect.h = json["h"].ToInt();
+    rect.width = json["w"].ToInt();
+    rect.height = json["h"].ToInt();
     return rect;
 }
 

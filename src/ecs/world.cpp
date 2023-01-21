@@ -3,7 +3,6 @@
 
 World::World() {
     storage = new WorldStorage();
-    eventBus = std::make_shared<EventBus>();
 }
 
 Entity World::CreateEntity() {

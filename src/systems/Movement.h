@@ -18,6 +18,7 @@ class MovementSystem : public System
     void Update(float dt)
     {
       for(auto entity : GetEntities()){
+        return;
         auto& transform = entity.GetComponent<Transform>();
         const auto rigidbody = entity.GetComponent<RigidBody>();
 

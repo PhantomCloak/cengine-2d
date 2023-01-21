@@ -4,16 +4,16 @@
 #include "../ecs/system.h"
 #include "../ecs/world.h"
 #include "../game/map.h"
-#include "SDL_rect.h"
+#include "../render/render_primitives.h"
 
 class CameraSystem : public System {
     private:
-    SDL_Rect* camera;
+    CommancheRect* camera;
     int mapWidth;
     int mapHeight;
 
     public:
-    CameraSystem(SDL_Rect* camera, Map* map) {
+    CameraSystem(CommancheRect* camera, Map* map) {
         this->camera = camera;
         //this->mapWidth = map->GetMapWidth();
         //this->mapHeight = map->GetMapHeight();
@@ -26,8 +26,8 @@ class CameraSystem : public System {
         for (auto& entity : GetEntities()) {
             auto& transform = entity.GetComponent<Transform>();
 
-            camera->x = glm::clamp(transform.pos.x - camera->w / 2, 0.f, (float)mapWidth - camera->w);
-            camera->y = glm::clamp(transform.pos.y - camera->h / 2, 0.f, (float)mapHeight - camera->h);
+            camera->x = glm::clamp(transform.pos.x - camera->width / 2, 0.f, (float)mapWidth - camera->width);
+            camera->y = glm::clamp(transform.pos.y - camera->height / 2, 0.f, (float)mapHeight - camera->height);
         }
     }
 };

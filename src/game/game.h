@@ -1,13 +1,12 @@
 #ifndef GAME_H
 #define GAME_H
 
-#define EDITOR true
+#define EDITOR false
 #define LUA_SUPPORT true
 
 #include "../ecs/world.h"
 #include "commanche2d.h"
 #include "glm/glm.hpp"
-#include <SDL.h>
 #include <iostream>
 #include <sol/sol.hpp>
 
@@ -41,7 +40,7 @@ class Game {
     static int mapWidth;
     std::shared_ptr<World> world;
 
-    SDL_Rect camera;
+    CommancheCamera camera;
     CommancheRenderer* renderer;
     private:
     bool isDebug = false;
@@ -50,6 +49,7 @@ class Game {
     int tickLastFrame;
     sol::state lua;
     Map* map;
+    EventBus* bus;
 
 #if EDITOR
     Editor* editor;

@@ -1,7 +1,6 @@
 #include "AssetManager.h"
 #include "../log/log.h"
 #include "../scripting/lua_manager.h"
-#include "SDL_opengl.h"
 #include <glm/glm.hpp>
 
 std::map<std::string, int> textures;
@@ -12,7 +11,6 @@ CommancheRenderer* renderer;
 void AssetManager::Initialize(CommancheRenderer* render) {
     renderer = render;
     Log::Inf("Asset manager initialized");
-    LuaManager::RegisterCppToLuaFunc("addTexture", &AssetManager::AddTexture);
 }
 
 void AssetManager::AddTexture(const std::string& assetId, const std::string& path) {
@@ -29,8 +27,8 @@ void AssetManager::AddTexture(const std::string& assetId, const std::string& pat
 }
 
 void AssetManager::AddFont(const std::string& assetId, const std::string& path, int fontSize) {
-    int fontId = renderer->LoadFont(path, fontSize);
-    fonts.emplace(std::make_pair(assetId, fontId));
+    // int fontId = renderer->LoadFont(path, fontSize);
+    // fonts.emplace(std::make_pair(assetId, fontId));
 }
 
 std::vector<std::string> AssetManager::GetLoadedTextures() {

@@ -1,5 +1,4 @@
-#ifndef TRANSFORM_H
-#define TRANSFORM_H
+#pragma once
 
 #include <glm/glm.hpp>
 
@@ -15,5 +14,3 @@ struct Transform{
     this->rotation = rotation;
   };
 };
-
-#endif

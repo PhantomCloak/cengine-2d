@@ -5,6 +5,7 @@
 #include "../ecs/world.h"
 #include "../game/game.h"
 #include "../game/map_serializer.h"
+#include "../libs/imgui/imgui.h"
 #include "imgui.h"
 #include "imgui_impl_opengl2.h"
 #include "imgui_impl_sdl.h"
@@ -18,35 +19,45 @@
 
 std::unordered_map<int, bool> windowFlags;
 std::shared_ptr<World> worldRef;
-SDL_Rect* cam;
+CommancheCamera* cam;
 EngineSerializer* serializer;
 Map* mp;
 bool tileSetIsInit = false;
 
+static ImGuiIO io;
 static int zIndexStart = 800;
-void SubscribeToEvents(std::shared_ptr<EventBus>& eventBus) {
-}
 
-void Editor::Init(CommancheRenderer* renderer, Map* map, std::shared_ptr<World> world, SDL_Rect* camera, std::shared_ptr<EventBus> bus) {
+void Editor::Init(CommancheRenderer* renderer, Map* map, std::shared_ptr<World> world, CommancheCamera* camera, EventBus* bus) {
     worldRef = world;
     cam = camera;
     mp = map;
 
-    SDL_GL_MakeCurrent((SDL_Window*)renderer->wnd, renderer->gctx);
+    //SDL_GL_MakeCurrent((SDL_Window*)renderer->wnd, renderer->gctx);
     MapLuaSerializer ser;
     std::vector<std::string> a;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
-    ImGuiIO& io = ImGui::GetIO();
+    io = ImGui::GetIO();
     (void)io;
+
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+    io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
+    io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
+    io.BackendFlags |= ImGuiBackendFlags_HasMouseHoveredViewport;
+
 
     ImGui::StyleColorsDark();
 
-    ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)renderer->wnd, renderer->gctx);
-    ImGui_ImplOpenGL2_Init();
+    //ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)renderer->wnd, renderer->gctx);
+    //ImGui_ImplOpenGL2_Init();
 
-    bus->SubscribeEvent(this, &Editor::onMousePressed);
+
+    // bus->SubscribeEvent(this, &Editor::onMousePressed);
     serializer = new EngineSerializer(world);
 }
 
@@ -218,14 +229,16 @@ void InterpolateToGrid(glm::vec2* vec, int gridSize) {
     vec->y = floor(vec->y / gridSize) * gridSize;
 }
 
-void Editor::ProcessInput(SDL_Event* event) {
-    ImGui_ImplSDL2_ProcessEvent(event);
-}
+//void Editor::ProcessInput(SDL_Event* event) {
+//    ImGui_ImplSDL2_ProcessEvent(event);
+//}
 
+ImGuiWindowFlags window_flags = 0;
 void Editor::Render() {
-    ImGui_ImplOpenGL2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
+    //ImGui_ImplOpenGL2_NewFrame();
+    //ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
+
 
     if (ImGui::BeginMainMenuBar()) {
         FileMenu();
@@ -252,7 +265,14 @@ void Editor::Render() {
         InterpolateToGrid(&pos, 32);
         draggableTransform->pos = pos;
     }
+
+
     ImGui::EndFrame();
     ImGui::Render();
+
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
+    //ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }

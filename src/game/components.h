@@ -1,6 +1,7 @@
 #pragma once
 #include "../components/CharacterController.h"
 #include "../components/Transform.h"
+#include "../components/RectTransform.h"
 #include "../components/Animation.h"
 #include "../components/BoxCollider.h"
 #include "../components/Camera.h"
@@ -12,3 +13,4 @@
 #include "../components/Label.h"
 #include "../components/MapTile.h"
 #include "../components/Serializable.h"
+#include "../components/Mesh.h"

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "SDL_timer.h"
-
 struct Projectile {
     bool friendly;
     int hitPercentageDmg;
@@ -12,6 +10,6 @@ struct Projectile {
         this->friendly = friendly;
         this->hitPercentageDmg = hitPercentageDmg;
         this->duration = duration;
-        startTime = SDL_GetTicks();
+        //startTime = SDL_GetTicks();
     }
 };

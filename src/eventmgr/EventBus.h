@@ -1,77 +1,76 @@
 #ifndef EVENTBUS_H
 #define EVENTBUS_H
 
+#include "../log/log.h"
 #include <list>
-#include <map>
+#include <string>
 #include <typeindex>
+#include <unordered_map>
 #include <util.h>
 
-class Event {
+class IEvent {
     public:
-    Event() = default;
+    virtual void Clear(){};
+    virtual ~IEvent(){};
 };
 
-class IEventCallback {
-    private:
-    virtual void Call(Event& a) = 0;
-
+template <typename T>
+class EventQueue : public IEvent {
     public:
-    virtual ~IEventCallback() = default;
-    void Execute(Event& e) {
-        Call(e);
+    std::vector<T> events;
+
+    EventQueue() = default;
+    void Clear() override {
+        events.clear();
+    }
+
+    void Add(T event) {
+        events.push_back(event);
+    }
+
+    virtual ~EventQueue() {
+        Clear();
     }
 };
-
-template <typename TSrc, typename TEvent>
-class EventCallback : public IEventCallback {
-    private:
-    typedef void (TSrc::*CallbackFunction)(TEvent&);
-    TSrc* instance;
-    CallbackFunction callback;
-    virtual void Call(Event& e) override {
-        std::invoke(callback, instance, static_cast<TEvent&>(e));
-    }
-
-    public:
-    EventCallback(TSrc* instance, CallbackFunction callback) {
-        this->instance = instance;
-        this->callback = callback;
-    }
-    virtual ~EventCallback() override = default;
-};
-
-typedef std::list<std::unique_ptr<IEventCallback>> HandlerList;
 
 class EventBus {
     public:
-    std::map<std::type_index, std::unique_ptr<HandlerList>> subs;
-    EventBus() {
-    }
-    ~EventBus() {
-    }
+    std::unordered_map<std::type_index, IEvent*> queueStorage;
 
-    template <typename TEvent, typename TInstance>
-    void SubscribeEvent(TInstance* instance, void (TInstance::*callback)(TEvent&)) {
-        if (!subs[typeid(TEvent)].get()) {
-            subs[typeid(TEvent)] = std::make_unique<HandlerList>();
-        }
-
-        auto subscriber = std::make_unique<EventCallback<TInstance, TEvent>>(instance, callback);
-        subs[typeid(TEvent)]->push_back(std::move(subscriber));
-    }
+    EventBus() = default;
+    ~EventBus() = default;
 
     template <typename TEvent, typename... TArgs>
-    void EmitEvent(TArgs&&... args) {
-        auto handlers = subs[typeid(TEvent)].get();
+    void PushEvent(TArgs&&... args) {
+        const std::type_info& type = typeid(TEvent);
+        if (queueStorage.find(std::type_index(type)) == queueStorage.end()) {
+            queueStorage[std::type_index(type)] = new EventQueue<TEvent>();
+        }
 
-        if (!handlers)
-            return;
+        auto v = queueStorage.at(std::type_index(type));
+        EventQueue<TEvent>* ref = static_cast<EventQueue<TEvent>*>(v);
+        TEvent event(std::forward<TArgs>(args)...);
+        ref->Add(event);
+    }
 
-        for (auto it = handlers->begin(); it != handlers->end(); it++) {
-            auto handler = it->get();
-            TEvent event(std::forward<TArgs>(args)...);
-            handler->Execute(event);
+
+    template <typename TEvent>
+    std::vector<TEvent> GetEvents() const {
+        const std::type_info& type = typeid(TEvent);
+        if (queueStorage.find(std::type_index(type)) == queueStorage.end()) {
+            Log::Warn(std::string("an system tried to access evet type that hasn't registered yet ") + type.name());
+            return std::vector<TEvent>();
+        }
+        auto v = queueStorage.at(std::type_index(type));
+        EventQueue<TEvent>* ref = static_cast<EventQueue<TEvent>*>(v);
+        return ref->events;
+    }
+
+    void ClearEvents() {
+        for (auto queue : queueStorage) {
+            queue.second->Clear();
         }
     }
 };
+
 #endif

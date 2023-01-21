@@ -18,7 +18,7 @@ class DamageSystem : public System {
     }
 
     void SubscribeToEvents(std::shared_ptr<EventBus>& eventBus) {
-        eventBus->SubscribeEvent(this, &DamageSystem::onCollision);
+        //eventBus->SubscribeEvent(this, &DamageSystem::onCollision);
     }
 
     void onCollision(CollisionEvent& event) {

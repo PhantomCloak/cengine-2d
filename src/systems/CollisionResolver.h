@@ -2,6 +2,7 @@
 #define COLLISIONRESOLVER_H
 
 #include "../components/BoxCollider.h"
+#include "../components/TileCollider.h"
 #include "../components/Transform.h"
 #include "../ecs/system.h"
 #include "../ecs/world.h"
@@ -20,6 +21,7 @@ class CollisionResolver : public System {
 
     void Update() {
         for (Entity& a : GetEntities()) {
+
             auto aCol = a.GetComponent<BoxCollider>();
             auto aTransf = a.GetComponent<Transform>();
 
@@ -29,6 +31,7 @@ class CollisionResolver : public System {
             for (Entity& b : GetEntities()) {
                 if (a == b)
                     continue;
+
                 auto bCol = b.GetComponent<BoxCollider>();
                 auto bTransf = b.GetComponent<Transform>();
 
@@ -49,7 +52,7 @@ class CollisionResolver : public System {
 
                 if (isColliding) {
                     Log::Err("Collided!");
-                    eventBus->EmitEvent<CollisionEvent>(a, b);
+                    //eventBus->EmitEvent<CollisionEvent>(a, b);
                 }
             }
         }

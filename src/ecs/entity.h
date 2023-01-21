@@ -14,6 +14,7 @@ class Entity {
     WorldStorage* owner;
 
     public:
+    Entity() = default;
     Entity(int id)
     : id(id){};
     int GetId() const;
@@ -110,7 +111,6 @@ TComponent& Entity::GetComponent() const {
     const int entityId = GetId();
 
     auto componentPool = std::static_pointer_cast<Pool<TComponent>>(owner->componentPools[componentId]);
-
     return componentPool->Get(entityId);
 }
 

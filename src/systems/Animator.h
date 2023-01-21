@@ -17,8 +17,8 @@ class Animator : public System {
           auto& animationComponent = entity.GetComponent<Animation>();
           auto& spriteComponent = entity.GetComponent<Sprite>();
 
-          animationComponent.currentFrame = (int)((SDL_GetTicks() - animationComponent.startTime) * animationComponent.frameSpeed / 1000.0) % animationComponent.numFrames;
-          spriteComponent.srcRect.x = animationComponent.currentFrame * spriteComponent.width;
+          //animationComponent.currentFrame = (int)((SDL_GetTicks() - animationComponent.startTime) * animationComponent.frameSpeed / 1000.0) % animationComponent.numFrames;
+          //spriteComponent.srcRect.x = animationComponent.currentFrame * spriteComponent.width;
         }
     }
 };

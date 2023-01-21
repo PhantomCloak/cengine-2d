@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../ecs/world.h"
-#include "SDL_render.h"
 #include <glm/glm.hpp>
 #include <iostream>
 #include <sol/sol.hpp>

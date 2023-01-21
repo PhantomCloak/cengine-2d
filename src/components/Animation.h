@@ -1,7 +1,6 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-#include "SDL_timer.h"
 #include "glm/glm.hpp"
 
 struct Animation {
@@ -16,7 +15,7 @@ struct Animation {
     this->numFrames = numFrames;
     this->frameSpeed = frameSpeed;
     this->isLoop = isLoop;
-    startTime = SDL_GetTicks();
+    //startTime = SDL_GetTicks();
   };
 };
 #endif

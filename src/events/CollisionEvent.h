@@ -4,7 +4,7 @@
 #include "../ecs/entity.h"
 #include "../eventmgr/EventBus.h"
 
-class CollisionEvent : public Event {
+class CollisionEvent {
     public:
     Entity a;
     Entity b;

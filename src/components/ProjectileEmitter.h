@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SDL_timer.h"
+//#include "SDL_timer.h"
 #include "glm/glm.hpp"
 
 struct ProjectileEmitter {
@@ -17,6 +17,6 @@ struct ProjectileEmitter {
         this->particleDuration = particleDuration;
         this->repeatFrequency = repeatFrequency;
         this->projectileDamage = damage;
-        this->lastEmitTime = SDL_GetTicks();
+        //this->lastEmitTime = SDL_GetTicks();
     }
 };

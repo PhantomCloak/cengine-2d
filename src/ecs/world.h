@@ -29,7 +29,6 @@ class World {
     std::unordered_map<int, std::string> entityToGroupMap;
 
     public:
-    std::shared_ptr<EventBus> eventBus;
     WorldStorage* storage;
     World();
     Entity CreateEntity();

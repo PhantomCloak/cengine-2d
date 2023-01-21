@@ -1,20 +1,27 @@
 #pragma once
 
 #include "../eventmgr/EventBus.h"
-#include "SDL_keycode.h"
 
-class KeyPressedEvent : public Event {
+class KeyPressEvent {
     public:
-    SDL_Keycode symbol;
-    KeyPressedEvent(SDL_Keycode symbol)
-    : symbol(symbol) {
-    }
+    const uint8_t* keyboard;
+    //KeyPressEvent(const uint8_t* keyboard)
+    //: keyboard(keyboard) {
+    //}
 };
 
-class MousePressedEvent : public Event {
+class KeyPressUpEvent {
     public:
-    SDL_Keycode symbol;
-    MousePressedEvent(SDL_Keycode symbol)
-    : symbol(symbol) {
-    }
+    int key;
+    //KeyPressUpEvent(SDL_Keycode key)
+    //: key(key) {
+    //}
+};
+
+class MousePressedEvent {
+    public:
+    int symbol;
+    //MousePressedEvent(SDL_Keycode symbol)
+    //: symbol(symbol) {
+    //}
 };

@@ -2,6 +2,7 @@
 #include "../log/log.h"
 #include "../scripting/lua_manager.h"
 #include "wapper.h"
+#include "../common/common.h"
 #include <filesystem>
 #include <iostream>
 
@@ -15,7 +16,8 @@ Game::Game() {
     world = std::make_unique<World>();
     cursor = glm::vec2(0);
     renderer = new CommancheRenderer();
-    editor = new Editor();
+    //editor = new Editor();
+    bus = new EventBus();
     AssetManager::Initialize(renderer);
     Log::Inf("Game Constructor Called");
 
@@ -26,6 +28,7 @@ Game::Game() {
     LuaManager::RegisterCppToLuaFunc("addTile", &Map::PlaceTile, map);
     LuaManager::RegisterCppToLuaFunc("getEntityFromTileIndex", &Map::GetEntityFromTileIndex, map);
     LuaManager::RegisterCppToLuaFunc("addCollider", &Wrapper::AddCollider, wrapper);
+    LuaManager::RegisterCppToLuaFunc("addTexture", &AssetManager::AddTexture);
 
     LuaManager::LoadLuaFile("./assets/scripts/config.lua");
     sol::table initCfg = LuaManager::LoadLuaTable("config");
@@ -38,9 +41,6 @@ Game::~Game() {
 
 
 void Game::Initialize() {
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-        printf("Error: %s\n", SDL_GetError());
-    }
 
     sol::table displayCfg = LuaManager::LoadLuaTable("config");
 
@@ -48,14 +48,13 @@ void Game::Initialize() {
     int screenH = displayCfg["resolution"]["height"];
 
     renderer->Initialize("Twelve Villages", screenW, screenH);
-    editor->Init(renderer, map, world, &camera, world->eventBus);
-
     isRunning = true;
 
     camera.x = 0;
     camera.y = 0;
-    camera.w = screenW;
-    camera.h = screenH;
+    camera.width = screenW;
+    camera.height = screenH;
+    camera.gridSize = 64;
 }
 
 
@@ -74,94 +73,99 @@ void Game::Setup() {
     world->AddSystem<RenderText2D>(renderer, &camera);
     world->AddSystem<RenderDebug>(renderer, &camera);
     world->AddSystem<Animator>();
-    world->AddSystem<CollisionResolver>(world->eventBus);
-    world->AddSystem<DamageSystem>(world->eventBus);
-    world->AddSystem<CharacterSystem>(world->eventBus);
-    world->AddSystem<CameraSystem>(&camera, map);
+    world->AddSystem<Physics>();
+    world->AddSystem<CharacterSystem>(bus, &camera);
     world->AddSystem<ProjectileSystem>();
-    world->AddSystem<ProjectileEmitterSystem>(world, world->eventBus);
 
-    // Setup Entities
-    Entity chopper = world->CreateEntity();
-    chopper.Tag("player");
+    //Entity text = world->CreateEntity();
+    //const CommancheColorRGB& color = { 255, 255, 255 };
+    //text.AddComponent<Health>();
+    //text.AddComponent<Label>(glm::vec2(1920 / 2 - 120, 200), "CENGINE-2D", "charriot-font", color);
 
-    chopper.AddComponent<Transform>(glm::vec2(10, 30), glm::vec2(2, 2), 0);
-    chopper.AddComponent<RigidBody>(glm::vec2(0, 0));
-    chopper.AddComponent<Sprite>(AssetManager::GetTexture("chopper"), 32, 32, 1);
-    chopper.AddComponent<Animation>(2, 25, true);
-    chopper.AddComponent<Camera>();
-    //chopper.AddComponent<Health>(100);
-    chopper.AddComponent<BoxCollider>(32, 32);
-    chopper.AddComponent<CharacterController>(80);
-    chopper.AddComponent<ProjectileEmitter>(true, glm::vec2(200, 200), 10000, 1500, 10);
 
-    Entity text = world->CreateEntity();
-    const SDL_Color& color = { 255, 255, 255 };
-    text.AddComponent<Health>();
-    text.AddComponent<Label>(glm::vec2(1920 / 2 - 120, 200), "CENGINE-2D", "charriot-font", color);
+    Entity player = world->CreateEntity();
+    player.AddComponent<RectTransform>(glm::vec2(40, 40), glm::vec2(1, 1), glm::vec2(1, 1), 0);
+    player.AddComponent<Sprite>(AssetManager::GetTexture("box"), 10, 10);
+    //player.AddComponent<CharacterController>(5,1,1,1);
+    player.AddComponent<Mesh>();
+    player.AddComponent<RigidBody>(false);
 
-    std::vector<Entity> ent = world->GetComponentEntities<Health>();
+
+    //Entity platform = world->CreateEntity();
+    //platform.AddComponent<RectTransform>(glm::vec2(2, 10), glm::vec2(4, 1), glm::vec2(1, 1), 0);
+    //platform.AddComponent<Sprite>(AssetManager::GetTexture("box2"), 100, 32, 1);
+    //platform.AddComponent<Mesh>();
+    //platform.AddComponent<RigidBody>(true, 0, glm::vec2(0, 0));
+
+
+    //Entity platform2 = world->CreateEntity();
+    //platform2.AddComponent<RectTransform>(glm::vec2(14, 10), glm::vec2(4, 1), glm::vec2(1, 1), 0);
+    //platform2.AddComponent<Sprite>(AssetManager::GetTexture("box2"), 100, 32, 1);
+    //platform2.AddComponent<Mesh>();
+    //platform2.AddComponent<RigidBody>(true, 0, glm::vec2(0, 0));
 }
-
 void Game::Update() {
-    int timeToWait = FRAME_TIME_LENGTH - (SDL_GetTicks() - tickLastFrame);
+    int timeToWait = FRAME_TIME_LENGTH - (getTime() - tickLastFrame);
 
     if (timeToWait > 0 && timeToWait <= FRAME_TIME_LENGTH) {
-        SDL_Delay(timeToWait);
+        sleepProgram(timeToWait);
     }
 
-    float dt = (SDL_GetTicks() - tickLastFrame) / 1000.0f;
-    tickLastFrame = SDL_GetTicks();
+    float dt = (getTime() - tickLastFrame) / 1000.0f;
+    tickLastFrame = getTime();
 
     world->Update();
 
-    world->GetSystem<MovementSystem>().Update(dt);
-    world->GetSystem<Animator>().Update();
-    world->GetSystem<CollisionResolver>().Update();
-    world->GetSystem<ProjectileEmitterSystem>().Update();
-    world->GetSystem<CameraSystem>().Update();
-    world->GetSystem<ProjectileSystem>().Update();
+    //world->GetSystem<CharacterSystem>().Update();
+    //world->GetSystem<MovementSystem>().Update(dt);
+    //world->GetSystem<Animator>().Update();
+    //world->GetSystem<Physics>().Update();
+    bus->ClearEvents();
 }
 
 void Game::ProcessInput() {
-    SDL_Event event;
     int cx = 0;
     int cy = 0;
 
-    SDL_GetMouseState(&cx, &cy);
+    //SDL_GetMouseState(&cx, &cy);
     cursor = glm::vec2(cx, cy);
-    while (SDL_PollEvent(&event)) {
-        editor->ProcessInput(&event);
-        switch (event.type) {
-        case SDL_QUIT:
-            isRunning = false;
-            break;
-        case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_ESCAPE)
-                isRunning = false;
-            if (event.key.keysym.sym == SDLK_d)
-                isDebug = !isDebug;
-            world->eventBus->EmitEvent<KeyPressedEvent>(event.key.keysym.sym);
-            break;
-        case SDL_MOUSEBUTTONDOWN:
-            world->eventBus->EmitEvent<MousePressedEvent>(event.key.keysym.sym);
-            break;
-        case SDL_KEYUP:
 
-            break;
-        }
-    }
+    //SDL_PumpEvents();
+
+    int keyArraySize = 0;
+   // const uint8_t* keyArray = SDL_GetKeyboardState(&keyArraySize);
+
+   // if (keyArraySize > 0) {
+   //     bus->PushEvent<KeyPressEvent>(keyArray);
+   // }
+
+   // if (keyArray[SDL_SCANCODE_ESCAPE]) {
+   //     isRunning = false;
+   // }
+
+   // SDL_Event event;
+   // while (SDL_PollEvent(&event) != 0) {
+   //     switch (event.type) {
+   //     case SDL_WINDOWEVENT:
+   //         if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+   //           glViewport(0, 0, event.window.data1, event.window.data2);
+   //         }
+   //     case SDL_KEYUP: {
+   //         bus->PushEvent<KeyPressUpEvent>(event.key.keysym.sym);
+   //     } break;
+   //     }
+   //     //editor->ProcessInput(&event);
+   // }
 }
 
 
 void Game::Render() {
+    //world->GetSystem<RenderText2D>().Update();
+
+    //world->GetSystem<RenderDebug>().Update();
+
+    //editor->Render();
     world->GetSystem<RenderSystem>().Update();
-    world->GetSystem<RenderText2D>().Update();
-
-    if (isDebug)
-        world->GetSystem<RenderDebug>().Update();
-
-    editor->Render();
     renderer->Render();
 }
 

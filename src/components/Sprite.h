@@ -1,8 +1,8 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include "SDL_render.h"
 #include <string>
+#include "../render/render_primitives.h"
 
 struct Sprite {
     int texture;
@@ -10,14 +10,14 @@ struct Sprite {
     int height;
     int zIndex;
     bool isFixed;
-    SDL_Rect srcRect;
+    CommancheRect srcRect;
 
     Sprite(int texture = -1, int width = 1, int height = 1, int zIndex = 0, int srcRectX = 0, int srcRectY = 0) {
         this->texture = texture;
         this->width = width;
         this->height = height;
         this->zIndex = zIndex;
-        this->srcRect = { srcRectX, srcRectY, width, height };
+        this->srcRect = { (float)srcRectX, (float)srcRectY, (float)width, (float)height };
     }
 };
 

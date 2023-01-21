@@ -6,7 +6,7 @@ class RenderText2D : public System {
     CommancheRenderer* renderer;
 
     public:
-    RenderText2D(CommancheRenderer *renderer, SDL_Rect* camera) {
+    RenderText2D(CommancheRenderer *renderer, CommancheCamera* camera) {
         this->renderer = renderer;
         RequireComponent<Label>();
     }
@@ -14,7 +14,7 @@ class RenderText2D : public System {
     void Update() {
         for (auto entities : GetEntities()) {
             const auto textLabel = entities.GetComponent<Label>();
-            renderer->DrawText(AssetManager::GetFont(textLabel.fontName), textLabel.text, textLabel.pos.x, textLabel.pos.y, 300);
+            //renderer->DrawText(AssetManager::GetFont(textLabel.fontName), textLabel.text, textLabel.pos.x, textLabel.pos.y, 300);
         }
     }
 };

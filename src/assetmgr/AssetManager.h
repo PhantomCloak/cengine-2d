@@ -3,8 +3,6 @@
 
 #include <string>
 #include <map>
-#include <SDL.h>
-#include <SDL_ttf.h>
 #include "../render/render.h"
 
 struct TextureInf{

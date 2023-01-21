@@ -7,21 +7,27 @@ INCLUDE_PATHS = -I"./libs" \
 		-I"./libs/SimpleJSON" \
 		-I"./libs/box2d/include" \
 		-I"./libs/imgui/backends" \
-		-I/opt/homebrew/include 
+		-I/opt/homebrew/include \
+		-I./libs/glad/include \
+		-I./libs/stb \
+		`pkg-config --cflags glfw3`
 LIBRARY_PATHS = -L/opt/homebrew/lib
-SRC_FILES = ./src/*.cpp \
+SRC_FILES = ./libs/glad/src/glad.c \
+	    ./src/*.cpp \
 	    ./src/game/*.cpp \
 	    ./src/ecs/*.cpp \
 	    ./src/log/*.cpp \
 	    ./src/editor/*.cpp \
+	    ./src/common/*.cpp \
 	    ./src/assetmgr/*.cpp \
 	    ./src/scripting/*.cpp \
 	    ./src/render/*.cpp \
+	    ./src/render/opengl/*.cpp \
 	    ./libs/imgui/*.cpp \
 	    ./libs/box2d/src/*/*.cpp \
-	    ./libs/imgui/backends/imgui_impl_sdl.cpp \
+	    ./libs/imgui/backends/imgui_impl_glfw.cpp \
 	    ./libs/imgui/backends/imgui_impl_opengl2.cpp
-LINKER_FLAGS = `sdl2-config --cflags` `sdl2-config --libs` -lSDL2_ttf -lSDL2_image -llua -framework OpenGL
+LINKER_FLAGS = `pkg-config --static --libs glfw3` -llua -framework OpenGL
 BINARY_NAME = commanche2d
 
 

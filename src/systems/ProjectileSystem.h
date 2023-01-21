@@ -15,9 +15,9 @@ class ProjectileSystem : public System {
         for (auto entity : GetEntities()) {
             auto projectile = entity.GetComponent<Projectile>();
 
-            if (SDL_GetTicks() - projectile.startTime > projectile.duration) {
-                entity.Kill();
-            }
+            //if (SDL_GetTicks() - projectile.startTime > projectile.duration) {
+            //    entity.Kill();
+            //}
         }
     }
 };

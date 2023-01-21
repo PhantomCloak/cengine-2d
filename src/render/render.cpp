@@ -1,21 +1,26 @@
 #include "render.h"
-#include "SDL_image.h"
-#include "SDL_opengl.h"
-#include "SDL_ttf.h"
 #include "glm/glm.hpp"
+#include "opengl/GLShape.h"
+#include "opengl/primitives.h"
+#include "opengl/texture.h"
+#include <GLFW/glfw3.h>
 #include <filesystem>
+#include <glad/glad.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <map>
 #include <unordered_map>
 
-
-SDL_Window* window;
-SDL_GLContext glContext;
+GLFWwindow* window;
 std::string driverStr;
 int nextFontId = 0;
+glm::mat4 proj;
 
-// TODO: Horrible hack
-std::unordered_map<int, std::unordered_map<std::string, int>> generatedTextRegistry;
-std::unordered_map<int, TTF_Font*> fontRegistry;
+std::unordered_map<int, GLShape*> glShapes;
+std::unordered_map<int, Shader> glShaders;
+std::unordered_map<int, Texture> glTextures;
+
+Texture* dummyTexture;
 
 float pixelCordToUvY(float y, int height) {
     return y / height;
@@ -26,177 +31,84 @@ float pixelCordToUvX(float x, int width) {
 }
 
 int GenerateTextureFromText(std::string text, int fontId, CommancheColorRGB textColor) {
-    GLuint texture;
+    return -1;
+}
 
-    if (fontRegistry.find(fontId) == fontRegistry.end()) {
-        Log::Err("Requested font for id " + std::to_string(fontId) + " couldn't find ");
-        return -1;
-    }
-
-    // Check if we were generated font before
-    if (generatedTextRegistry.find(fontId) == generatedTextRegistry.end()) {
-        generatedTextRegistry.insert(std::make_pair(fontId, std::unordered_map<std::string, int>()));
-    } else {
-        if (generatedTextRegistry[fontId].find(text) != generatedTextRegistry[fontId].end()) {
-            return generatedTextRegistry[fontId][text];
-        }
-    }
-
-
-    TTF_Font* font = fontRegistry.at(fontId);
-    SDL_Color color = {
-        .r = (uint8_t)textColor.r,
-        .g = (uint8_t)textColor.g,
-        .b = (uint8_t)textColor.b,
-        .a = 255
-    };
-
-    SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), color);
-
-    glEnable(GL_TEXTURE_2D);
-
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    SDL_Surface* s = SDL_CreateRGBSurface(0, surface->w, surface->h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-    SDL_BlitSurface(surface, NULL, s, NULL);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-    glDisable(GL_TEXTURE_2D);
-
-    generatedTextRegistry[fontId].insert(std::make_pair(text, texture));
-    return texture;
+void InitGLTypes() {
+    glShaders[DEFAULT_SHADER_SLOT] = Shader("default.vert", "default.frag");
+    glShapes[RECT_PRIMITIVE] = new GLShape(glRectVertices, sizeof(glRectVertices), &glShaders[DEFAULT_SHADER_SLOT]);
 }
 
 int CommancheRenderer::LoadFont(const std::string& path, int fontSize) {
-
-    TTF_Font* font = TTF_OpenFont(path.c_str(), fontSize);
-
-    if (font == nullptr) {
-        std::string err(SDL_GetError());
-        Log::Err("error on loading font to OpenGL message: " + err);
-        return -1;
-    }
-
-    fontRegistry.insert(std::make_pair(nextFontId, font));
-    return nextFontId++;
+    return -1;
 }
 
 void CommancheRenderer::Initialize(const std::string& title, int windowWidth, int windowHeight) {
+    glfwInit();
 
-    int glMajor = 0;
-    int glMinor = 0;
-    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &glMajor);
-    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &glMinor);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    driverStr = "OpenGL " + std::to_string(glMajor) + "." + std::to_string(glMinor);
+    window = glfwCreateWindow(windowWidth, windowHeight, title.c_str(), NULL, NULL);
 
-    // GL 3.2 Core + GLSL 150
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-
-    std::string windoiwTitle = title + " - " + driverStr;
-    window = SDL_CreateWindow(windoiwTitle.c_str(), 0, 0, windowWidth, windowHeight, window_flags);
-
-    if (TTF_Init() != 0) {
-        printf("Error: %s\n", TTF_GetError());
+    wnd = window;
+    if (window == NULL) {
+        Log::Err("Failed to create GLFW window");
+        glfwTerminate();
+        return;
     }
 
-    glContext = SDL_GL_CreateContext(window);
-    if (!glContext) {
-        Log::Err("Error while creating renderer");
-    }
+    glfwMakeContextCurrent(window);
+    gladLoadGL();
 
-    SDL_GL_MakeCurrent(window, glContext);
-    SDL_GL_SetSwapInterval(1); // Enable vsync
+    glfwSetFramebufferSizeCallback(
+    window, [](GLFWwindow* window, int width, int height) {
+        glViewport(0, 0, width, height);
+    });
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+    const float aspectRatio = (float)16 / (float)9;
+    const float w = 100.0f;
+    const float h = w / aspectRatio;
 
-    glOrtho(0, windowWidth, windowHeight, 0, -1, 1);
+    proj = glm::ortho(0.0f, w, h, 0.0f, -1.0f, 1.0f);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    wnd = (void*)window;
-    gctx = (void*)glContext;
+    InitGLTypes();
 }
 
-void CommancheRenderer::DrawRectangle(int x, int y, int w, int h, CommancheColorRGB color) {
+// void CommancheRenderer::DrawRectangle(float x, float y, float w, float h, float rotation, CommancheColorRGB color) {
+// }
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glBegin(GL_QUADS);
-    {
-        // top left
-        glColor3f(color.r, color.g, color.b);
-        glVertex3f(x, y, 0);
-        // bot left
-        glColor3f(color.r, color.g, color.b);
-        glVertex3f(x, y + h, 0);
-        // bot right
-        glColor3f(color.r, color.g, color.b);
-        glVertex3f(x + w, y + h, 0);
-        // top right
-        glColor3f(color.r, color.g, color.b);
-        glVertex3f(x + w, y, 0);
-    }
-    glEnd();
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+void CommancheRenderer::DrawImage(int textureId, float x, float y, float width, float height, float rotation, int offsetX, int offsetY) {
+    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    GLShape* shape = glShapes[RECT_PRIMITIVE];
+    Texture texture = glTextures[textureId];
+
+    shape->BindShape();
+
+    shape->Scale(glm::vec2(width, height));
+    shape->SetProjection(proj);
+    shape->Translate(glm::vec2(x, y));
+    shape->Rotate(rotation);
+
+    shape->SetOffset(glm::vec2(offsetX, offsetY));
+
+    texture.Bind();
+
+    shape->DrawShape();
+
+    texture.Unbind();
 }
 
-void CommancheRenderer::DrawImage(int textureId, int x, int y, int width, int height, int size, int offsetX, int offsetY) {
-    glBindTexture(GL_TEXTURE_2D, textureId);
-
-    int picH = 0;
-    int picW = 0;
-
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &picW);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &picH);
-
-    glm::vec2 topLeft = glm::vec2(pixelCordToUvX(offsetX, picW), pixelCordToUvY(offsetY, picH));
-    glm::vec2 topRight = glm::vec2(pixelCordToUvX(offsetX + size, picW), pixelCordToUvY(offsetY, picH));
-
-    glm::vec2 botLeft = glm::vec2(pixelCordToUvX(offsetX, picW), pixelCordToUvY(offsetY + size, picH));
-    glm::vec2 botRight = glm::vec2(pixelCordToUvX(offsetX + size, picW), pixelCordToUvY(offsetY + size, picH));
-
-    glEnable(GL_TEXTURE_2D);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    glBegin(GL_QUADS);
-    {
-        // Top-left vertex (corner)
-        glTexCoord2f(topLeft.x, topLeft.y);
-        glVertex3f(x, y, 0);
-
-        // Bottom-left vertex (corner)
-        glTexCoord2f(botLeft.x, botLeft.y);
-        glVertex3f(x, y + height, 0);
-
-        // Bottom-right vertex (corner)
-        glTexCoord2f(botRight.x, botRight.y);
-        glVertex3f(x + width, y + height, 0);
-
-        // Top-right vertex (corner)
-        glTexCoord2f(topRight.x, topRight.y);
-        glVertex3f(x + width, y, 0);
+bool CommancheRenderer::IsTextureValid(int textureId) {
+    if (glTextures.find(textureId) == glTextures.end()) {
+        return false;
     }
-
-    glEnd();
-    glDisable(GL_BLEND);
-    glDisable(GL_TEXTURE_2D);
-}
-
-bool CommancheRenderer::IsTextureValid(int textureId){
-  return glIsTexture(textureId);
+    return true;
 }
 
 void CommancheRenderer::DrawText(int fontId, std::string message, int x, int y, int size, CommancheColorRGB color) {
@@ -234,71 +146,33 @@ void CommancheRenderer::DrawText(int fontId, std::string message, int x, int y, 
 }
 
 int CommancheRenderer::LoadTexture(std::string path) {
-    SDL_Surface* surface = IMG_Load(path.c_str());
+    Texture texture = Texture(path.c_str(), GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
 
-    GLint nofcolors;
-    GLuint texture = NULL;
-    GLenum texture_format = NULL;
+    if(!texture.isSuccess)
+      return -1;
 
-    if (surface == NULL) {
-        Log::Err("An error occured while trying to load image " + path);
-        return -1;
-    }
+    texture.texUnit(&glShaders[DEFAULT_SHADER_SLOT], "tex0", 0);
 
-    nofcolors = surface->format->BytesPerPixel;
-
-    // contains an alpha channel
-    if (nofcolors == 4) {
-        if (surface->format->Rmask == 0x000000ff)
-            texture_format = GL_RGBA;
-        else
-            texture_format = GL_BGRA;
-    } else if (nofcolors == 3) // no alpha channel
-    {
-        if (surface->format->Rmask == 0x000000ff)
-            texture_format = GL_RGB;
-        else
-            texture_format = GL_BGR;
-    } else {
-        Log::Warn("warning: the " + path + " is not truecolor...this will break ");
-    }
-
-    glGenTextures(1, &texture);
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, nofcolors, surface->w, surface->h, 0,
-    texture_format, GL_UNSIGNED_BYTE, surface->pixels);
-
-    if (surface) {
-        SDL_FreeSurface(surface);
-    }
-
-    return texture;
+    glTextures[texture.ID] = texture;
+    return texture.ID;
 }
 
 CommancheTextureInfo CommancheRenderer::GetTextureInfo(int id) {
-    int w, h;
-    int miplevel = 0;
-    glBindTexture(GL_TEXTURE_2D, id);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_WIDTH, &w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_HEIGHT, &h);
+    Texture texture = glTextures[id];
 
     CommancheTextureInfo inf;
-    inf.width = w;
-    inf.height = h;
+    inf.width = texture.height;
+    inf.height = texture.width;
 
     return inf;
 }
 
 void CommancheRenderer::Render() {
-    SDL_GL_SwapWindow(window);
+    glfwSwapBuffers(window);
+    glfwPollEvents();
 }
 
 void CommancheRenderer::Destroy() {
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
