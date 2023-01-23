@@ -196,7 +196,7 @@ void MapEditor() {
             Entity piece = worldRef->CreateEntity();
             piece.Group("tiles");
 
-            piece.AddComponent<Sprite>(selectedTextureId, 16, 16, zIndexStart, start.x, start.y);
+            piece.AddComponent<Sprite>(selectedTextureId, zIndexStart, start.x, start.y);
             piece.AddComponent<Serializable>();
             piece.AddComponent<Transform>(glm::vec2(100, 100), glm::vec2(4, 4), 0);
             piece.AddComponent<MapTile>(i);
@@ -258,7 +258,7 @@ void Editor::Render() {
     }
 
     if (draggableTransform != nullptr) {
-        auto pos = glm::vec2(Game::cursor.x, Game::cursor.y);
+        auto pos = glm::vec2(0);
         pos.x += cam->x;
         pos.y += cam->y;
 

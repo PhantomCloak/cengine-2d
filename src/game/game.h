@@ -35,7 +35,6 @@ class Game {
     void Destroy();
 
     bool isRunning;
-    static glm::vec2 cursor;
     static int mapHeight;
     static int mapWidth;
     std::shared_ptr<World> world;

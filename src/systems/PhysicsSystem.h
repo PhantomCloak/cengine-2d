@@ -4,7 +4,7 @@
 #include "../render/physics_debug_renderer.h"
 #include "box2d/box2d.h"
 
-#define PIXELS_PER_METER 1
+#define PIXELS_PER_METER 8
 
 struct PhyscsBinding {
     Entity entity;
@@ -37,7 +37,6 @@ class Physics : public System {
         RequireComponent<Sprite>();
         RequireComponent<RectTransform>();
         RequireComponent<RigidBody>();
-        RequireComponent<Mesh>();
     };
 
     void renderPolygon(b2Body* body) {
@@ -51,46 +50,6 @@ class Physics : public System {
             b2Vec2 worldVertex = body->GetLocalPoint(vertices[i]);
             worldVertices.push_back(worldVertex);
         }
-
-        //glPushMatrix();
-        // glTranslated(body->GetPosition().x, body->GetPosition().y, 1);
-        // glScalef(2, 2, 1);
-        //glBegin(GL_POLYGON);
-        for (int i = 0; i < numVertices; i++) {
-            b2Vec2 worldVertex = worldVertices[i];
-            //glVertex2f(worldVertex.x, worldVertex.y);
-        }
-        //glEnd();
-        //glPopMatrix();
-    }
-
-    void renderPolygon2(b2Body* body) {
-        // Retrieve the position and angle of the body
-        b2Vec2 position = body->GetPosition();
-        float angle = body->GetAngle();
-
-        // Retrieve the vertices of the polygon
-        b2PolygonShape* shape = dynamic_cast<b2PolygonShape*>(body->GetFixtureList()->GetShape());
-        b2Vec2* vertices = shape->m_vertices;
-        int numVertices = shape->m_count;
-
-        // Save the current modelview matrix
-        //glPushMatrix();
-
-        // Translate and rotate the coordinate system to match the body
-        //glScalef(10, 10, 1);
-        //glTranslatef(position.x, position.y, 0.0);
-        //glRotatef(angle * 180.0 / M_PI, 0.0, 0.0, 1.0);
-
-        // Draw the polygon using the local coordinates of the vertices
-        //glBegin(GL_POLYGON);
-        for (int i = 0; i < numVertices; i++) {
-            //glVertex2f(vertices[i].x, vertices[i].y);
-        }
-        //glEnd();
-
-        // Restore the modelview matrix
-        //glPopMatrix();
     }
 
     void Update() {
@@ -101,7 +60,6 @@ class Physics : public System {
         for (auto entity : GetEntities()) {
             RectTransform transform = entity.GetComponent<RectTransform>();
             RigidBody& rigidBody = entity.GetComponent<RigidBody>();
-            Mesh& mesh = entity.GetComponent<Mesh>();
 
             if (!rigidBody.isInit) {
                 rigidBody.isInit = true;
@@ -111,21 +69,10 @@ class Physics : public System {
                 bodyDef.position.Set(transform.pos.x, transform.pos.y);
 
                 b2Body* body = world->CreateBody(&bodyDef);
+                body->SetFixedRotation(true);
                 b2PolygonShape shape;
 
-                float spriteProjectionX = transform.size.x * transform.scale.x;
-                float spriteProjectionY = transform.size.y * transform.scale.y;
-
-                //shape.SetAsBox(spriteProjectionX / 2, spriteProjectionY / 2, b2Vec2(spriteProjectionX / 2, spriteProjectionY / 2), 0);
-
-
-                // leak
-                b2Vec2* vec2 = (b2Vec2*)malloc(sizeof(b2Vec2) * mesh.verticiesCount);
-                for(int i = 0; i < mesh.verticiesCount; i++)
-                  vec2[i] = b2Vec2(mesh.vertices[i].x, mesh.vertices[i].y);
-
-                shape.Set(vec2, mesh.verticiesCount);
-
+                shape.SetAsBox((transform.size.x * transform.scale.x) / 2, (transform.size.y * transform.scale.y) / 2);
                 b2FixtureDef fixtureDef;
                 fixtureDef.shape = &shape;
                 fixtureDef.density = 1.0f;
@@ -154,18 +101,8 @@ class Physics : public System {
             pair->body->ApplyLinearImpulseToCenter(accForce, true);
         }
 
-        //glClear(GL_COLOR_BUFFER_BIT);
-        //glMatrixMode(GL_MODELVIEW);
-        //glLoadIdentity();
         world->Step(timeStep, velocityIterations, positionIterations);
         world->ClearForces();
-        // world->DebugDraw();
-
-        for (int i = 0; i < bindings.size(); i++) {
-            PhyscsBinding* pair = bindings[i];
-            renderPolygon2(pair->body);
-        }
-        //glFlush();
 
         for (int i = 0; i < bindings.size(); i++) {
             PhyscsBinding* pair = bindings[i];

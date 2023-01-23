@@ -47,8 +47,8 @@ giri::json::JSON SerializeComponent(Sprite component) {
     giri::json::JSON arrParam = giri::json::JSON();
 
     arrParam["texture"] = AssetManager::GetTexture(component.texture).c_str();
-    arrParam["width"] = component.width;
-    arrParam["height"] = component.height;
+    //arrParam["width"] = component.width;
+    //arrParam["height"] = component.height;
     arrParam["zIndex"] = component.zIndex;
     arrParam["srcRect"] = SerializeType(component.srcRect);
 
@@ -62,8 +62,8 @@ Sprite DeserializeSprite(giri::json::JSON json) {
     giri::json::JSON& parameterNode = json["parameters"];
 
     component.texture = AssetManager::GetTexture(parameterNode["texture"].ToString());
-    component.width = parameterNode["width"].ToInt();
-    component.height = parameterNode["height"].ToInt();
+    //component.width = parameterNode["width"].ToInt();
+    //component.height = parameterNode["height"].ToInt();
     component.zIndex = parameterNode["zIndex"].ToInt();
     component.srcRect = DeserializeSDLRectType(parameterNode["srcRect"]);
 

@@ -50,25 +50,7 @@ class RenderSystem : public System {
         });
 
         for (RenderObject& renderObj : renderSortList) {
-            // const int mpx = 1920 / 10;
-
-            // float normalizeW = renderObj.transform->size.x * camera->gridSize;
-            // float normalizeH = renderObj.transform->size.y * camera->gridSize;
-
-
-            // float normalizedX = renderObj.transform->pos.x * camera->gridSize;
-            // float normalizedY = renderObj.transform->pos.y * camera->gridSize;
-            //
-            // CommancheRect dstRect;
-            // dstRect.x = normalizedX;
-            // dstRect.y = normalizedY;
-            // dstRect.width = normalizeW;
-            // dstRect.height = normalizeH;
-
-            // SDL_Rect offsetRect = renderObj.sprite->srcRect;
-            renderer->DrawImage(renderObj.sprite->texture, renderObj.transform->pos.x, renderObj.transform->pos.y, renderObj.sprite->width, renderObj.sprite->height, renderObj.transform->rotation, 0, 0);
-            // renderer->DrawImage(renderObj.sprite->texture, dstRect.x, dstRect.y, dstRect.width, dstRect.height, renderObj.transform->rotation, offsetRect.w, offsetRect.x, offsetRect.y);
-            // renderer->DrawRectangle(dstRect.x, dstRect.y, dstRect.width, dstRect.height, renderObj.transform->rotation, {255, 0, 0});
+          renderer->DrawImage(renderObj.sprite->texture, renderObj.transform->pos.x, renderObj.transform->pos.y, renderObj.transform->size.x, renderObj.transform->size.y, renderObj.transform->rotation, 0, 0);
         }
     };
 };

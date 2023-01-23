@@ -54,7 +54,10 @@ void GLShape::SetOffset(glm::vec2 offset){
 }
 
 void GLShape::Rotate(float rad){
-  
+  static unsigned int rotationLocation = glGetUniformLocation(shader->ID, "rot");
+  glm::mat4 rot = glm::mat4(1.0f);
+  rot = glm::rotate(rot, rad, glm::vec3(0.0f, 0.0f, 1.0f));
+  glUniformMatrix4fv(rotationLocation, 1, GL_TRUE, glm::value_ptr(rot));
 }
 
 void GLShape::BindShape(){

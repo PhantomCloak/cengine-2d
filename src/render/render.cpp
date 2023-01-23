@@ -11,7 +11,7 @@
 #include <map>
 #include <unordered_map>
 
-GLFWwindow* window;
+GLFWwindow* k_window;
 std::string driverStr;
 int nextFontId = 0;
 glm::mat4 proj;
@@ -51,20 +51,20 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(windowWidth, windowHeight, title.c_str(), NULL, NULL);
+    k_window = glfwCreateWindow(windowWidth, windowHeight, title.c_str(), NULL, NULL);
 
-    wnd = window;
-    if (window == NULL) {
+    wnd = k_window;
+    if (k_window == NULL) {
         Log::Err("Failed to create GLFW window");
         glfwTerminate();
         return;
     }
 
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(k_window);
     gladLoadGL();
 
     glfwSetFramebufferSizeCallback(
-    window, [](GLFWwindow* window, int width, int height) {
+    k_window, [](GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
     });
 
@@ -82,9 +82,6 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
 
 
 void CommancheRenderer::DrawImage(int textureId, float x, float y, float width, float height, float rotation, int offsetX, int offsetY) {
-    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     GLShape* shape = glShapes[RECT_PRIMITIVE];
     Texture texture = glTextures[textureId];
 
@@ -168,11 +165,14 @@ CommancheTextureInfo CommancheRenderer::GetTextureInfo(int id) {
 }
 
 void CommancheRenderer::Render() {
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(k_window);
     glfwPollEvents();
+
+    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void CommancheRenderer::Destroy() {
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(k_window);
     glfwTerminate();
 }

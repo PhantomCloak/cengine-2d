@@ -1,27 +1,28 @@
 #include "game.h"
+#include "../common/common.h"
+#include "../core/cursor.h"
+#include "../core/keyboard.h"
 #include "../log/log.h"
 #include "../scripting/lua_manager.h"
 #include "wapper.h"
-#include "../common/common.h"
 #include <filesystem>
 #include <iostream>
 
 int Game::mapHeight = 0;
 int Game::mapWidth = 0;
 Wrapper* wrapper;
-glm::vec2 Game::cursor;
 
 Game::Game() {
     isRunning = false;
     world = std::make_unique<World>();
-    cursor = glm::vec2(0);
     renderer = new CommancheRenderer();
-    //editor = new Editor();
+    // editor = new Editor();
     bus = new EventBus();
     AssetManager::Initialize(renderer);
     Log::Inf("Game Constructor Called");
 
     wrapper = new Wrapper(world);
+
 
     LuaManager::InitSandbox();
 
@@ -48,6 +49,8 @@ void Game::Initialize() {
     int screenH = displayCfg["resolution"]["height"];
 
     renderer->Initialize("Twelve Villages", screenW, screenH);
+    Keyboard::Setup(renderer->wnd);
+    Cursor::Setup(renderer->wnd);
     isRunning = true;
 
     camera.x = 0;
@@ -77,32 +80,21 @@ void Game::Setup() {
     world->AddSystem<CharacterSystem>(bus, &camera);
     world->AddSystem<ProjectileSystem>();
 
-    //Entity text = world->CreateEntity();
-    //const CommancheColorRGB& color = { 255, 255, 255 };
-    //text.AddComponent<Health>();
-    //text.AddComponent<Label>(glm::vec2(1920 / 2 - 120, 200), "CENGINE-2D", "charriot-font", color);
-
+    Entity bg = world->CreateEntity();
+    bg.AddComponent<RectTransform>(glm::vec2(100, 60), glm::vec2(200, 120));
+    bg.AddComponent<Sprite>(AssetManager::GetTexture("desert"), -1);
 
     Entity player = world->CreateEntity();
-    player.AddComponent<RectTransform>(glm::vec2(40, 40), glm::vec2(1, 1), glm::vec2(1, 1), 0);
-    player.AddComponent<Sprite>(AssetManager::GetTexture("box"), 10, 10);
-    //player.AddComponent<CharacterController>(5,1,1,1);
-    player.AddComponent<Mesh>();
+    player.AddComponent<RectTransform>(glm::vec2(100, 10), glm::vec2(5, 5));
+    player.AddComponent<Sprite>(AssetManager::GetTexture("box"));
+    player.AddComponent<CharacterController>(8,0.5f,0.5f,0.5f);
     player.AddComponent<RigidBody>(false);
 
 
-    //Entity platform = world->CreateEntity();
-    //platform.AddComponent<RectTransform>(glm::vec2(2, 10), glm::vec2(4, 1), glm::vec2(1, 1), 0);
-    //platform.AddComponent<Sprite>(AssetManager::GetTexture("box2"), 100, 32, 1);
-    //platform.AddComponent<Mesh>();
-    //platform.AddComponent<RigidBody>(true, 0, glm::vec2(0, 0));
-
-
-    //Entity platform2 = world->CreateEntity();
-    //platform2.AddComponent<RectTransform>(glm::vec2(14, 10), glm::vec2(4, 1), glm::vec2(1, 1), 0);
-    //platform2.AddComponent<Sprite>(AssetManager::GetTexture("box2"), 100, 32, 1);
-    //platform2.AddComponent<Mesh>();
-    //platform2.AddComponent<RigidBody>(true, 0, glm::vec2(0, 0));
+     Entity platform = world->CreateEntity();
+     platform.AddComponent<RectTransform>(glm::vec2(100, 90), glm::vec2(100, 5));
+     platform.AddComponent<Sprite>(AssetManager::GetTexture("box2"));
+     platform.AddComponent<RigidBody>(true, 0, glm::vec2(0, 0));
 }
 void Game::Update() {
     int timeToWait = FRAME_TIME_LENGTH - (getTime() - tickLastFrame);
@@ -116,54 +108,20 @@ void Game::Update() {
 
     world->Update();
 
-    //world->GetSystem<CharacterSystem>().Update();
-    //world->GetSystem<MovementSystem>().Update(dt);
-    //world->GetSystem<Animator>().Update();
-    //world->GetSystem<Physics>().Update();
+     world->GetSystem<CharacterSystem>().Update();
+     world->GetSystem<Animator>().Update();
+     world->GetSystem<Physics>().Update();
+
     bus->ClearEvents();
+    Keyboard::FlushPressedKeys();
 }
 
 void Game::ProcessInput() {
-    int cx = 0;
-    int cy = 0;
-
-    //SDL_GetMouseState(&cx, &cy);
-    cursor = glm::vec2(cx, cy);
-
-    //SDL_PumpEvents();
-
-    int keyArraySize = 0;
-   // const uint8_t* keyArray = SDL_GetKeyboardState(&keyArraySize);
-
-   // if (keyArraySize > 0) {
-   //     bus->PushEvent<KeyPressEvent>(keyArray);
-   // }
-
-   // if (keyArray[SDL_SCANCODE_ESCAPE]) {
-   //     isRunning = false;
-   // }
-
-   // SDL_Event event;
-   // while (SDL_PollEvent(&event) != 0) {
-   //     switch (event.type) {
-   //     case SDL_WINDOWEVENT:
-   //         if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-   //           glViewport(0, 0, event.window.data1, event.window.data2);
-   //         }
-   //     case SDL_KEYUP: {
-   //         bus->PushEvent<KeyPressUpEvent>(event.key.keysym.sym);
-   //     } break;
-   //     }
-   //     //editor->ProcessInput(&event);
-   // }
+    Keyboard::Poll();
 }
 
 
 void Game::Render() {
-    //world->GetSystem<RenderText2D>().Update();
-
-    //world->GetSystem<RenderDebug>().Update();
-
     //editor->Render();
     world->GetSystem<RenderSystem>().Update();
     renderer->Render();

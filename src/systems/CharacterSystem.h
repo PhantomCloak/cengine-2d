@@ -1,5 +1,6 @@
 #pragma once
 #include "../game/commanche2d.h"
+#include "../core/keyboard.h"
 
 class CharacterSystem : public System {
     private:
@@ -13,57 +14,31 @@ class CharacterSystem : public System {
 
         RequireComponent<Sprite>();
         RequireComponent<RigidBody>();
+        RequireComponent<RectTransform>();
         RequireComponent<CharacterController>();
     }
 
-    void SubscribeToEvents(std::shared_ptr<EventBus>& eventBus) {
-        // eventBus->SubscribeEvent(this, &CharacterSystem::onKeyPressed);
-    }
-
-    void onKeyKeyPressed(KeyPressUpEvent& event) {
-        //if (event.key == SDLK_1) {
-        //    camera->gridSize *= 2;
-        //}
-
-        //if (event.key == SDLK_2) {
-        //    camera->gridSize /= 2;
-        //}
-
-        //for (auto entity : GetEntities()) {
-        //    auto& rigidbody = entity.GetComponent<RigidBody>();
-        //    const auto characterController = entity.GetComponent<CharacterController>();
-        //    if (event.key == SDLK_UP) {
-        //      Log::Inf("JUMP HAS PRESSED");
-        //        rigidbody.forceAcc += characterController.upVelocity;
-        //    }
-        //}
-    }
-
-    void onKeyPress(KeyPressEvent& event) {
-        //for (auto entity : GetEntities()) {
-        //    const auto characterController = entity.GetComponent<CharacterController>();
-        //    auto& rigidbody = entity.GetComponent<RigidBody>();
-
-        //    if (event.keyboard[SDL_SCANCODE_RIGHT]) {
-        //      Log::Inf("RIGHT HAS PRESSED");
-        //        rigidbody.forceAcc += characterController.rightVelocity;
-        //    }
-
-        //    if (event.keyboard[SDL_SCANCODE_LEFT]) {
-        //      Log::Inf("LEFT HAS PRESSED");
-        //        rigidbody.forceAcc += characterController.leftVelocity;
-        //    }
-        //}
-    }
-
     void Update() {
-        auto keyHoldEvents = eventBus->GetEvents<KeyPressEvent>();
-        auto keyPressedEvents = eventBus->GetEvents<KeyPressUpEvent>();
-        for (auto event : keyHoldEvents) {
-            onKeyPress(event);
-        }
-        for (auto event : keyPressedEvents) {
-            onKeyKeyPressed(event);
+        for (auto entity : GetEntities()) {
+            const auto characterController = entity.GetComponent<CharacterController>();
+            auto& rigidbody = entity.GetComponent<RigidBody>();
+            auto& transform = entity.GetComponent<RectTransform>();
+
+            if (Keyboard::IsKeyPressed(KeyCode::Key_W)) {
+                Log::Inf("UP HAS PRESSED");
+                rigidbody.forceAcc += characterController.upVelocity;
+            }
+            if (Keyboard::IsKeyPressing(KeyCode::Key_D)) {
+                Log::Inf("RIGHT HAS PRESSED");
+                rigidbody.forceAcc += characterController.rightVelocity;
+                //transform.pos.x += 1;
+            }
+
+            if (Keyboard::IsKeyPressing(KeyCode::Key_A)) {
+                Log::Inf("LEFT HAS PRESSED");
+                //transform.pos.x -= 1;
+                rigidbody.forceAcc += characterController.leftVelocity;
+            }
         }
     }
 };

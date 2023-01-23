@@ -18,7 +18,8 @@ uniform vec2 offset;
 
 void main()
 {
-        gl_Position = proj * vec4(aPos * scale + trans, 1.0);
+        //gl_Position = proj * vec4(aPos * scale + trans, 1.0);
+        gl_Position = proj * (rot * vec4(aPos * scale, 1.0)) + vec4(trans, 0.0);
         texCoord = aTex;
         textOffset = offset;
 }
