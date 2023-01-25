@@ -14,7 +14,9 @@ class AssetManager {
   public:
     static void Initialize(CommancheRenderer* render);
     static void AddTexture(const std::string& assetId, const std::string& path);
+    static void AddShader(const std::string& assetId, const std::string& path);
     static int GetTexture(const std::string& assetId);
+    static int GetShader(const std::string& shaderId);
     static std::string GetTexture(int textureId);
     static TextureInf GetTextureInf(const std::string& assetId);
     static std::vector<std::string> GetLoadedTextures();

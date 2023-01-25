@@ -7,8 +7,8 @@
 #include "../game/map_serializer.h"
 #include "../libs/imgui/imgui.h"
 #include "imgui.h"
-#include "imgui_impl_opengl2.h"
-#include "imgui_impl_sdl.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include <functional>
 #include <memory>
 #include <stdio.h>
@@ -21,18 +21,18 @@ std::unordered_map<int, bool> windowFlags;
 std::shared_ptr<World> worldRef;
 CommancheCamera* cam;
 EngineSerializer* serializer;
+static CommancheRenderer* renderer;
 Map* mp;
 bool tileSetIsInit = false;
 
 static ImGuiIO io;
 static int zIndexStart = 800;
 
-void Editor::Init(CommancheRenderer* renderer, Map* map, std::shared_ptr<World> world, CommancheCamera* camera, EventBus* bus) {
+void Editor::Init(CommancheRenderer* renderer1, Map* map, std::shared_ptr<World> world, CommancheCamera* camera, EventBus* bus) {
     worldRef = world;
     cam = camera;
     mp = map;
 
-    //SDL_GL_MakeCurrent((SDL_Window*)renderer->wnd, renderer->gctx);
     MapLuaSerializer ser;
     std::vector<std::string> a;
     IMGUI_CHECKVERSION();
@@ -40,11 +40,10 @@ void Editor::Init(CommancheRenderer* renderer, Map* map, std::shared_ptr<World> 
 
     io = ImGui::GetIO();
     (void)io;
-
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
     io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
@@ -53,12 +52,15 @@ void Editor::Init(CommancheRenderer* renderer, Map* map, std::shared_ptr<World> 
 
     ImGui::StyleColorsDark();
 
-    //ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)renderer->wnd, renderer->gctx);
-    //ImGui_ImplOpenGL2_Init();
-
+    // ImGui_ImplSDL3_InitForOpenGL((SDL_Window*)renderer->wnd, renderer->gctx);
+    // ImGui_ImplOpenGL3_Init("#version 330 core");
+    ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)renderer1->wnd, true);
+    ImGui_ImplOpenGL3_Init("#version 330 core");
 
     // bus->SubscribeEvent(this, &Editor::onMousePressed);
     serializer = new EngineSerializer(world);
+    this->world = world;
+    renderer = renderer1;
 }
 
 Transform* draggableTransform;
@@ -101,9 +103,7 @@ float pixelCordToUvX2(float x, int width) {
 
 void SelectMapTile(std::string mapName) {
 }
-
 void SaveDialog() {
-
     ImGui::Begin("Save Menu");
     static char* mapNameBuff = (char*)malloc(128);
     ImGui::Text("Map Name: ");
@@ -229,43 +229,72 @@ void InterpolateToGrid(glm::vec2* vec, int gridSize) {
     vec->y = floor(vec->y / gridSize) * gridSize;
 }
 
-//void Editor::ProcessInput(SDL_Event* event) {
-//    ImGui_ImplSDL2_ProcessEvent(event);
-//}
+// void Editor::ProcessInput(SDL_Event* event) {
+//     ImGui_ImplSDL2_ProcessEvent(event);
+// }
 
 ImGuiWindowFlags window_flags = 0;
+
 void Editor::Render() {
-    //ImGui_ImplOpenGL2_NewFrame();
-    //ImGui_ImplSDL2_NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    
+        if (ImGui::BeginMainMenuBar()) {
+            FileMenu();
+            EntitiesMenu();
+            AssetsMenu();
+            ImGui::EndMainMenuBar();
+        }
+    
+        if (windowFlags[EDITOR_SHOW_MAP_EDITOR]) {
+            MapEditor();
+        }
+        if (windowFlags[EDITOR_SHOW_SAVE_DIALOG]) {
+            SaveDialog();
+        }
+        if (windowFlags[EDITOR_SHOW_LOAD_DIALOG]) {
+            LoadDialog();
+        }
+    
+        if (draggableTransform != nullptr) {
+            auto pos = glm::vec2(0);
+            pos.x += cam->x;
+            pos.y += cam->y;
+    
+            InterpolateToGrid(&pos, 32);
+            draggableTransform->pos = pos;
+        }
+    
+    static ImVec2 size;
+    if (ImGui::Begin("Scene List")) {}
+    ImGui::End();
+    if (ImGui::Begin("Files")) {}
+    ImGui::End();
+    if (ImGui::Begin("Viewport")) {
 
-    if (ImGui::BeginMainMenuBar()) {
-        FileMenu();
-        EntitiesMenu();
-        AssetsMenu();
-        ImGui::EndMainMenuBar();
-    }
+        if (size.x != ImGui::GetWindowWidth() || size.y != ImGui::GetWindowHeight()) {
 
-    if (windowFlags[EDITOR_SHOW_MAP_EDITOR]) {
-        MapEditor();
-    }
-    if (windowFlags[EDITOR_SHOW_SAVE_DIALOG]) {
-        SaveDialog();
-    }
-    if (windowFlags[EDITOR_SHOW_LOAD_DIALOG]) {
-        LoadDialog();
-    }
+            size.x = ImGui::GetWindowWidth();
+            size.y = ImGui::GetWindowHeight();
+        }
+        renderer->SetFrameSize(size.x, size.y);
 
-    if (draggableTransform != nullptr) {
-        auto pos = glm::vec2(0);
-        pos.x += cam->x;
-        pos.y += cam->y;
+        renderer->Render1();
+        world->GetSystem<RenderSystem>().Update();
+        renderer->Render2();
+        // renderer->Render();
+        auto tex = renderer->GetFrame();
 
-        InterpolateToGrid(&pos, 32);
-        draggableTransform->pos = pos;
+
+        ImVec2 uv0 = {0, 1};
+        ImVec2 uv1 = {1, 0};
+        ImGui::Image((void*)tex, size, uv0, uv1);
+
+        //ImGui::Image((void*)tex, size);
+        ImGui::End();
     }
-
 
     ImGui::EndFrame();
     ImGui::Render();
@@ -273,6 +302,6 @@ void Editor::Render() {
     ImGui::UpdatePlatformWindows();
     ImGui::RenderPlatformWindowsDefault();
     //ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-
-    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    renderer->Render();
 }

@@ -4,7 +4,7 @@
 #include "../render/physics_debug_renderer.h"
 #include "box2d/box2d.h"
 
-#define PIXELS_PER_METER 8
+#define PIXELS_PER_METER 10
 
 struct PhyscsBinding {
     Entity entity;
@@ -91,7 +91,9 @@ class Physics : public System {
         for (int i = 0; i < bindings.size(); i++) {
             PhyscsBinding* pair = bindings[i];
             RigidBody rigidBody = pair->entity.GetComponent<RigidBody>();
+            RectTransform rt = pair->entity.GetComponent<RectTransform>();
 
+            pair->body->SetTransform(b2Vec2(rt.pos.x, rt.pos.y), 0);
             b2Vec2 accForce = b2Vec2((rigidBody.forceAcc.x * pair->body->GetMass()), (rigidBody.forceAcc.y * pair->body->GetMass()));
             accForce *= PIXELS_PER_METER;
             // pair->body->ApplyTorque(1, true);

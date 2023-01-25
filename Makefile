@@ -15,6 +15,7 @@ LIBRARY_PATHS = -L/opt/homebrew/lib
 SRC_FILES = ./libs/glad/src/glad.c \
 	    ./src/*.cpp \
 	    ./src/game/*.cpp \
+	    ./src/core/*.cpp \
 	    ./src/ecs/*.cpp \
 	    ./src/log/*.cpp \
 	    ./src/editor/*.cpp \
@@ -26,7 +27,7 @@ SRC_FILES = ./libs/glad/src/glad.c \
 	    ./libs/imgui/*.cpp \
 	    ./libs/box2d/src/*/*.cpp \
 	    ./libs/imgui/backends/imgui_impl_glfw.cpp \
-	    ./libs/imgui/backends/imgui_impl_opengl2.cpp
+	    ./libs/imgui/backends/imgui_impl_opengl3.cpp
 LINKER_FLAGS = `pkg-config --static --libs glfw3` -llua -framework OpenGL
 BINARY_NAME = commanche2d
 

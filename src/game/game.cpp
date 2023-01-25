@@ -7,16 +7,18 @@
 #include "wapper.h"
 #include <filesystem>
 #include <iostream>
+#include "../editor/editor.h"
 
 int Game::mapHeight = 0;
 int Game::mapWidth = 0;
 Wrapper* wrapper;
+Editor* editor;
 
 Game::Game() {
     isRunning = false;
     world = std::make_unique<World>();
     renderer = new CommancheRenderer();
-    // editor = new Editor();
+    editor = new Editor();
     bus = new EventBus();
     AssetManager::Initialize(renderer);
     Log::Inf("Game Constructor Called");
@@ -49,6 +51,8 @@ void Game::Initialize() {
     int screenH = displayCfg["resolution"]["height"];
 
     renderer->Initialize("Twelve Villages", screenW, screenH);
+
+    editor->Init(renderer, map, world, &camera, bus);
     Keyboard::Setup(renderer->wnd);
     Cursor::Setup(renderer->wnd);
     isRunning = true;
@@ -85,9 +89,9 @@ void Game::Setup() {
     bg.AddComponent<Sprite>(AssetManager::GetTexture("desert"), -1);
 
     Entity player = world->CreateEntity();
-    player.AddComponent<RectTransform>(glm::vec2(100, 10), glm::vec2(5, 5));
+    player.AddComponent<RectTransform>(glm::vec2(100, 10), glm::vec2(2, 5));
     player.AddComponent<Sprite>(AssetManager::GetTexture("box"));
-    player.AddComponent<CharacterController>(8,0.5f,0.5f,0.5f);
+    player.AddComponent<CharacterController>(4,0.5f,0.5f,0.5f);
     player.AddComponent<RigidBody>(false);
 
 
@@ -122,9 +126,9 @@ void Game::ProcessInput() {
 
 
 void Game::Render() {
-    //editor->Render();
-    world->GetSystem<RenderSystem>().Update();
-    renderer->Render();
+    //world->GetSystem<RenderSystem>().Update();
+    editor->Render();
+    //renderer->Render();
 }
 
 

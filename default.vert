@@ -17,7 +17,7 @@ uniform mat4 rot;
 void main()
 {
         //gl_Position = proj * vec4(aPos * scale + trans, 1.0);
-        gl_Position = proj * ((vec4(aPos,1.0) * rot) * vec4(scale, 1.0) + vec4(trans, 1.0));
+        gl_Position = proj * ((vec4(aPos,1.0) * vec4(scale, 1.0)) * rot + vec4(trans, 1.0));
 
         texCoord = aTex;
 }

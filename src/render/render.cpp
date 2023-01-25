@@ -101,6 +101,10 @@ void CommancheRenderer::DrawImage(int textureId, float x, float y, float width, 
     texture.Unbind();
 }
 
+bool CommancheRenderer::IsShaderValid(int shaderId){
+  return false;
+}
+
 bool CommancheRenderer::IsTextureValid(int textureId) {
     if (glTextures.find(textureId) == glTextures.end()) {
         return false;
@@ -142,7 +146,49 @@ void CommancheRenderer::DrawText(int fontId, std::string message, int x, int y, 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-int CommancheRenderer::LoadTexture(std::string path) {
+int CommancheRenderer::LoadShader(const std::string& path){
+
+}
+
+
+int CommancheRenderer::GetFrame(){
+  return textureColorbuffer;
+}
+
+void CommancheRenderer::SetFrameSize(int width, int height){
+  glViewport(0, 0, width, height);
+
+  // glDeleteFramebuffers(1, &framebuffer);
+
+  // framebuffer configuration
+  // -------------------------
+  framebuffer = 0;
+
+  // Create FBO & Textrue
+  glGenFramebuffers(1, &framebuffer);
+  glGenTextures(1, &textureColorbuffer);
+  
+  // Bind FBO & Texture
+  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+  glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+
+  // generate texture according to WxH
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  // FBO to Texture
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!"
+              << std::endl;
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+int CommancheRenderer::LoadTexture(const std::string& path) {
     Texture texture = Texture(path.c_str(), GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
 
     if(!texture.isSuccess)
@@ -164,12 +210,30 @@ CommancheTextureInfo CommancheRenderer::GetTextureInfo(int id) {
     return inf;
 }
 
+void CommancheRenderer::Render1() {
+    glfwPollEvents();
+
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+}
+void CommancheRenderer::Render2() {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glfwSwapBuffers(k_window);
+    //glfwPollEvents();
+
+
+}
 void CommancheRenderer::Render() {
+    glfwSwapBuffers(k_window);
+  return;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glfwSwapBuffers(k_window);
     glfwPollEvents();
 
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 }
 
 void CommancheRenderer::Destroy() {

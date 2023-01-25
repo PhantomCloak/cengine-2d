@@ -30,14 +30,14 @@ class CharacterSystem : public System {
             }
             if (Keyboard::IsKeyPressing(KeyCode::Key_D)) {
                 Log::Inf("RIGHT HAS PRESSED");
-                rigidbody.forceAcc += characterController.rightVelocity;
-                //transform.pos.x += 1;
+                //rigidbody.forceAcc += characterController.rightVelocity;
+                transform.pos.x += 0.5f;
             }
 
             if (Keyboard::IsKeyPressing(KeyCode::Key_A)) {
                 Log::Inf("LEFT HAS PRESSED");
-                //transform.pos.x -= 1;
-                rigidbody.forceAcc += characterController.leftVelocity;
+                transform.pos.x -= 0.5f;
+                //rigidbody.forceAcc += characterController.leftVelocity;
             }
         }
     }
