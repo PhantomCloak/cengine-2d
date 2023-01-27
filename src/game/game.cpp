@@ -99,13 +99,13 @@ void Game::Setup() {
     player.AddComponent<Sprite>(AssetManager::GetTexture("box"));
     player.AddComponent<CharacterController>(4,0.5f,0.5f,0.5f);
     player.AddComponent<Health>(100);
-    player.AddComponent<RigidBody>(false);
+    player.AddComponent<RigidBody>(false, 0.0f, false);
 
 
      Entity platform = world->CreateEntity();
      platform.AddComponent<RectTransform>(glm::vec2(100, 90), glm::vec2(100, 5));
      platform.AddComponent<Sprite>(AssetManager::GetTexture("box2"));
-     platform.AddComponent<RigidBody>(true, 0, glm::vec2(0, 0));
+     platform.AddComponent<RigidBody>(true, 0, true, glm::vec2(0, 0));
 }
 void Game::Update() {
     int timeToWait = FRAME_TIME_LENGTH - (getTime() - tickLastFrame);

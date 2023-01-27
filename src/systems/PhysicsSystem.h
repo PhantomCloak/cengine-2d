@@ -69,7 +69,7 @@ class Physics : public System {
                 bodyDef.position.Set(transform.pos.x, transform.pos.y);
 
                 b2Body* body = world->CreateBody(&bodyDef);
-                body->SetFixedRotation(true);
+                body->SetFixedRotation(rigidBody.isFixedRot);
                 b2PolygonShape shape;
 
                 shape.SetAsBox((transform.size.x * transform.scale.x) / 2, (transform.size.y * transform.scale.y) / 2);
@@ -93,7 +93,7 @@ class Physics : public System {
             RigidBody rigidBody = pair->entity.GetComponent<RigidBody>();
             RectTransform rt = pair->entity.GetComponent<RectTransform>();
 
-            pair->body->SetTransform(b2Vec2(rt.pos.x, rt.pos.y), 0);
+            pair->body->SetTransform(b2Vec2(rt.pos.x, rt.pos.y), rt.rotation);
             b2Vec2 accForce = b2Vec2((rigidBody.forceAcc.x * pair->body->GetMass()), (rigidBody.forceAcc.y * pair->body->GetMass()));
             accForce *= PIXELS_PER_METER;
             // pair->body->ApplyTorque(1, true);

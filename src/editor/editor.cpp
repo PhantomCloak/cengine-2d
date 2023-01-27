@@ -13,6 +13,8 @@
 #include <functional>
 #include <memory>
 #include <stdio.h>
+#include "../core/filesystem.h"
+
 namespace fs = std::filesystem;
 
 
@@ -61,6 +63,8 @@ void Editor::Init(CommancheRenderer* renderer, Map* map, std::shared_ptr<World> 
 
     AssetManager::AddTexture("folder", "./assets/editor/folder-icon.png");
     AssetManager::AddTexture("file", "./assets/editor/file-icon.png");
+
+    fileView = new FileView();
 }
 
 Transform* draggableTransform;
@@ -243,30 +247,35 @@ static std::string _labelPrefix(const char* const label) {
 
 void SerializeEntity(Entity e) {
     if (e.HasComponent<RectTransform>()) {
-        auto comp = e.GetComponent<RectTransform>();
+        auto& comp = e.GetComponent<RectTransform>();
         ImGui::BeginGroupPanel("Transform");
         ImGui::InputFloat(_labelPrefix("pos x:").c_str(), &comp.pos.x);
         ImGui::InputFloat(_labelPrefix("pos y:").c_str(), &comp.pos.y);
 
         ImGui::Spacing();
 
-        ImGui::InputFloat(_labelPrefix("width:").c_str(), &comp.size.x);
-        ImGui::InputFloat(_labelPrefix("height:").c_str(), &comp.size.y);
+        ImGui::InputFloat(_labelPrefix("width:").c_str(), &comp.size.x, 1);
+        ImGui::InputFloat(_labelPrefix("height:").c_str(), &comp.size.y, 1);
 
         ImGui::Spacing();
 
-        ImGui::InputFloat(_labelPrefix("scale x:").c_str(), &comp.scale.x);
-        ImGui::InputFloat(_labelPrefix("scale y:").c_str(), &comp.scale.y);
+        ImGui::InputFloat(_labelPrefix("scale x:").c_str(), &comp.scale.x, 1);
+        ImGui::InputFloat(_labelPrefix("scale y:").c_str(), &comp.scale.y, 1);
 
+        ImGui::Spacing();
+        
+        ImGui::InputFloat(_labelPrefix("rotation: ").c_str(), &comp.rotation, 1);
+        
         ImGui::EndGroupPanel();
     }
     if (e.HasComponent<RigidBody>()) {
-        auto comp = e.GetComponent<RigidBody>();
+        auto& comp = e.GetComponent<RigidBody>();
         ImGui::BeginGroupPanel("RigidBody");
         ImGui::InputFloat(_labelPrefix("velocity x:").c_str(), &comp.velocity.x);
         ImGui::InputFloat(_labelPrefix("velocity y:").c_str(), &comp.velocity.y);
         ImGui::InputFloat(_labelPrefix("restution:").c_str(), &comp.restution);
         ImGui::Checkbox(_labelPrefix("is static:").c_str(), &comp.isStatic);
+        ImGui::Checkbox(_labelPrefix("is fixed rot:").c_str(), &comp.isFixedRot);
         ImGui::EndGroupPanel();
     }
     if (e.HasComponent<Sprite>()) {
@@ -287,7 +296,7 @@ void SerializeEntity(Entity e) {
         ImGui::EndGroupPanel();
     }
     if (e.HasComponent<Health>()) {
-        auto comp = e.GetComponent<Health>();
+        auto& comp = e.GetComponent<Health>();
         ImGui::BeginGroupPanel("Health");
         ImGui::InputInt(_labelPrefix("Health").c_str(), &comp.healthPercentage);
         ImGui::EndGroupPanel();
@@ -404,87 +413,8 @@ void Editor::Render() {
     static ImVec2 size;
     Properties();
     SceneList();
-    if (ImGui::Begin("Files")) {
-        static int folderIcon = AssetManager::GetTexture("folder");
-        static int fileIcon = AssetManager::GetTexture("file");
+    fileView->RenderWindow();
 
-        static std::string path = ".";
-        static std::string lastPath = ".";
-        static bool hoverList[1024];
-        int ctx = 0;
-
-        for (const auto& entry : fs::directory_iterator(path)) {
-
-            if (ctx == 0) {
-
-                ImGui::SameLine();
-                bool isHovered = ImGui::IsItemHovered();
-                if (isHovered) {
-                    hoverList[ctx - 1] = true;
-                } else
-                    hoverList[ctx - 1] = false;
-
-                ImGui::BeginGroup();
-                if (hoverList[ctx]) {
-                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-                }
-
-                ImGui::PushID("...");
-                if (ImGui::ImageButton((void*)(intptr_t)folderIcon, ImVec2(75, 75), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1))) {
-                    path = lastPath;
-                }
-                ImGui::PopID();
-
-                ImGui::Text("..");
-                ImGui::EndGroup();
-
-                if (hoverList[ctx])
-                    ImGui::PopStyleVar();
-
-                ImGui::SameLine();
-            }
-
-            std::string fileName = std::filesystem::path(entry.path()).stem();
-            fileName = fileName.substr(0, fileName.length() > 10 ? 10 : fileName.length());
-
-            int ico = 0;
-            std::error_code ec;
-            if (fs::is_directory(entry.path(), ec)) {
-                ico = folderIcon;
-            } else
-                ico = fileIcon;
-
-            bool isHovered = ImGui::IsItemHovered();
-            if (isHovered) {
-                hoverList[ctx - 1] = true;
-            } else
-                hoverList[ctx - 1] = false;
-
-            ImGui::BeginGroup();
-            if (hoverList[ctx]) {
-                ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-            }
-
-            ImGui::PushID(fileName.c_str());
-            if (ImGui::ImageButton((void*)(intptr_t)ico, ImVec2(75, 75), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1))) {
-                lastPath = path;
-                path = entry.path();
-            }
-            ImGui::PopID();
-
-            ImGui::Text(fileName.c_str());
-            ImGui::EndGroup();
-
-            if (hoverList[ctx])
-                ImGui::PopStyleVar();
-
-            ImGui::SameLine();
-            ctx++;
-        }
-
-        ctx++;
-        ImGui::End();
-    }
     if (ImGui::Begin("Viewport", NULL, ImGuiWindowFlags_NoScrollbar|ImGuiWindowFlags_NoScrollWithMouse)) {
 
         if (size.x != ImGui::GetWindowWidth() || size.y != ImGui::GetWindowHeight()) {

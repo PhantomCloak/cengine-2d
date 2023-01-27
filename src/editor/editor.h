@@ -7,6 +7,7 @@
 #include "../components/Camera.h"
 #include "../game/map.h"
 #include "../events/KeyPressedEvent.h"
+#include "fileview.h"
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 //#include <SDL_opengles2.h>
 #else
@@ -20,6 +21,7 @@ class Editor {
     void Render();
     //void ProcessInput(SDL_Event * event);
     private:
+    FileView* fileView;
     void onMousePressed(MousePressedEvent& event);
     std::shared_ptr<World> world;
     CommancheRenderer* renderer;
