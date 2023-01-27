@@ -35,7 +35,11 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
 	// Compile the Vertex Shader into machine code
 	glCompileShader(vertexShader);
 	// Checks if Shader compiled succesfully
-	compileErrors(vertexShader, "VERTEX");
+	if(!compileErrors(vertexShader, "VERTEX")){
+    compiledSuccessfully = false;
+    glDeleteShader(vertexShader);
+    return;
+  }
 
 	// Create Fragment Shader Object and get its reference
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -44,7 +48,13 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
 	// Compile the Vertex Shader into machine code
 	glCompileShader(fragmentShader);
 	// Checks if Shader compiled succesfully
-	compileErrors(fragmentShader, "FRAGMENT");
+
+	if(!compileErrors(fragmentShader, "FRAGMENT")){
+    compiledSuccessfully = false;
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    return;
+  }
 
 	// Create Shader Program Object and get its reference
 	ID = glCreateProgram();
@@ -54,12 +64,14 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
 	// Wrap-up/Link all the shaders together into the Shader Program
 	glLinkProgram(ID);
 	// Checks if Shaders linked succesfully
-	compileErrors(ID, "PROGRAM");
+
+	if(!compileErrors(ID, "PROGRAM")){
+    compiledSuccessfully = false;
+  }
 
 	// Delete the now useless Vertex and Fragment Shader objects
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
-
 }
 
 // Activates the Shader Program
@@ -79,7 +91,7 @@ void Shader::Delete()
 }
 
 // Checks if the different Shaders have compiled properly
-void Shader::compileErrors(unsigned int shader, const char* type)
+bool Shader::compileErrors(unsigned int shader, const std::string type)
 {
 	// Stores status of compilation
 	GLint hasCompiled;
@@ -92,6 +104,7 @@ void Shader::compileErrors(unsigned int shader, const char* type)
 		{
 			glGetShaderInfoLog(shader, 1024, NULL, infoLog);
 			std::cout << "SHADER_COMPILATION_ERROR for:" << type << "\n" << infoLog << std::endl;
+      return false;
 		}
 	}
 	else
@@ -101,6 +114,9 @@ void Shader::compileErrors(unsigned int shader, const char* type)
 		{
 			glGetProgramInfoLog(shader, 1024, NULL, infoLog);
 			std::cout << "SHADER_LINKING_ERROR for:" << type << "\n" << infoLog << std::endl;
+      return false;
 		}
 	}
+
+  return true;
 }

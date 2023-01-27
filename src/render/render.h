@@ -10,6 +10,7 @@ class CommancheRenderer {
     void* gctx;
     std::string driverStr;
     void Initialize(const std::string& title, int windowHeight, int windowWidth);
+    void InitializeShaders(const std::string& defaultShaderPath);
     //void DrawRectangle(float x, float y, float w, float h, float rotation, CommancheColorRGB color);
     bool IsTextureValid(int textureId);
     bool IsShaderValid(int shaderId);
@@ -18,13 +19,13 @@ class CommancheRenderer {
     void SetFrameSize(int width, int height);
     int GetFrame();
     int LoadTexture(const std::string& path);
-    int LoadShader(const std::string& path);
+    int LoadShader(const std::string& path, const std::string shaderName);
     CommancheTextureInfo GetTextureInfo(int id);
     int LoadFont(const std::string& path, int size);
     //void DrawTest();
-    void Render();
-    void Render1();
-    void Render2();
+    void RenderApply();
+    void RenderStart();
+    void RenderEnd();
     void Destroy();
     private:
     unsigned int framebuffer, textureColorbuffer;

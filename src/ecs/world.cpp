@@ -28,10 +28,25 @@ Entity World::CreateEntity() {
     return entity;
 }
 
+std::vector<Entity> World::GetEntities() {
+    std::vector<Entity> entities;
+
+    for (int i = 0; i < storage->entityComponentRegistry.size(); i++) {
+
+        auto fit = find(freeIds.begin(), freeIds.end(), i);
+        if (fit == freeIds.end()) {
+            Entity e = Entity(i);
+            e.SetOwner(this);
+            entities.push_back(e);
+        }
+    }
+
+    return entities;
+}
 std::vector<Entity> World::GetEntitiesByGroup(const std::string& group) const {
 
     if (groupToEntitiesMap.find(group) == groupToEntitiesMap.end()) {
-      return {};
+        return {};
     }
 
     auto& setOfEntities = groupToEntitiesMap.at(group);
@@ -42,8 +57,8 @@ void World::KillEntity(Entity& entity) {
     entityRemoveQueue.insert(entity);
 }
 
-Entity World::GetEntity(int entityId){
-  return Entity(entityId);
+Entity World::GetEntity(int entityId) {
+    return Entity(entityId);
 };
 
 void World::AddEntityToSystems(Entity entity) {

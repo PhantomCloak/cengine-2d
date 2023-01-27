@@ -34,11 +34,6 @@ int GenerateTextureFromText(std::string text, int fontId, CommancheColorRGB text
     return -1;
 }
 
-void InitGLTypes() {
-    glShaders[DEFAULT_SHADER_SLOT] = Shader("default.vert", "default.frag");
-    glShapes[RECT_PRIMITIVE] = new GLShape(glRectVertices, sizeof(glRectVertices), &glShaders[DEFAULT_SHADER_SLOT]);
-}
-
 int CommancheRenderer::LoadFont(const std::string& path, int fontSize) {
     return -1;
 }
@@ -73,8 +68,19 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
     const float h = w / aspectRatio;
 
     proj = glm::ortho(0.0f, w, h, 0.0f, -1.0f, 1.0f);
+}
 
-    InitGLTypes();
+void CommancheRenderer::InitializeShaders(const std::string& defaultShaderPath) {
+
+    std::string vert = defaultShaderPath + "/default.vert";
+    std::string frag = defaultShaderPath + "/default.frag";
+    
+    Shader defaultShader = Shader(vert.c_str(), frag.c_str());
+
+    assert(!defaultShader.compiledSuccessfully);
+
+    glShaders[DEFAULT_SHADER_SLOT] = defaultShader;
+    glShapes[RECT_PRIMITIVE] = new GLShape(glRectVertices, sizeof(glRectVertices), &glShaders[DEFAULT_SHADER_SLOT]);
 }
 
 // void CommancheRenderer::DrawRectangle(float x, float y, float w, float h, float rotation, CommancheColorRGB color) {
@@ -101,8 +107,9 @@ void CommancheRenderer::DrawImage(int textureId, float x, float y, float width, 
     texture.Unbind();
 }
 
-bool CommancheRenderer::IsShaderValid(int shaderId){
-  return false;
+bool CommancheRenderer::IsShaderValid(int shaderId) {
+    Shader shader = glShaders[shaderId];
+    return shader.compiledSuccessfully;
 }
 
 bool CommancheRenderer::IsTextureValid(int textureId) {
@@ -146,53 +153,81 @@ void CommancheRenderer::DrawText(int fontId, std::string message, int x, int y, 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-int CommancheRenderer::LoadShader(const std::string& path){
+int CommancheRenderer::LoadShader(const std::string& path, const std::string shaderName) {
 
+    std::string vertexShaderPath;
+    std::string fragmentShaderPath;
+
+    for (const auto& entry : std::filesystem::directory_iterator(path)) {
+        std::string fileName = std::filesystem::path(entry.path()).stem();
+        std::string extension = std::filesystem::path(entry.path()).extension();
+
+        if (fileName != shaderName) {
+            continue;
+        }
+
+        if (extension == ".vert") {
+            vertexShaderPath = entry.path();
+        } else if (extension == ".frag") {
+            fragmentShaderPath = entry.path();
+
+        } else {
+            std::cout << "err on shader load no extension" << std::endl;
+        }
+    }
+
+    Shader shader = Shader(vertexShaderPath.c_str(), fragmentShaderPath.c_str());
+
+    glShaders.insert(std::make_pair(shader.ID, shader));
+    return shader.ID;
 }
 
-
-int CommancheRenderer::GetFrame(){
-  return textureColorbuffer;
+int CommancheRenderer::GetFrame() {
+    return textureColorbuffer;
 }
 
-void CommancheRenderer::SetFrameSize(int width, int height){
-  glViewport(0, 0, width, height);
+void CommancheRenderer::SetFrameSize(int width, int height) {
 
-  // glDeleteFramebuffers(1, &framebuffer);
+    glDeleteTextures(1, &textureColorbuffer);
+    glDeleteFramebuffers(1, &framebuffer);
 
-  // framebuffer configuration
-  // -------------------------
-  framebuffer = 0;
+    glViewport(0, 0, width, height);
 
-  // Create FBO & Textrue
-  glGenFramebuffers(1, &framebuffer);
-  glGenTextures(1, &textureColorbuffer);
-  
-  // Bind FBO & Texture
-  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-  glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    // glDeleteFramebuffers(1, &framebuffer);
 
-  // generate texture according to WxH
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    // framebuffer configuration
+    // -------------------------
+    framebuffer = 0;
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // Create FBO & Textrue
+    glGenFramebuffers(1, &framebuffer);
+    glGenTextures(1, &textureColorbuffer);
 
-  // FBO to Texture
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+    // Bind FBO & Texture
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
 
-  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!"
-              << std::endl;
+    // generate texture according to WxH
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // FBO to Texture
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!"
+                  << std::endl;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 int CommancheRenderer::LoadTexture(const std::string& path) {
     Texture texture = Texture(path.c_str(), GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
 
-    if(!texture.isSuccess)
-      return -1;
+    if (!texture.isSuccess)
+        return -1;
 
     texture.texUnit(&glShaders[DEFAULT_SHADER_SLOT], "tex0", 0);
 
@@ -210,30 +245,18 @@ CommancheTextureInfo CommancheRenderer::GetTextureInfo(int id) {
     return inf;
 }
 
-void CommancheRenderer::Render1() {
+void CommancheRenderer::RenderStart() {
     glfwPollEvents();
 
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-}
-void CommancheRenderer::Render2() {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //glfwSwapBuffers(k_window);
-    //glfwPollEvents();
-
-
-}
-void CommancheRenderer::Render() {
-    glfwSwapBuffers(k_window);
-  return;
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glfwSwapBuffers(k_window);
-    glfwPollEvents();
-
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+}
+void CommancheRenderer::RenderEnd() {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+void CommancheRenderer::RenderApply() {
+    glfwSwapBuffers(k_window);
 }
 
 void CommancheRenderer::Destroy() {

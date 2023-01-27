@@ -119,7 +119,8 @@ class Physics : public System {
             if (radians < 0.0) {
                 radians += 2 * M_PI;
             }
-
+            const b2Vec2& vel = pair->body->GetLinearVelocity();
+            rigidBody.velocity = glm::vec2(vel.x, vel.y);
             transform.pos.x = position.x;
             transform.pos.y = position.y;
             transform.rotation = radians;

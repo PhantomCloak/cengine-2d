@@ -34,7 +34,8 @@ BINARY_NAME = commanche2d
 
 build:
 	$(CC) $(COMPILER_FLAGS) $(LANG_STD) $(INCLUDE_PATHS) $(SRC_FILES) $(LINKER_FLAGS) $(LIBRARY_PATHS) -o commanche2d
-
+dev:
+	$(CC) $(COMPILER_FLAGS) $(LANG_STD) $(INCLUDE_PATHS) $(SRC_FILES) $(LINKER_FLAGS) $(LIBRARY_PATHS) -DEDITOR=1 -o commanche2d
 run:
 	./commanche2d
 

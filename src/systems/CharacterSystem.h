@@ -20,25 +20,35 @@ class CharacterSystem : public System {
 
     void Update() {
         for (auto entity : GetEntities()) {
-            const auto characterController = entity.GetComponent<CharacterController>();
+            auto& characterController = entity.GetComponent<CharacterController>();
             auto& rigidbody = entity.GetComponent<RigidBody>();
             auto& transform = entity.GetComponent<RectTransform>();
 
             if (Keyboard::IsKeyPressed(KeyCode::Key_W)) {
                 Log::Inf("UP HAS PRESSED");
                 rigidbody.forceAcc += characterController.upVelocity;
+                characterController.up = true;
+            }
+            else{
+                characterController.up = false;
             }
             if (Keyboard::IsKeyPressing(KeyCode::Key_D)) {
                 Log::Inf("RIGHT HAS PRESSED");
                 //rigidbody.forceAcc += characterController.rightVelocity;
                 transform.pos.x += 0.5f;
+                characterController.right = true;
+            }else{
+                characterController.right = false;
             }
 
             if (Keyboard::IsKeyPressing(KeyCode::Key_A)) {
                 Log::Inf("LEFT HAS PRESSED");
                 transform.pos.x -= 0.5f;
+                characterController.left = true;
                 //rigidbody.forceAcc += characterController.leftVelocity;
             }
+            else
+                characterController.left = false;
         }
     }
 };

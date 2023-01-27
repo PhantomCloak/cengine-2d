@@ -36,6 +36,8 @@ class World {
     void KillEntity(Entity& entity);
     void Update();
 
+    std::vector<Entity> GetEntities();
+
     template <typename TComponent>
     std::vector<Entity> GetComponentEntities();
     // Tag Management

@@ -12,19 +12,21 @@
 int Game::mapHeight = 0;
 int Game::mapWidth = 0;
 Wrapper* wrapper;
-Editor* editor;
 
 Game::Game() {
     isRunning = false;
     world = std::make_unique<World>();
     renderer = new CommancheRenderer();
+
+#if EDITOR
     editor = new Editor();
+#endif
+
     bus = new EventBus();
     AssetManager::Initialize(renderer);
     Log::Inf("Game Constructor Called");
 
     wrapper = new Wrapper(world);
-
 
     LuaManager::InitSandbox();
 
@@ -52,7 +54,12 @@ void Game::Initialize() {
 
     renderer->Initialize("Twelve Villages", screenW, screenH);
 
+    renderer->InitializeShaders("./src/shaders");
+
+#if EDITOR
     editor->Init(renderer, map, world, &camera, bus);
+#endif
+
     Keyboard::Setup(renderer->wnd);
     Cursor::Setup(renderer->wnd);
     isRunning = true;
@@ -71,7 +78,6 @@ void Game::Setup() {
     Log::Warn("Engine is starting");
 
     // Setup Assets
-    AssetManager::AddFont("charriot-font", "/Users/unalozyurt/Workspace/commanche-2d/assets/fonts/charriot.ttf", 64);
 
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/after_load");
 
@@ -92,6 +98,7 @@ void Game::Setup() {
     player.AddComponent<RectTransform>(glm::vec2(100, 10), glm::vec2(2, 5));
     player.AddComponent<Sprite>(AssetManager::GetTexture("box"));
     player.AddComponent<CharacterController>(4,0.5f,0.5f,0.5f);
+    player.AddComponent<Health>(100);
     player.AddComponent<RigidBody>(false);
 
 
@@ -127,8 +134,17 @@ void Game::ProcessInput() {
 
 void Game::Render() {
     //world->GetSystem<RenderSystem>().Update();
-    editor->Render();
-    //renderer->Render();
+    //world->GetSystem<RenderSystem>().Update();
+
+  renderer->RenderStart();
+  world->GetSystem<RenderSystem>().Update();
+  renderer->RenderEnd();
+
+#if EDITOR
+  editor->Render();
+#endif
+
+  renderer->RenderApply();
 }
 
 

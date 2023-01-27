@@ -15,7 +15,7 @@ void AssetManager::Initialize(CommancheRenderer* render) {
 }
 
 void AssetManager::AddShader(const std::string& assetId, const std::string& path) {
-  int shaderId = renderer->LoadShader(path);
+  int shaderId = renderer->LoadShader(path, assetId);
 
   if (!renderer->IsShaderValid(shaderId)) {
         Log::Warn("Shader with invalid ID (" + std::to_string(shaderId) + ") has tried to load");

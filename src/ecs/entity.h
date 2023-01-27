@@ -100,8 +100,6 @@ template <typename TComponent>
 bool Entity::HasComponent() const {
     const int componentId = Component<TComponent>::GetId();
     const int entityId = GetId();
-    int a = owner->entityComponentRegistry.size();
-    Log::Inf(std::to_string(a));
     return owner->entityComponentRegistry[entityId].test(componentId);
 }
 

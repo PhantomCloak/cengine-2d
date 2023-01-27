@@ -24,9 +24,10 @@ public:
 	void Deactivate();
 	// Deletes the Shader Program
 	void Delete();
+  bool compiledSuccessfully;
 private:
 	// Checks if the different Shaders have compiled properly
-	void compileErrors(unsigned int shader, const char* type);
+	bool compileErrors(unsigned int shader, const std::string type);
 };
 
 
