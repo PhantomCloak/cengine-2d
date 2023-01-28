@@ -22,8 +22,8 @@ class MovementSystem : public System
         auto& transform = entity.GetComponent<Transform>();
         const auto rigidbody = entity.GetComponent<RigidBody>();
 
-        transform.pos.x += rigidbody.velocity.x * dt;
-        transform.pos.y += rigidbody.velocity.y * dt;
+        transform.pos.x += rigidbody.velocityLinear.x * dt;
+        transform.pos.y += rigidbody.velocityLinear.y * dt;
       }
     };
 };

@@ -133,7 +133,7 @@ giri::json::JSON SerializeComponent(RigidBody component) {
     giri::json::JSON selfJson = giri::json::JSON();
     giri::json::JSON arrParam = giri::json::JSON();
 
-    arrParam["velocity"] = SerializeType(component.velocity);
+    arrParam["velocity"] = SerializeType(component.velocityLinear);
 
     selfJson["parameters"] = arrParam;
 

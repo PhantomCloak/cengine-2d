@@ -1,7 +1,7 @@
 #include "game.h"
 #include "../common/common.h"
-#include "../core/cursor.h"
-#include "../core/keyboard.h"
+#include "../io/cursor.h"
+#include "../io/keyboard.h"
 #include "../log/log.h"
 #include "../scripting/lua_manager.h"
 #include "wapper.h"
@@ -78,7 +78,7 @@ void Game::Setup() {
     Log::Warn("Engine is starting");
 
     // Setup Assets
-
+    Physics::Initialize();
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/after_load");
 
     world->AddSystem<MovementSystem>();
@@ -86,7 +86,7 @@ void Game::Setup() {
     world->AddSystem<RenderText2D>(renderer, &camera);
     world->AddSystem<RenderDebug>(renderer, &camera);
     world->AddSystem<Animator>();
-    world->AddSystem<Physics>();
+    world->AddSystem<PhysicsController>();
     world->AddSystem<CharacterSystem>(bus, &camera);
     world->AddSystem<ProjectileSystem>();
 
@@ -121,7 +121,7 @@ void Game::Update() {
 
      world->GetSystem<CharacterSystem>().Update();
      world->GetSystem<Animator>().Update();
-     world->GetSystem<Physics>().Update();
+     world->GetSystem<PhysicsController>().Update();
 
     bus->ClearEvents();
     Keyboard::FlushPressedKeys();
@@ -133,8 +133,8 @@ void Game::ProcessInput() {
 
 
 void Game::Render() {
-    //world->GetSystem<RenderSystem>().Update();
-    //world->GetSystem<RenderSystem>().Update();
+  //world->GetSystem<RenderSystem>().Update();
+  //world->GetSystem<RenderSystem>().Update();
 
   renderer->RenderStart();
   world->GetSystem<RenderSystem>().Update();

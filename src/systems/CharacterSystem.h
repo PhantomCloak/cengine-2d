@@ -1,6 +1,7 @@
 #pragma once
 #include "../game/commanche2d.h"
-#include "../core/keyboard.h"
+#include "../io/keyboard.h"
+#include "../physics/physics.h"
 
 class CharacterSystem : public System {
     private:
@@ -26,7 +27,7 @@ class CharacterSystem : public System {
 
             if (Keyboard::IsKeyPressed(KeyCode::Key_W)) {
                 Log::Inf("UP HAS PRESSED");
-                rigidbody.forceAcc += characterController.upVelocity;
+                Physics::AddForce(rigidbody, characterController.upVelocity);
                 characterController.up = true;
             }
             else{
@@ -34,9 +35,8 @@ class CharacterSystem : public System {
             }
             if (Keyboard::IsKeyPressing(KeyCode::Key_D)) {
                 Log::Inf("RIGHT HAS PRESSED");
-                rigidbody.forceAcc += characterController.rightVelocity;
-
-                //transform.pos.x += 0.5f;
+                //Physics::AddForce(rigidbody, characterController.rightVelocity);
+                transform.pos.x += 0.5f;
                 characterController.right = true;
             }else{
                 characterController.right = false;
@@ -44,9 +44,9 @@ class CharacterSystem : public System {
 
             if (Keyboard::IsKeyPressing(KeyCode::Key_A)) {
                 Log::Inf("LEFT HAS PRESSED");
-                //transform.pos.x -= 0.5f;
+                transform.pos.x -= 0.5f;
                 characterController.left = true;
-                rigidbody.forceAcc += characterController.leftVelocity;
+                //Physics::AddForce(rigidbody, characterController.leftVelocity);
             }
             else
                 characterController.left = false;
