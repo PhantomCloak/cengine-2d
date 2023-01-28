@@ -4,3 +4,5 @@
 [submodule "deps/sol"]
 	path = deps/sol
 	url = git@github.com:Rapptz/sol.git
+[submodule "libs/imgui"]
+	url = https://github.com/PhantomCloak/imgui/tree/docking
