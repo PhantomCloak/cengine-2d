@@ -15,9 +15,10 @@ LIBRARY_PATHS = -L/opt/homebrew/lib
 SRC_FILES = ./libs/glad/src/glad.c \
 	    ./src/*.cpp \
 	    ./src/game/*.cpp \
-	    ./src/core/*.cpp \
+	    ./src/io/*.cpp \
 	    ./src/ecs/*.cpp \
 	    ./src/log/*.cpp \
+	    ./src/physics/*.cpp \
 	    ./src/editor/*.cpp \
 	    ./src/common/*.cpp \
 	    ./src/assetmgr/*.cpp \
