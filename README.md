@@ -2,7 +2,7 @@
 
 check progress at [here](https://www.youtube.com/playlist?list=PL2dQtIx06FzXMnB5aWsK_OJ6UocCFF-Ga)
 
-<img width="2672" alt="image" src="https://user-images.githubusercontent.com/34552014/214997794-80e2f87d-8851-45fb-9787-928a6929dbf6.png">
+<img width="2672" alt="image" src="https://user-images.githubusercontent.com/34552014/215361052-f2e86742-1947-4fc5-b710-a89293f40a1f.png">
 
 ## Features
 
