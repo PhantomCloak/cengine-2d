@@ -14,6 +14,10 @@ brew install lua
 brew install luarocks
 luarocks install dkjson
 ```
+optional (to build editor)
+```
+brew install glm
+```
 ## Features
 
 #### Physics Engine
