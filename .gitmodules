@@ -6,3 +6,6 @@
 	url = git@github.com:Rapptz/sol.git
 [submodule "libs/imgui"]
 	url = https://github.com/PhantomCloak/imgui/tree/docking
+[submodule "libs/SimpleJSON"]
+	path = libs/SimpleJSON
+	url = git@github.com:nbsdx/SimpleJSON.git
