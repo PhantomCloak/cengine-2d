@@ -5,7 +5,8 @@
 	path = deps/sol
 	url = git@github.com:Rapptz/sol.git
 [submodule "libs/imgui"]
-	url = https://github.com/PhantomCloak/imgui/tree/docking
+	url = https://github.com/PhantomCloak/imgui
+	path = libs/imgui
 [submodule "libs/SimpleJSON"]
 	path = libs/SimpleJSON
 	url = git@github.com:nbsdx/SimpleJSON.git
