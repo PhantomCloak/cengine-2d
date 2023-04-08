@@ -13,6 +13,7 @@ brew install glfw
 brew install lua
 brew install luarocks
 luarocks install dkjson
+brew install pkg-config
 ```
 optional (to build editor)
 ```
