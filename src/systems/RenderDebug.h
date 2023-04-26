@@ -2,48 +2,29 @@
 #define RENDERDBG_H
 
 #include "../components/BoxCollider.h"
-#include "../components/Camera.h"
 #include "../components/Sprite.h"
-#include "../components/Transform.h"
+#include "../components/RectTransform.h"
+#include "../components/DebugTile.h"
 #include "../ecs/system.h"
 #include "../log/log.h"
 #include "../src/render/render.h"
 
 class RenderDebug : public System {
     public:
-    CommancheCamera* camera;
     CommancheRenderer* renderer;
-    RenderDebug(CommancheRenderer* renderer, CommancheCamera* camera) {
-        this->camera = camera;
+    RenderDebug(CommancheRenderer* renderer) {
         this->renderer = renderer;
-        RequireComponent<BoxCollider>();
-        RequireComponent<Transform>();
+        RequireComponent<RectTransform>();
         RequireComponent<Sprite>();
+        RequireComponent<DebugTile>();
     };
 
     void Update() {
-        int gridSize = camera->gridSize;
-        const int gridCtxW = 1920 / gridSize;
-        const int gridCtxH = 1080 / gridSize;
-
-        for (int i = 0; i < gridCtxW * gridCtxH; i++) {
-            int nextX = (i * gridSize) % 1920;
-            int nextY = floor(i / gridCtxW) * gridSize;
-
-            //renderer->DrawRectangle(nextX, nextY, gridSize, gridSize,0 , { 255, 255, 255 });
-        }
-
         for (auto entity : GetEntities()) {
-            return;
-            const auto& transform = entity.GetComponent<Transform>();
+          auto& transform = entity.GetComponent<RectTransform>();
+          auto sprite = entity.GetComponent<Sprite>();
 
-            CommancheRect colliderRect;
-            colliderRect.x = transform.pos.x + camera->x;
-            colliderRect.y = transform.pos.y + camera->y;
-            colliderRect.width = camera->gridSize;
-            colliderRect.height = camera->gridSize;
-
-            //renderer->DrawRectangle(colliderRect.x, colliderRect.y, colliderRect.width, colliderRect.height, { 1, 0, 0 });
+          renderer->DrawRectRangle(sprite.texture, transform.pos.x, transform.pos.y, transform.size.x, transform.size.y, 0, 0, 0);
         }
     }
 };

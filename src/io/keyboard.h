@@ -22,6 +22,10 @@ class Keyboard {
 
 enum KeyCode {
     Key_UNKNOWN = -1,
+    Key_LArrow = 263,
+    Key_UArrow=   265,
+    Key_RArrow = 262,
+    Key_DArrow = 264,
     Key_SPACE = 32,
     Key_APOSTROPHE = 39,
     Key_COMMA = 44,

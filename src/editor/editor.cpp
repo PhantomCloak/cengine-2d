@@ -5,6 +5,7 @@
 #include "../ecs/world.h"
 #include "../game/game.h"
 #include "../game/map_serializer.h"
+#include "../io/filesystem.h"
 #include "../libs/imgui/imgui.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -13,7 +14,6 @@
 #include <functional>
 #include <memory>
 #include <stdio.h>
-#include "../io/filesystem.h"
 
 namespace fs = std::filesystem;
 
@@ -133,6 +133,23 @@ void LoadDialog() {
         windowFlags[EDITOR_SHOW_LOAD_DIALOG] = false;
     }
     ImGui::End();
+}
+
+void Editor::Keybindings(){
+    if(Keyboard::IsKeyPressing(KeyCode::Key_RArrow)){
+      renderer->OffsetCamera(25, 0);
+    }
+
+    if(Keyboard::IsKeyPressing(KeyCode::Key_LArrow)){
+      renderer->OffsetCamera(-25, 0);
+    }
+
+    if(Keyboard::IsKeyPressing(KeyCode::Key_UArrow)){
+      renderer->OffsetCamera(0, -25);
+    }
+    if(Keyboard::IsKeyPressing(KeyCode::Key_DArrow)){
+      renderer->OffsetCamera(0, 25);
+    }
 }
 
 void MapEditor() {
@@ -263,9 +280,9 @@ void SerializeEntity(Entity e) {
         ImGui::InputFloat(_labelPrefix("scale y:").c_str(), &comp.scale.y, 1);
 
         ImGui::Spacing();
-        
+
         ImGui::InputFloat(_labelPrefix("rotation: ").c_str(), &comp.rotation, 1);
-        
+
         ImGui::EndGroupPanel();
     }
     if (e.HasComponent<RigidBody>()) {
@@ -378,6 +395,7 @@ void renderDockingSpace() {
 }
 
 void Editor::Render() {
+    Keybindings();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -416,10 +434,10 @@ void Editor::Render() {
     SceneList();
     fileView->RenderWindow();
 
-    if (ImGui::Begin("Viewport", NULL, ImGuiWindowFlags_NoScrollbar|ImGuiWindowFlags_NoScrollWithMouse)) {
+    ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.0f, 0.0f ) );
+    if (ImGui::Begin("Viewport", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
 
         if (size.x != ImGui::GetWindowWidth() || size.y != ImGui::GetWindowHeight()) {
-
             size.x = ImGui::GetWindowWidth();
             size.y = ImGui::GetWindowHeight();
             renderer->SetFrameSize(size.x, size.y);
@@ -427,11 +445,12 @@ void Editor::Render() {
 
         auto tex = renderer->GetFrame();
 
-
         static ImVec2 uv0 = { 0, 1 };
         static ImVec2 uv1 = { 1, 0 };
-        ImGui::Image((void*)tex, size, uv0, uv1);
+        ImVec2 avail = ImGui::GetContentRegionAvail();
+        ImGui::Image((void*)tex, avail, uv0, uv1);
         ImGui::End();
+        ImGui::PopStyleVar();
     }
 
     ImGui::EndFrame();

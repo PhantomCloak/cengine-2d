@@ -2,6 +2,17 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+Texture::Texture(unsigned char* data, GLenum texType, int width, int height) {
+    glGenTextures(1, &ID);
+    glBindTexture(texType, ID);
+    glTexImage2D(texType, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+    // set texture options
+    glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
 Texture::Texture(const char* image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType) {
     // Assigns the type of the texture ot the texture object
     type = texType;

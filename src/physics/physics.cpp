@@ -27,8 +27,8 @@ b2Body* findBodyById(int id) {
 
 void Physics::AddForce(RigidBody body, glm::vec2 forceVector) {
     b2Body* bBody = findBodyById(body.rigId);
-    int fX = (forceVector.x * bBody->GetMass()) * PIXELS_PER_METER;
-    int fY = (forceVector.y * bBody->GetMass()) * PIXELS_PER_METER;
+    int fX = (forceVector.x * bBody->GetMass());
+    int fY = (forceVector.y * bBody->GetMass());
 
     bBody->ApplyLinearImpulseToCenter(b2Vec2(fX, fY), true);
 }
@@ -53,7 +53,7 @@ void Physics::RegisterBody(RigidBody body, RectTransform transform) {
 
     b2PolygonShape shape;
 
-    shape.SetAsBox((transform.size.x * transform.scale.x) / 2, (transform.size.y * transform.scale.y) / 2);
+    shape.SetAsBox(((transform.size.x * transform.scale.x) / PIXELS_PER_METER ) / 2, ((transform.size.y * transform.scale.y) / PIXELS_PER_METER) / 2);
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &shape;
 

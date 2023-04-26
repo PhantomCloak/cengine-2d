@@ -5,7 +5,7 @@
 #include "physics_metadata.h"
 #include <map>
 
-#define PIXELS_PER_METER 10
+#define PIXELS_PER_METER 1
 
 class Physics {
     public:

@@ -34,7 +34,7 @@ class PhysicsController : public System {
 
         for (auto entity : GetEntities()) {
             RectTransform transform = entity.GetComponent<RectTransform>();
-            RigidBody rigidBody = entity.GetComponent<RigidBody>();
+            RigidBody& rigidBody = entity.GetComponent<RigidBody>();
             rigidBody.rigId = entity.GetId();
 
             if (!Physics::HasRegistered(entity.GetId())) {

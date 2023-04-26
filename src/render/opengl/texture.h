@@ -14,6 +14,7 @@ public:
   int width;
   bool isSuccess;
   Texture() = default;
+  Texture(unsigned char* data, GLenum texType, int width, int height);
 	Texture(const char* image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType);
 
 	// Assigns a texture unit to a texture

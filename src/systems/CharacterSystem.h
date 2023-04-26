@@ -26,7 +26,7 @@ class CharacterSystem : public System {
             auto& transform = entity.GetComponent<RectTransform>();
 
             if (Keyboard::IsKeyPressed(KeyCode::Key_W)) {
-                Log::Inf("UP HAS PRESSED");
+                //Log::Inf("UP HAS PRESSED");
                 Physics::AddForce(rigidbody, characterController.upVelocity);
                 characterController.up = true;
             }
@@ -34,17 +34,18 @@ class CharacterSystem : public System {
                 characterController.up = false;
             }
             if (Keyboard::IsKeyPressing(KeyCode::Key_D)) {
-                Log::Inf("RIGHT HAS PRESSED");
+                //Log::Inf("RIGHT HAS PRESSED");
                 //Physics::AddForce(rigidbody, characterController.rightVelocity);
-                transform.pos.x += 0.5f;
+                transform.pos.x += characterController.rightVelocity.x;
                 characterController.right = true;
             }else{
                 characterController.right = false;
             }
 
             if (Keyboard::IsKeyPressing(KeyCode::Key_A)) {
-                Log::Inf("LEFT HAS PRESSED");
-                transform.pos.x -= 0.5f;
+                //Log::Inf("LEFT HAS PRESSED");
+                transform.pos.x -= characterController.rightVelocity.x;
+                //transform.pos.x += characterController.leftVelocity.x;
                 characterController.left = true;
                 //Physics::AddForce(rigidbody, characterController.leftVelocity);
             }

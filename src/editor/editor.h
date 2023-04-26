@@ -19,8 +19,8 @@ class Editor {
     Editor() = default;
     void Init(CommancheRenderer* renderer, Map* map,std::shared_ptr<World> world, CommancheCamera * camera, EventBus* eventBus);
     void Render();
-    //void ProcessInput(SDL_Event * event);
     private:
+    void Keybindings();
     FileView* fileView;
     void onMousePressed(MousePressedEvent& event);
     std::shared_ptr<World> world;

@@ -10,7 +10,8 @@ INCLUDE_PATHS = -I"./libs" \
 		-I/opt/homebrew/include \
 		-I./libs/glad/include \
 		-I./libs/stb \
-		`pkg-config --cflags glfw3`
+		`pkg-config --cflags glfw3` \
+		`pkg-config --cflags-only-I freetype2`
 LIBRARY_PATHS = -L/opt/homebrew/lib
 SRC_FILES = ./libs/glad/src/glad.c \
 	    ./src/*.cpp \
@@ -24,12 +25,13 @@ SRC_FILES = ./libs/glad/src/glad.c \
 	    ./src/assetmgr/*.cpp \
 	    ./src/scripting/*.cpp \
 	    ./src/render/*.cpp \
+	    ./src/render/backends/render_opengl.cpp \
 	    ./src/render/opengl/*.cpp \
 	    ./libs/imgui/*.cpp \
 	    ./libs/box2d/src/*/*.cpp \
 	    ./libs/imgui/backends/imgui_impl_glfw.cpp \
 	    ./libs/imgui/backends/imgui_impl_opengl3.cpp
-LINKER_FLAGS = `pkg-config --static --libs glfw3` -llua -framework OpenGL
+LINKER_FLAGS = `pkg-config --static --libs glfw3` `pkg-config --static --libs freetype2` -llua -framework IOKit -framework Cocoa -framework OpenGL
 BINARY_NAME = commanche2d
 
 

@@ -5,9 +5,9 @@
 #include <string>
 
 enum LogType {
-    LOG_INFO,
-    LOG_WARNING,
-    LOG_ERROR
+    CLOG_INFO,
+    CLOG_WARNING,
+    CLOG_ERROR
 };
 
 struct LogEntry {

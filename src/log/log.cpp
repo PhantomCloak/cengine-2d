@@ -16,7 +16,7 @@ const std::string getDateString() {
 
 void Log::Inf(const std::string& message) {
     LogEntry logEntry;
-    logEntry.type = LOG_INFO;
+    logEntry.type = CLOG_INFO;
     logEntry.message = "(INF): [" + getDateString() + "]: " + message;
     std::cout << "\x1B[32m" << logEntry.message << "\033[0m" << std::endl;
     messages.push_back(logEntry);
@@ -24,7 +24,7 @@ void Log::Inf(const std::string& message) {
 
 void Log::Warn(const std::string& message) {
     LogEntry logEntry;
-    logEntry.type = LOG_INFO;
+    logEntry.type = CLOG_INFO;
     logEntry.message = "(WARN): [" + getDateString() + "]: " + message;
     std::cout << "\x1B[33m" << logEntry.message << "\033[0m" << std::endl;
     messages.push_back(logEntry);
@@ -32,7 +32,7 @@ void Log::Warn(const std::string& message) {
 
 void Log::Err(const std::string& message) {
     LogEntry logEntry;
-    logEntry.type = LOG_ERROR;
+    logEntry.type = CLOG_ERROR;
     logEntry.message = "(ERR): [" + getDateString() + "]: " + message;
     messages.push_back(logEntry);
     std::cerr << "\x1B[91m" << logEntry.message << "\033[0m" << std::endl;

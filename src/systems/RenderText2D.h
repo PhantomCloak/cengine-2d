@@ -14,7 +14,8 @@ class RenderText2D : public System {
     void Update() {
         for (auto entities : GetEntities()) {
             const auto textLabel = entities.GetComponent<Label>();
-            //renderer->DrawText(AssetManager::GetFont(textLabel.fontName), textLabel.text, textLabel.pos.x, textLabel.pos.y, 300);
+            renderer->CDrawText(0, textLabel.text, textLabel.pos.x, textLabel.pos.y, 20, textLabel.textColor);
         }
+
     }
 };

@@ -3,6 +3,7 @@
 #include "../components/RectTransform.h"
 #include "../components/Sprite.h"
 #include "../components/Transform.h"
+#include "../components/DebugTile.h"
 #include "../ecs/system.h"
 #include "../log/log.h"
 #include "../render/render.h"
@@ -35,7 +36,12 @@ class RenderSystem : public System {
         for (auto entity : GetEntities()) {
             auto& transform = entity.GetComponent<RectTransform>();
             auto sprite = entity.GetComponent<Sprite>();
+            bool term = entity.HasComponent<DebugTile>();
 
+            if(term)
+            {
+              continue;
+            }
 
             RenderObject renderObj = {
                 .sprite = std::make_unique<Sprite>(sprite),
@@ -50,7 +56,14 @@ class RenderSystem : public System {
         });
 
         for (RenderObject& renderObj : renderSortList) {
-          renderer->DrawImage(renderObj.sprite->texture, renderObj.transform->pos.x, renderObj.transform->pos.y, renderObj.transform->size.x, renderObj.transform->size.y, renderObj.transform->rotation, 0, 0);
+            //if (renderObj.transform->size.x < 1.0f) {
+                //renderer->DrawRectRangle(renderObj.sprite->texture, renderObj.transform->pos.x, renderObj.transform->pos.y, renderObj.transform->size.x, renderObj.transform->size.y, renderObj.transform->rotation, 0, 0);
+            //} else
+                renderer->CDrawImage(renderObj.sprite->texture, renderObj.transform->pos.x, renderObj.transform->pos.y, renderObj.transform->size.x, renderObj.transform->size.y, renderObj.transform->rotation, 0, 0);
         }
+
+        // renderer->CDrawText(0, "C ENGINE 2D", 600, 100, 10, {255, 0 , 0});
+        renderer->CDrawLine(0, 0, 10, 500);
+        renderer->DrawTest();
     };
 };

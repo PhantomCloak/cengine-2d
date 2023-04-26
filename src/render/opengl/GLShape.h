@@ -16,7 +16,7 @@ class GLShape{
     void Rotate(float rad);
     void SetOffset(glm::vec2 offset);
     void BindShape();
-    void DrawShape();
+    void DrawShape(bool wireFrame = false);
     int verticesCount;
     private:
     Shader* shader;
