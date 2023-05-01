@@ -5,7 +5,6 @@
 #include "../log/log.h"
 #include "entity.h"
 #include "pool.h"
-#include "serializer.h"
 #include "system.h"
 #include "wstorage.h"
 #include <algorithm>
@@ -29,6 +28,8 @@ class World {
     std::unordered_map<int, std::string> entityToGroupMap;
 
     public:
+
+    void AddEntityToSystems(Entity entity);
     WorldStorage* storage;
     World();
     Entity CreateEntity();
@@ -55,6 +56,8 @@ class World {
 
     // System templates
     template <typename TSystem, typename... TArgs>
+    void LoadSystem(TArgs&&... args);
+    template <typename TSystem, typename... TArgs>
     void AddSystem(TArgs&&... args);
     template <typename TSystem>
     void RemoveSystem();
@@ -64,7 +67,6 @@ class World {
     TSystem& GetSystem() const;
 
     // Entity templates
-    void AddEntityToSystems(Entity entity);
     void RemoveEntityFromSystems(Entity entity);
     ~World() = default;
 };
@@ -94,6 +96,14 @@ std::vector<Entity> World::GetComponentEntities() {
 template <typename TSystem, typename... TArgs>
 void World::AddSystem(TArgs&&... args) {
     std::shared_ptr<TSystem> newSystem = std::make_shared<TSystem>(std::forward<TArgs>(args)...);
+    newSystem.isActive = true;
+    storage->systems.insert(std::make_pair(std::type_index(typeid(TSystem)), newSystem));
+}
+
+template <typename TSystem, typename... TArgs>
+void World::LoadSystem(TArgs&&... args) {
+    std::shared_ptr<TSystem> newSystem = std::make_shared<TSystem>(std::forward<TArgs>(args)...);
+    newSystem->isActive = false;
     storage->systems.insert(std::make_pair(std::type_index(typeid(TSystem)), newSystem));
 }
 

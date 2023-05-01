@@ -6,13 +6,8 @@
 #include "../ecs/world.h"
 #include "commanche2d.h"
 #include "glm/glm.hpp"
-#include <iostream>
+#include <iostream> 
 #include <sol/sol.hpp>
-
-#if EDITOR
-#include "../editor/editor.h"
-#endif
-
 #define SCREEN_HEIGHT 1080
 #define SCREEN_WIDTH 1920
 
@@ -34,23 +29,14 @@ class Game {
     void Destroy();
 
     bool isRunning;
-    static int mapHeight;
-    static int mapWidth;
-    std::shared_ptr<World> world;
 
-    CommancheCamera camera;
-    CommancheRenderer* renderer;
     private:
     bool isDebug = false;
     int windowWidth;
     int windowHeight;
     int tickLastFrame;
     sol::state lua;
-    Map* map;
     EventBus* bus;
 
-#if EDITOR
-    Editor* editor;
-#endif
 };
 #endif

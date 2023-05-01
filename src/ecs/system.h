@@ -15,11 +15,13 @@ class System {
     std::vector<Entity> entities;
 
     public:
+    bool isActive = false;
     System() = default;
     ~System() = default;
 
     void AddEntity(Entity entity);
     void RemoveEntity(int id);
+    virtual void Update() = 0;
     std::vector<Entity>& GetEntities() const;
     const ComponentRegistry& GetEnabledComponents() const;
     template <typename T> void RequireComponent();

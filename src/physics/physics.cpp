@@ -38,6 +38,11 @@ void Physics::SetPosition(RigidBody body, glm::vec2 pos) {
     bBody->SetTransform(b2Vec2(pos.x, pos.y), bBody->GetAngle());
 }
 
+void Physics::SetVelocity(RigidBody body, glm::vec2 velocity){
+    b2Body* bBody = findBodyById(body.rigId);
+    bBody->SetLinearVelocity(b2Vec2(velocity.x, velocity.y));
+}
+
 void Physics::RegisterBody(RigidBody body, RectTransform transform) {
     PhysicsMetadata* meta = new PhysicsMetadata();
     meta->identifier = body.rigId;
@@ -84,7 +89,12 @@ void Physics::Update() {
 
 std::map<int, PhysicsResult> Physics::GetUpdatedEntries() {
     b2Body* body = world->GetBodyList();
+
+
     std::map<int, PhysicsResult> results;
+
+    if(body == NULL)
+      return results;
 
     b2Body* curBody = body;
 

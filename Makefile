@@ -19,8 +19,11 @@ SRC_FILES = ./libs/glad/src/glad.c \
 	    ./src/io/*.cpp \
 	    ./src/ecs/*.cpp \
 	    ./src/log/*.cpp \
+	    ./src/core/*.cpp \
 	    ./src/physics/*.cpp \
+	    ./src/systems/*.cpp \
 	    ./src/editor/*.cpp \
+	    ./src/scene/*.cpp \
 	    ./src/common/*.cpp \
 	    ./src/assetmgr/*.cpp \
 	    ./src/scripting/*.cpp \

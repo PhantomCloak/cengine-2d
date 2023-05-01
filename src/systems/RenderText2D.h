@@ -6,16 +6,10 @@ class RenderText2D : public System {
     CommancheRenderer* renderer;
 
     public:
-    RenderText2D(CommancheRenderer *renderer, CommancheCamera* camera) {
+    RenderText2D(CommancheRenderer *renderer) {
         this->renderer = renderer;
         RequireComponent<Label>();
     }
 
-    void Update() {
-        for (auto entities : GetEntities()) {
-            const auto textLabel = entities.GetComponent<Label>();
-            renderer->CDrawText(0, textLabel.text, textLabel.pos.x, textLabel.pos.y, 20, textLabel.textColor);
-        }
-
-    }
+    void Update() override;
 };

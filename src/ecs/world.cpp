@@ -58,15 +58,18 @@ void World::KillEntity(Entity& entity) {
 }
 
 Entity World::GetEntity(int entityId) {
-    return Entity(entityId);
+    Entity e = Entity(entityId);
+    e.SetOwner(this);
+    return e;
 };
 
 void World::AddEntityToSystems(Entity entity) {
-    const auto entityId = entity.GetId();
-    const auto& entityEnabledComponents = storage->entityComponentRegistry[entityId];
+    const int entityId = entity.GetId();
+    const std::bitset<MAX_COMPONENT_COUNT>& entityEnabledComponents = storage->entityComponentRegistry[entityId];
 
     for (auto& system : storage->systems) {
-        const auto& systemEnabledComponents = system.second->GetEnabledComponents();
+        const std::bitset<MAX_COMPONENT_COUNT>& systemEnabledComponents = system.second->GetEnabledComponents();
+        // bitwise trick
         bool isInterested = (entityEnabledComponents & systemEnabledComponents) == systemEnabledComponents;
 
         if (isInterested) {

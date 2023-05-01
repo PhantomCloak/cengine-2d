@@ -20,8 +20,7 @@ int nextFontId = 0;
 glm::mat4 proj;
 glm::mat4 proj2;
 
-std::unordered_map<int, GLShape*> glShapes;
-std::unordered_map<int, Shader> glShaders;
+std::unordered_map<int, GLShape*> glShapes; std::unordered_map<int, Shader> glShaders;
 std::unordered_map<int, Texture> glTextures;
 
 int screenWidth = 0;
@@ -442,7 +441,7 @@ void CommancheRenderer::DrawTest() {
         vbo = new VBO(NULL, sizeof(float) * (gridSize * gridSize) * 2, GL_DYNAMIC_DRAW);
         vao->LinkAttrib(vbo, 0, 2, GL_FLOAT, 2 * sizeof(float), 0);
 
-        glUniform4f(glGetUniformLocation(shader.ID, "color"), 0, 0, 0, 255);
+        glUniform4f(glGetUniformLocation(shader.ID, "color"), 0, 0, 0, 0.3f);
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
 
         int index = 0;

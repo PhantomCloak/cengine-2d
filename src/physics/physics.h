@@ -15,7 +15,6 @@ class Physics {
     static bool HasRegistered(int body);
     static void RegisterBody(RigidBody body, RectTransform transform);
     static void SetPosition(RigidBody body, glm::vec2 pos);
+    static void SetVelocity(RigidBody body, glm::vec2 velocity);
     static void AddForce(RigidBody body, glm::vec2 forceVector);
-    //static void AddTorque(RigidBody body, float torque);
-    //static void Destroy(RigidBody body);
 };

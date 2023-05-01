@@ -2,6 +2,7 @@
 
 #include "../game/entities.h"
 #include "../game/components.h"
+#include "../game/systems.h"
 #include "json.hpp"
 
 enum {
@@ -12,8 +13,6 @@ enum {
 
 class EngineSerializer {
     public:
-    EngineSerializer();
-    EngineSerializer(std::shared_ptr<World> world);
-    void SerializeWorldToFile(const std::string& path);
-    void DeserializeFileToWorld(const std::string path);
+    static void SerializeSceneToFile(const std::string& path);
+    static void DeserializeFileToScene(const std::string path);
 };

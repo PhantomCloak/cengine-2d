@@ -32,6 +32,7 @@ enum KeyCode {
     Key_MINUS = 45,
     Key_PERIOD = 46,
     Key_SLASH = 47,
+    Key_CTRL = 341,
     Key_0 = 48,
     Key_1 = 49,
     Key_2 = 50,
