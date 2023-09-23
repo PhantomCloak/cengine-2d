@@ -2,6 +2,7 @@
 
 #include "../log/log.h"
 #include "render_primitives.h"
+#include "glm/glm.hpp"
 #include <string>
 
 class CommancheRenderer {
@@ -25,11 +26,17 @@ class CommancheRenderer {
     CommancheTextureInfo GetTextureInfo(int id);
     int LoadFont(const std::string& path, int size);
     void OffsetCamera(float vertical, float horizontal);
-    void DrawTest();
+    void DrawGrids();
     void RenderApply();
     void RenderStart();
     void RenderEnd();
     void Destroy();
+    static glm::mat4 ProjectionMat;
+    glm::mat4 view;
+    int screenWidth = 0;
+    int screenHeight = 0;
+    int ho;
+    int vo;
     private:
     unsigned int framebuffer, textureColorbuffer;
 };

@@ -3,7 +3,6 @@
 #include "../opengl/primitives.h"
 #include "../opengl/texture.h"
 #include "../render.h"
-#include "glm/glm.hpp"
 #include <GLFW/glfw3.h>
 #include <filesystem>
 #include <ft2build.h>
@@ -16,15 +15,14 @@
 
 GLFWwindow* k_window;
 std::string driverStr;
+glm::mat4 CommancheRenderer::ProjectionMat;
+
 int nextFontId = 0;
-glm::mat4 proj;
-glm::mat4 proj2;
+const int scaleFactor = 1;
 
 std::unordered_map<int, GLShape*> glShapes; std::unordered_map<int, Shader> glShaders;
 std::unordered_map<int, Texture> glTextures;
 
-int screenWidth = 0;
-int screenHeight = 0;
 int PPM = 0;
 
 GLLine* test;
@@ -50,7 +48,6 @@ struct Character {
 };
 
 std::map<char, Character> Characters;
-
 void InitFreeType() {
 }
 
@@ -88,14 +85,12 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
     });
 
     const float aspectRatio = (float)16 / (float)9;
-    const float w = 1920.0f;
-    const float h = w / aspectRatio;
+    const float w = 1920.0f / 2;
+    const float h = 1080.0f / 2;
 
     screenWidth = w;
     screenHeight = h;
-    // proj = glm::ortho(0.0f, w, h, 0.0f, -1.0f, 0.0f);
-    proj = glm::ortho(0.0f, w, h, 0.0f, -1.0f, 1.0f);
-    proj2 = glm::ortho(0.0f, w, w, 0.0f, -1.0f, 1.0f);
+    ProjectionMat = glm::ortho(0.0f, w, h, 0.0f, -1.0f, 1.0f);
 
     // OpenGL state
     // ------------
@@ -179,7 +174,7 @@ void CommancheRenderer::InitializeShaders(const std::string& defaultShaderPath) 
     Shader solidRenderShader = Shader(solidRenderShaderVert.c_str(), solidRenderShaderFrag.c_str());
 
     defaultFontShader.Activate();
-    glUniformMatrix4fv(glGetUniformLocation(defaultFontShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
+    glUniformMatrix4fv(glGetUniformLocation(defaultFontShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(ProjectionMat));
     defaultFontShader.Deactivate();
 
     assert(defaultShader.compiledSuccessfully);
@@ -200,15 +195,15 @@ void CommancheRenderer::DrawRectRangle(int textureId, float x, float y, float wi
     GLShape* shape = glShapes[RECT_PRIMITIVE];
     Texture texture = glTextures[textureId];
 
-    x *= 100;
-    y *= 100;
-    width *= 100;
-    height *= 100;
+    x *= scaleFactor;
+    y *= scaleFactor;
+    width *= scaleFactor;
+    height *= scaleFactor;
 
     shape->BindShape();
 
     shape->Scale(glm::vec2(width, height));
-    shape->SetProjection(proj);
+    shape->SetProjection(ProjectionMat);
     shape->Translate(glm::vec2(x, y));
     shape->Rotate(rotation);
 
@@ -229,15 +224,15 @@ void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width,
     GLShape* shape = glShapes[RECT_PRIMITIVE];
     Texture texture = glTextures[textureId];
 
-    x *= 100;
-    y *= 100;
-    width *= 100;
-    height *= 100;
+    x *= scaleFactor;
+    y *= scaleFactor;
+    width *= scaleFactor;
+    height *= scaleFactor;
 
     shape->BindShape();
 
     shape->Scale(glm::vec2(width, height));
-    shape->SetProjection(proj);
+    shape->SetProjection(ProjectionMat);
     shape->Translate(glm::vec2(x, y));
     shape->Rotate(rotation);
 
@@ -277,7 +272,7 @@ void CommancheRenderer::CDrawLine(float startx, float starty, float endx, float 
     shader.Activate();
 
     test->UpdateLine(glm::vec2(startx, starty), glm::vec2(endx, endy));
-    test->SetProjection(proj);
+    test->SetProjection(ProjectionMat);
 
     test->DrawLine();
     shader.Deactivate();
@@ -332,8 +327,7 @@ void CommancheRenderer::CDrawText(int fontId, std::string message, int x, int y,
         glDrawArrays(GL_TRIANGLES, 0, 6);
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
         x += (ch.Advance >> 6) * 1; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
-    }
-    vao->Unbind();
+    } vao->Unbind();
     glBindTexture(GL_TEXTURE_2D, 0);
     shader.Deactivate();
 }
@@ -423,7 +417,7 @@ int CommancheRenderer::CLoadTexture(const std::string& path) {
     return texture.ID;
 }
 
-void CommancheRenderer::DrawTest() {
+void CommancheRenderer::DrawGrids() {
     static bool isInit = false;
     static VAO* vao;
     static VBO* vbo;
@@ -442,7 +436,7 @@ void CommancheRenderer::DrawTest() {
         vao->LinkAttrib(vbo, 0, 2, GL_FLOAT, 2 * sizeof(float), 0);
 
         glUniform4f(glGetUniformLocation(shader.ID, "color"), 0, 0, 0, 0.3f);
-        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
+        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(ProjectionMat));
 
         int index = 0;
 
@@ -479,20 +473,17 @@ CommancheTextureInfo CommancheRenderer::GetTextureInfo(int id) {
     Texture texture = glTextures[id];
 
     CommancheTextureInfo inf;
-    inf.width = texture.height;
-    inf.height = texture.width;
+    inf.width = texture.width;
+    inf.height = texture.height;
 
     return inf;
 }
 
 void CommancheRenderer::OffsetCamera(float vertical, float horizontal) {
-    static float vo = 0;
-    static float ho = 0;
-
     vo += vertical;
     ho += horizontal;
 
-    proj = glm::ortho(0.0f + vo, (float)screenWidth + vo, (float)screenHeight + ho, 0.0f + ho, -1.0f, 1.0f);
+    ProjectionMat = glm::ortho(0.0f + vo, (float)screenWidth + vo, (float)screenHeight + ho, 0.0f + ho, -1.0f, 1.0f);
 }
 
 void CommancheRenderer::RenderStart() {

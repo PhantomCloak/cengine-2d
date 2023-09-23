@@ -81,7 +81,7 @@ void Scene::Render() {
     renderer->RenderStart();
     Scene::GetSystem<RenderSystem>().Update();
     Scene::GetSystem<RenderText2D>().Update();
-    Scene::GetSystem<RenderDebug>().Update();
+    //Scene::GetSystem<RenderDebug>().Update();
     Scene::GetSystem<PhysicsController>().Update();
     renderer->RenderEnd();
 

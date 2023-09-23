@@ -6,6 +6,7 @@
 #include "../ecs/world.h"
 #include "../game/game.h"
 #include "../game/map_serializer.h"
+#include "../io/cursor.h"
 #include "../io/filesystem.h"
 #include "../libs/imgui/imgui.h"
 #include "../scene/scene.h"
@@ -29,9 +30,6 @@ bool tileSetIsInit = false;
 static int zIndexStart = 800;
 
 void Editor::Init(CommancheRenderer* renderer) {
-    Entity text = Scene::CreateEntity();
-    text.AddComponent<Label>(glm::vec2(0, 50), "EDITOR ACTIVE");
-
     MapLuaSerializer ser;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -62,7 +60,7 @@ void Editor::Init(CommancheRenderer* renderer) {
     entityInspector = new EntityInspector();
 }
 
-Transform* draggableTransform;
+RectTransform* draggableTransform;
 Entity* draggableEntity;
 
 void Editor::onMousePressed(MousePressedEvent& event) {
@@ -121,14 +119,41 @@ void SaveDialog() {
     ImGui::End();
 }
 
+static std::string _labelPrefix(const char* const label) {
+    float width = ImGui::CalcItemWidth();
+
+    float x = ImGui::GetCursorPosX();
+    ImGui::Text(label);
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(x + width * 0.5f + ImGui::GetStyle().ItemInnerSpacing.x);
+    ImGui::SetNextItemWidth(-1);
+
+    std::string labelID = "##";
+    labelID += label;
+
+    return labelID;
+}
+
 void LoadDialog() {
     ImGui::Begin("Load Menu");
-    static char* mapNameBuff = (char*)malloc(128);
-    ImGui::InputText("Map Name: ", mapNameBuff, 128);
+
+    static std::string loc = "./assets/maps";
+    static int ctx;
+    std::vector<std::string> names = FileSys::GetFilesInDirectory(loc);
+
+    std::vector<const char*> cstrNames;
+    for (const auto& name : names) {
+        cstrNames.push_back(name.c_str());
+    }
+
+    // Display the combo box
+    ImGui::Combo(_labelPrefix("Selected Map: ").c_str(), &ctx, cstrNames.data(), cstrNames.size());
+    ImGui::Spacing();
+    ImGui::Spacing();
     ImGui::Spacing();
     ImGui::Spacing();
     if (ImGui::Button("OK")) {
-        EngineSerializer::DeserializeFileToScene("./assets/maps/" + std::string(mapNameBuff) + ".json");
+        EngineSerializer::DeserializeFileToScene(names[ctx]);
         windowFlags[EDITOR_SHOW_LOAD_DIALOG] = false;
     }
     ImGui::End();
@@ -152,8 +177,6 @@ void Editor::Keybindings() {
 }
 
 void MapEditor() {
-    const int gridSize = 9;
-    int currentGrid = 0;
     static bool isOpen = false;
     ImGui::Begin("Tile Editor", &isOpen);
 
@@ -192,46 +215,46 @@ void MapEditor() {
     ImGui::Checkbox("Collider   ", &collider);
     ImGui::Spacing();
     ImGui::Spacing();
-    int tileSize = 32;
+    int tileSize = 16;
 
     int columns = selectedMafInf.width / tileSize;
     int rows = selectedMafInf.height / tileSize;
     int totalScanArea = columns * rows;
 
 
+    ImVec2 availRegion = ImGui::GetContentRegionAvail();
+    int slice = availRegion.x / 64;
+
     for (int i = 0; i < totalScanArea; i++) {
-        glm::vec2 start;
-        glm::vec2 end;
-        // mp->TileIndexToTextCoord(std::string(selectedItem), i, start, end);
         auto identifier = std::to_string(i);
 
-        if (ImGui::ImageButton(identifier.c_str(),
-            (void*)(intptr_t)selectedTextureId,
-            ImVec2(64, 64),
-            ImVec2(pixelCordToUvX2(start.x, selectedMafInf.width),
-            pixelCordToUvY2(start.y, selectedMafInf.height)),
-            ImVec2(pixelCordToUvX2(start.x + tileSize, selectedMafInf.width),
-            pixelCordToUvY2(start.y + tileSize, selectedMafInf.height)))) {
+        if ((i % slice) == 0) {
+            ImGui::NewLine();
+        }
+
+        int currentColumn = i % columns;
+        int currentRow = i / columns;
+
+        ImVec2 uv0 = ImVec2(pixelCordToUvX2(currentColumn * tileSize, selectedMafInf.width), pixelCordToUvY2(currentRow * tileSize, selectedMafInf.height));
+        ImVec2 uv1 = ImVec2(pixelCordToUvX2((currentColumn + 1) * tileSize, selectedMafInf.width), pixelCordToUvY2((currentRow + 1) * tileSize, selectedMafInf.height));
 
 
+        if (ImGui::ImageButton(identifier.c_str(), (void*)(intptr_t)selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
             Entity piece = Scene::CreateEntity();
             piece.Group("tiles");
 
-            piece.AddComponent<Sprite>(selectedTextureId, zIndexStart, start.x, start.y);
-            piece.AddComponent<Serializable>();
-            piece.AddComponent<Transform>(glm::vec2(100, 100), glm::vec2(4, 4), 0);
-            piece.AddComponent<MapTile>(i);
+            piece.AddComponent<Sprite>(selectedTextureId, zIndexStart, currentColumn * tileSize, currentRow * tileSize);
+            piece.AddComponent<RectTransform>(glm::vec2(0, 0), glm::vec2(50, 50));
 
             if (collider) {
                 piece.AddComponent<BoxCollider>(16, 16);
             }
 
-            draggableTransform = &piece.GetComponent<Transform>();
+            draggableTransform = &piece.GetComponent<RectTransform>();
             zIndexStart++;
         }
-        currentGrid++;
-        if (currentGrid % gridSize != 0)
-            ImGui::SameLine();
+        // currentGrid++;
+        ImGui::SameLine();
     }
 
     ImGui::End();
@@ -248,12 +271,10 @@ void AssetsMenu() {
 
 
 void SerializeEntity(Entity e) {
-  
 }
 
 static Entity selectedEntityId = NULL;
 void Properties() {
-
 }
 
 void SceneList() {
@@ -271,7 +292,6 @@ void SceneList() {
                 selectedEntityId = entity;
             }
         }
-
         ImGui::End();
     }
 }
@@ -314,6 +334,82 @@ void renderDockingSpace() {
     ImGui::End();
 }
 
+
+// glm::vec2 ScreenToWorld(glm::vec2 screenPoint,
+// const glm::vec2& screenSize,
+// glm::mat4 ProjectionMat) {
+//     // Convert screenPoint to normalized device coordinates (NDC)
+//     float left = (-1.0f - ProjectionMat[3][0]) / ProjectionMat[0][0];
+//     float right = (1.0f - ProjectionMat[3][0]) / ProjectionMat[0][0];
+//     float bottom = (-1.0f - ProjectionMat[3][1]) / ProjectionMat[1][1];
+//     float top = (1.0f - ProjectionMat[3][1]) / ProjectionMat[1][1];
+//
+//     glm::vec4 ndc;
+//     ndc.x = (2.0f * screenPoint.x) / screenSize.x - 1.0f;
+//     ndc.y = 1.0f - (2.0f * screenPoint.y) / screenSize.y; // Invert Y-axis
+//     ndc.z = 0.0f;                                         // Assuming you're working in 2D so Z is 0
+//     ndc.w = 1.0f;
+//
+//     // Multiply by the inverse of the orthographic matrix to get world coordinates
+//
+//     glm::vec4 worldCoords = glm::inverse(ProjectionMat) * ndc;
+//
+//     return glm::vec2(worldCoords.x, worldCoords.y);
+// }
+
+
+glm::vec2 ScreenToWorld(glm::vec2 screenPoint,
+const glm::vec2& screenSize,
+const glm::mat4& ProjectionMat) {
+    // Decompose worldBounds for clarity
+
+    float left = (-1.0f - ProjectionMat[3][0]) / ProjectionMat[0][0];
+    float right = (1.0f - ProjectionMat[3][0]) / ProjectionMat[0][0];
+    float bottom = (-1.0f - ProjectionMat[3][1]) / ProjectionMat[1][1];
+    float top = (1.0f - ProjectionMat[3][1]) / ProjectionMat[1][1];
+
+    bottom *= 2;
+    right *= 2;
+    // Calculate scales
+    float Sx = screenSize.x / (right - left);
+    float Sy = screenSize.y / (top - bottom);
+
+    // Calculate inverse scales
+    float invSx = 1.0f / Sx;
+    float invSy = 1.0f / Sy;
+
+    // Transform the screen point using the inverse scales
+    float worldX = screenPoint.x * invSx + left;
+    float worldY = (screenSize.y - screenPoint.y) * invSy + bottom; // Invert Y-axis
+
+    return glm::vec2(worldX, worldY);
+}
+
+
+// glm::vec2 ScreenToWorld(glm::vec2 screenPoint,
+// const glm::vec2& screenSize,
+// const glm::vec4& worldBounds) {
+//     // Decompose worldBounds for clarity
+//     float left = worldBounds[0];
+//     float right = worldBounds[1];
+//     float bottom = worldBounds[2];
+//     float top = worldBounds[3];
+//
+//     // Calculate scales
+//     float Sx = screenSize.x / (right - left);
+//     float Sy = screenSize.y / (top - bottom);
+//
+//     // Calculate inverse scales
+//     float invSx = 1.0f / Sx;
+//     float invSy = 1.0f / Sy;
+//
+//     // Transform the screen point using the inverse scales
+//     float worldX = screenPoint.x * invSx + left;
+//     float worldY = (screenSize.y - screenPoint.y) * invSy + bottom; // Invert Y-axis
+//
+//     return glm::vec2(worldX, worldY);
+// }
+
 void Editor::Render() {
     Keybindings();
     ImGui_ImplOpenGL3_NewFrame();
@@ -332,11 +428,14 @@ void Editor::Render() {
         LoadDialog();
     }
     if (windowFlags[EDITOR_SYSTEM_EXPLORER_DIALOG]) {
-      explorer->RenderWindow();
+        explorer->RenderWindow();
     }
 
-    if (Keyboard::IsKeyPressing(KeyCode::Key_CTRL) && Keyboard::IsKeyPressed(KeyCode::Key_S)) {
-        Log::Inf("SVE");
+    static bool tff = true;
+
+    if (Keyboard::IsKeyPressing(KeyCode::Key_U) && tff) {
+        tff = false;
+        EngineSerializer::DeserializeFileToScene("./assets/maps/brew.json");
     }
 
     if (ImGui::BeginMainMenuBar()) {
@@ -349,10 +448,9 @@ void Editor::Render() {
     static ImVec2 size;
 
     if (ImGui::Begin("Properties")) {
-        if (selectedEntityId != NULL)
-        {
-          EntityInspector::SetEntity(selectedEntityId);
-          entityInspector->RenderWindow();
+        if (selectedEntityId != NULL) {
+            EntityInspector::SetEntity(selectedEntityId);
+            entityInspector->RenderWindow();
         }
         ImGui::End();
     }
@@ -374,7 +472,26 @@ void Editor::Render() {
         static ImVec2 uv0 = { 0, 1 };
         static ImVec2 uv1 = { 1, 0 };
         ImVec2 avail = ImGui::GetContentRegionAvail();
+
+
         ImGui::Image((void*)tex, avail, uv0, uv1);
+
+        if (draggableTransform != nullptr) {
+            auto mPos = ImGui::GetMousePos();
+
+            ImVec2 viewportPos = ImGui::GetMainViewport()->WorkPos;
+            glm::vec2 local_mouse_pos(mPos.x - viewportPos.x, mPos.y - viewportPos.y);
+            std::cout << "Local Mouse: " << local_mouse_pos.x << ", " << local_mouse_pos.y << std::endl;
+            // glm::vec2 worldPos = ScreenToWorld(local_mouse_pos, glm::vec2(size.x, size.y), glm::vec4(renderer->vo * 2, 1920 + (renderer->vo * 2), 1080 + (renderer->ho * 2), renderer->ho * 2));
+            glm::vec2 worldPos = ScreenToWorld(local_mouse_pos, glm::vec2(size.x, size.y), CommancheRenderer::ProjectionMat);
+            std::cout << "World Mouse: " << worldPos.x << ", " << worldPos.y << std::endl;
+            float gridSize = 25.0f; // define the grid size
+            worldPos.x = std::round(worldPos.x / gridSize) * gridSize;
+            worldPos.y = std::round(worldPos.y / gridSize) * gridSize;
+
+            draggableTransform->pos = worldPos;
+        }
+
         ImGui::End();
         ImGui::PopStyleVar();
     }
