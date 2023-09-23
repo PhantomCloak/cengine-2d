@@ -10,6 +10,7 @@
 #include "../io/filesystem.h"
 #include "../libs/imgui/imgui.h"
 #include "../scene/scene.h"
+#include "editor_utils.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -29,6 +30,9 @@ bool tileSetIsInit = false;
 
 static int zIndexStart = 800;
 glm::vec2 Editor::ScreenSize;
+
+RectTransform* draggableTransform;
+Entity* draggableEntity;
 
 void Editor::Init(CommancheRenderer* renderer) {
     MapLuaSerializer ser;
@@ -61,14 +65,6 @@ void Editor::Init(CommancheRenderer* renderer) {
     entityInspector = new EntityInspector();
 }
 
-RectTransform* draggableTransform;
-Entity* draggableEntity;
-
-void Editor::onMousePressed(MousePressedEvent& event) {
-    if (draggableTransform != nullptr) {
-        draggableTransform = nullptr;
-    }
-}
 
 void FileMenu() {
     if (ImGui::BeginMenu("File")) {
@@ -94,17 +90,6 @@ void EntitiesMenu() {
     }
 }
 
-
-float pixelCordToUvY2(float y, int height) {
-    return y / height;
-}
-
-float pixelCordToUvX2(float x, int width) {
-    return x / width;
-}
-
-void SelectMapTile(std::string mapName) {
-}
 void SaveDialog() {
     ImGui::Begin("Save Menu");
     static char* mapNameBuff = (char*)malloc(128);
@@ -236,16 +221,16 @@ void MapEditor() {
         int currentColumn = i % columns;
         int currentRow = i / columns;
 
-        ImVec2 uv0 = ImVec2(pixelCordToUvX2(currentColumn * tileSize, selectedMafInf.width), pixelCordToUvY2(currentRow * tileSize, selectedMafInf.height));
-        ImVec2 uv1 = ImVec2(pixelCordToUvX2((currentColumn + 1) * tileSize, selectedMafInf.width), pixelCordToUvY2((currentRow + 1) * tileSize, selectedMafInf.height));
+        ImVec2 uv0 = ImVec2(EditorUtils::pixelCordToUvX2(currentColumn * tileSize, selectedMafInf.width), EditorUtils::pixelCordToUvY2(currentRow * tileSize, selectedMafInf.height));
+        ImVec2 uv1 = ImVec2(EditorUtils::pixelCordToUvX2((currentColumn + 1) * tileSize, selectedMafInf.width), EditorUtils::pixelCordToUvY2((currentRow + 1) * tileSize, selectedMafInf.height));
 
 
         if (ImGui::ImageButton(identifier.c_str(), (void*)(intptr_t)selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
             Entity piece = Scene::CreateEntity();
             piece.Group("tiles");
 
-            piece.AddComponent<Sprite>(selectedTextureId, zIndexStart, currentColumn * tileSize, currentRow * tileSize);
-            piece.AddComponent<RectTransform>(glm::vec2(0, 0), glm::vec2(50, 50));
+            piece.AddComponent<Sprite>(selectedTextureId, zIndexStart, currentColumn * tileSize, currentRow * tileSize, 16, 16);
+            piece.AddComponent<RectTransform>(glm::vec2(0, 0), glm::vec2(250, 250));
 
             if (collider) {
                 piece.AddComponent<BoxCollider>(16, 16);
@@ -271,12 +256,7 @@ void AssetsMenu() {
 }
 
 
-void SerializeEntity(Entity e) {
-}
-
-static Entity selectedEntityId = NULL;
-void Properties() {
-}
+static Entity selectedEntityId = -1;
 
 void SceneList() {
     static bool selectableEntityList[1024];
@@ -286,6 +266,7 @@ void SceneList() {
             std::string txt = "Entity: " + std::to_string(entity.GetId());
 
             if (ImGui::Selectable(txt.c_str(), &selectableEntityList[entity.GetId()])) {
+                Log::Inf("HELLO");
                 for (int i = 0; i < sizeof(selectableEntityList); i++)
                     selectableEntityList[i] = false;
 
@@ -297,11 +278,6 @@ void SceneList() {
     }
 }
 
-
-void InterpolateToGrid(glm::vec2* vec, int gridSize) {
-    vec->x = floor(vec->x / gridSize) * gridSize;
-    vec->y = floor(vec->y / gridSize) * gridSize;
-}
 
 ImGuiWindowFlags window_flags = 0;
 
@@ -326,7 +302,6 @@ void renderDockingSpace() {
     if (opt_fullscreen)
         ImGui::PopStyleVar(2);
 
-    // Submit the DockSpace
     ImGuiIO& io = ImGui::GetIO();
 
     ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
@@ -335,14 +310,7 @@ void renderDockingSpace() {
     ImGui::End();
 }
 
-void Editor::Render() {
-    Keybindings();
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    renderDockingSpace();
-
+void WindowController(Editor* instance) {
     if (windowFlags[EDITOR_SHOW_MAP_EDITOR]) {
         MapEditor();
     }
@@ -353,8 +321,18 @@ void Editor::Render() {
         LoadDialog();
     }
     if (windowFlags[EDITOR_SYSTEM_EXPLORER_DIALOG]) {
-        explorer->RenderWindow();
+        instance->explorer->RenderWindow();
     }
+}
+
+void Editor::Render() {
+    Keybindings();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    renderDockingSpace();
+
+    WindowController(this);
 
     static bool tff = true;
 
@@ -371,7 +349,7 @@ void Editor::Render() {
     }
 
     if (ImGui::Begin("Properties")) {
-        if (selectedEntityId != NULL) {
+        if (selectedEntityId != -1) {
             EntityInspector::SetEntity(selectedEntityId);
             entityInspector->RenderWindow();
         }
@@ -384,9 +362,8 @@ void Editor::Render() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     if (ImGui::Begin("Viewport", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
 
-        if (ScreenSize.x != ImGui::GetWindowWidth() || ScreenSize.y != ImGui::GetWindowHeight()) {
-            ScreenSize.x = ImGui::GetWindowWidth();
-            ScreenSize.y = ImGui::GetWindowHeight();
+        if (ScreenSize != EditorUtils::GetWindowSize()) {
+            ScreenSize = EditorUtils::GetWindowSize();
             renderer->SetFrameSize(ScreenSize.x, ScreenSize.y);
         }
 
@@ -400,14 +377,12 @@ void Editor::Render() {
         ImGui::Image((void*)tex, avail, uv0, uv1);
 
         if (draggableTransform != nullptr) {
-            auto mPos = ImGui::GetMousePos();
 
-            ImVec2 viewportPos = ImGui::GetMainViewport()->WorkPos; glm::vec2 local_mouse_pos(mPos.x - viewportPos.x, mPos.y - viewportPos.y);
+            auto mPos = Cursor::GetCursorPosition();
+            ImVec2 viewportPos = ImGui::GetMainViewport()->WorkPos;
 
-            glm::vec2 worldPos = Cursor::GetCursorWorldPosition(local_mouse_pos);
-            float gridSize = 25.0f; // define the grid size
-            worldPos.x = std::round(worldPos.x / gridSize) * gridSize;
-            worldPos.y = std::round(worldPos.y / gridSize) * gridSize;
+            glm::vec2 local_mouse_pos(mPos.x - viewportPos.x, mPos.y - viewportPos.y);
+            glm::vec2 worldPos = EditorUtils::InterpolateToGrid(Cursor::GetCursorWorldPosition(local_mouse_pos), gridSize);
 
             draggableTransform->pos = worldPos;
         }

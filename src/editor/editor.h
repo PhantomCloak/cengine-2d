@@ -16,11 +16,11 @@ class Editor {
     void Init(CommancheRenderer* renderer);
     void Render();
     static glm::vec2 ScreenSize;
+    SystemExplorer* explorer;
     private:
     void Keybindings();
-    void onMousePressed(MousePressedEvent& event);
+    const int gridSize = 25;
     FileView* fileView;
     EntityInspector* entityInspector;
-    SystemExplorer* explorer;
     CommancheRenderer* renderer;
 };

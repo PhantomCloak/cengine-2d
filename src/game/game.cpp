@@ -36,6 +36,15 @@ void Game::Setup() {
     // Setup Assets
     Physics::Initialize();
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/after_load");
+
+    static const std::vector<std::string>& loadedAssets = AssetManager::GetLoadedTextures();
+
+    Scene::CreateEntity();
+    auto obj = Scene::CreateEntity();
+    static int selectedTextureId = AssetManager::GetTexture("dawn_like_door0");
+
+    obj.AddComponent<RectTransform>(glm::vec2(500, 250), glm::vec2(500, 500), glm::vec2(16, 16));
+    obj.AddComponent<Sprite>(selectedTextureId, 2000, 0.1f, 0.1f);
 }
 
 void Game::Update() {

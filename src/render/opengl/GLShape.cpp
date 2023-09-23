@@ -21,7 +21,7 @@ GLShape::GLShape(float vertices[], int verticesSize, Shader* shaderToUse) {
 
     // Initialize GPU memory
     verticesVBO = new VBO(vertices, verticesSize);
-    uvMapVBO = new VBO(UV, sizeof(UV));
+    uvMapVBO = new VBO(UV, sizeof(UV), GL_DYNAMIC_DRAW);
 
     dataFormatVAO->LinkAttrib(verticesVBO, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0); // layer(0): position
     dataFormatVAO->LinkAttrib(uvMapVBO, 1, 2, GL_FLOAT, 2 * sizeof(float), (void*)0);    // layer(1): texture UV
@@ -32,6 +32,21 @@ GLShape::GLShape(float vertices[], int verticesSize, Shader* shaderToUse) {
     uvMapVBO->Unbind();
 
     shader = shaderToUse;
+}
+
+void GLShape::SetUV(float uStart, float vStart, float uEnd, float vEnd) {
+    float newUV[] = {
+        uStart, vStart,
+        uStart, vEnd,
+        uEnd, vEnd,
+        uEnd, vStart
+    };
+    
+    // Update the entire UV buffer
+    int offset = 0; // Starting from the beginning of the UV buffer
+    int size = sizeof(newUV); // Size of the newUV array
+    
+    uvMapVBO->Update(offset, size, newUV);
 }
 
 void GLShape::Scale(glm::vec2 scale) {

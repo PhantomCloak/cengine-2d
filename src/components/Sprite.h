@@ -1,8 +1,8 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include <string>
 #include "../render/render_primitives.h"
+#include <string>
 
 struct Sprite {
     int texture;
@@ -10,10 +10,10 @@ struct Sprite {
     bool isFixed;
     CommancheRect srcRect;
 
-    Sprite(int texture = -1, int zIndex = 0, int srcRectX = 0, int srcRectY = 0) {
+    Sprite(int texture = -1, int zIndex = 0, float srcRectX = 0, float srcRectY = 0, float srcWidth = 0, float srcHeight = 0) {
         this->texture = texture;
         this->zIndex = zIndex;
-        this->srcRect = { (float)srcRectX, (float)srcRectY, (float)0, (float)0 };
+        this->srcRect = { srcRectX, srcRectY, srcWidth, srcHeight };
     }
 };
 

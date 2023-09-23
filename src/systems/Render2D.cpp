@@ -34,7 +34,16 @@ void RenderSystem::Update() {
     });
 
     for (RenderObject& renderObj : renderSortList) {
-        renderer->CDrawImage(renderObj.sprite->texture, renderObj.transform->pos.x, renderObj.transform->pos.y, renderObj.transform->size.x, renderObj.transform->size.y, renderObj.transform->rotation, 0, 0);
+            renderer->CDrawImage(renderObj.sprite->texture,
+                            renderObj.transform->pos.x,
+                            renderObj.transform->pos.y,
+                            renderObj.transform->size.x,
+                            renderObj.transform->size.y,
+                            renderObj.transform->rotation,
+                            renderObj.sprite->srcRect.x,
+                            renderObj.sprite->srcRect.y,
+                            renderObj.sprite->srcRect.width,
+                            renderObj.sprite->srcRect.height);
     }
     renderer->DrawGrids();
 };

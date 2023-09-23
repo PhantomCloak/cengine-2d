@@ -24,7 +24,8 @@ int CommancheRenderer::screenHeight;
 int nextFontId = 0;
 const int scaleFactor = 1;
 
-std::unordered_map<int, GLShape*> glShapes; std::unordered_map<int, Shader> glShaders;
+std::unordered_map<int, GLShape*> glShapes;
+std::unordered_map<int, Shader> glShaders;
 std::unordered_map<int, Texture> glTextures;
 
 int PPM = 0;
@@ -220,7 +221,7 @@ void CommancheRenderer::DrawRectRangle(int textureId, float x, float y, float wi
     shader.Deactivate();
 }
 
-void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width, float height, float rotation, int offsetX, int offsetY) {
+void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight) {
     Shader shader = glShaders[DEFAULT_SHADER_SLOT];
     shader.Activate();
 
@@ -232,6 +233,15 @@ void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width,
     width *= scaleFactor;
     height *= scaleFactor;
 
+    auto inf = GetTextureInfo(textureId);
+
+    float uStart = srcX / inf.width;
+    float vStart = srcY / inf.height;
+    float uEnd = (srcX + srcWidth) / inf.width;
+    float vEnd = (srcY + srcHeight) / inf.height;
+
+    shape->SetUV(uStart, vStart, uEnd, vEnd);
+
     shape->BindShape();
 
     shape->Scale(glm::vec2(width, height));
@@ -239,15 +249,13 @@ void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width,
     shape->Translate(glm::vec2(x, y));
     shape->Rotate(rotation);
 
-    shape->SetOffset(glm::vec2(offsetX, offsetY));
-
     texture.Bind();
-
     shape->DrawShape();
-
     texture.Unbind();
+
     shader.Deactivate();
 }
+
 
 bool CommancheRenderer::IsShaderValid(int shaderId) {
     Shader shader = glShaders[shaderId];
@@ -330,7 +338,8 @@ void CommancheRenderer::CDrawText(int fontId, std::string message, int x, int y,
         glDrawArrays(GL_TRIANGLES, 0, 6);
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
         x += (ch.Advance >> 6) * 1; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
-    } vao->Unbind();
+    }
+    vao->Unbind();
     glBindTexture(GL_TEXTURE_2D, 0);
     shader.Deactivate();
 }

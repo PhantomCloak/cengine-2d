@@ -15,8 +15,9 @@ class CommancheRenderer {
     void SetPPM(int val);
     bool IsTextureValid(int textureId);
     bool IsShaderValid(int shaderId);
-    void CDrawImage(int textureId, float x, float y, float width, float height, float rotation, int offsetX = 0, int offsetY = 0);
+    //void CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float offsetX = 0, float offsetY = 0);
     void DrawRectRangle(int textureId, float x, float y, float width, float height, float rotation, int offsetX = 0, int offsetY = 0);
+    void CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight);
     void CDrawText(int fontId, std::string message, int x, int y, int size, CommancheColorRGB color = { 255, 255, 255 });
     void CDrawLine(float startx, float starty, float endx, float endy, CommancheColorRGB color = {255, 255, 255});
     void SetFrameSize(int width, int height);
