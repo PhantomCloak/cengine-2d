@@ -16,6 +16,10 @@
 GLFWwindow* k_window;
 std::string driverStr;
 glm::mat4 CommancheRenderer::ProjectionMat;
+int CommancheRenderer::vo;
+int CommancheRenderer::ho;
+int CommancheRenderer::screenWidth;
+int CommancheRenderer::screenHeight;
 
 int nextFontId = 0;
 const int scaleFactor = 1;
@@ -84,7 +88,6 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
         glViewport(0, 0, width, height);
     });
 
-    const float aspectRatio = (float)16 / (float)9;
     const float w = 1920.0f / 2;
     const float h = 1080.0f / 2;
 

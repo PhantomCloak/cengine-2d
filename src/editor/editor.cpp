@@ -28,6 +28,7 @@ std::unordered_map<int, bool> windowFlags;
 bool tileSetIsInit = false;
 
 static int zIndexStart = 800;
+glm::vec2 Editor::ScreenSize;
 
 void Editor::Init(CommancheRenderer* renderer) {
     MapLuaSerializer ser;
@@ -334,82 +335,6 @@ void renderDockingSpace() {
     ImGui::End();
 }
 
-
-// glm::vec2 ScreenToWorld(glm::vec2 screenPoint,
-// const glm::vec2& screenSize,
-// glm::mat4 ProjectionMat) {
-//     // Convert screenPoint to normalized device coordinates (NDC)
-//     float left = (-1.0f - ProjectionMat[3][0]) / ProjectionMat[0][0];
-//     float right = (1.0f - ProjectionMat[3][0]) / ProjectionMat[0][0];
-//     float bottom = (-1.0f - ProjectionMat[3][1]) / ProjectionMat[1][1];
-//     float top = (1.0f - ProjectionMat[3][1]) / ProjectionMat[1][1];
-//
-//     glm::vec4 ndc;
-//     ndc.x = (2.0f * screenPoint.x) / screenSize.x - 1.0f;
-//     ndc.y = 1.0f - (2.0f * screenPoint.y) / screenSize.y; // Invert Y-axis
-//     ndc.z = 0.0f;                                         // Assuming you're working in 2D so Z is 0
-//     ndc.w = 1.0f;
-//
-//     // Multiply by the inverse of the orthographic matrix to get world coordinates
-//
-//     glm::vec4 worldCoords = glm::inverse(ProjectionMat) * ndc;
-//
-//     return glm::vec2(worldCoords.x, worldCoords.y);
-// }
-
-
-glm::vec2 ScreenToWorld(glm::vec2 screenPoint,
-const glm::vec2& screenSize,
-const glm::mat4& ProjectionMat) {
-    // Decompose worldBounds for clarity
-
-    float left = (-1.0f - ProjectionMat[3][0]) / ProjectionMat[0][0];
-    float right = (1.0f - ProjectionMat[3][0]) / ProjectionMat[0][0];
-    float bottom = (-1.0f - ProjectionMat[3][1]) / ProjectionMat[1][1];
-    float top = (1.0f - ProjectionMat[3][1]) / ProjectionMat[1][1];
-
-    bottom *= 2;
-    right *= 2;
-    // Calculate scales
-    float Sx = screenSize.x / (right - left);
-    float Sy = screenSize.y / (top - bottom);
-
-    // Calculate inverse scales
-    float invSx = 1.0f / Sx;
-    float invSy = 1.0f / Sy;
-
-    // Transform the screen point using the inverse scales
-    float worldX = screenPoint.x * invSx + left;
-    float worldY = (screenSize.y - screenPoint.y) * invSy + bottom; // Invert Y-axis
-
-    return glm::vec2(worldX, worldY);
-}
-
-
-// glm::vec2 ScreenToWorld(glm::vec2 screenPoint,
-// const glm::vec2& screenSize,
-// const glm::vec4& worldBounds) {
-//     // Decompose worldBounds for clarity
-//     float left = worldBounds[0];
-//     float right = worldBounds[1];
-//     float bottom = worldBounds[2];
-//     float top = worldBounds[3];
-//
-//     // Calculate scales
-//     float Sx = screenSize.x / (right - left);
-//     float Sy = screenSize.y / (top - bottom);
-//
-//     // Calculate inverse scales
-//     float invSx = 1.0f / Sx;
-//     float invSy = 1.0f / Sy;
-//
-//     // Transform the screen point using the inverse scales
-//     float worldX = screenPoint.x * invSx + left;
-//     float worldY = (screenSize.y - screenPoint.y) * invSy + bottom; // Invert Y-axis
-//
-//     return glm::vec2(worldX, worldY);
-// }
-
 void Editor::Render() {
     Keybindings();
     ImGui_ImplOpenGL3_NewFrame();
@@ -445,8 +370,6 @@ void Editor::Render() {
         ImGui::EndMainMenuBar();
     }
 
-    static ImVec2 size;
-
     if (ImGui::Begin("Properties")) {
         if (selectedEntityId != NULL) {
             EntityInspector::SetEntity(selectedEntityId);
@@ -461,10 +384,10 @@ void Editor::Render() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     if (ImGui::Begin("Viewport", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
 
-        if (size.x != ImGui::GetWindowWidth() || size.y != ImGui::GetWindowHeight()) {
-            size.x = ImGui::GetWindowWidth();
-            size.y = ImGui::GetWindowHeight();
-            renderer->SetFrameSize(size.x, size.y);
+        if (ScreenSize.x != ImGui::GetWindowWidth() || ScreenSize.y != ImGui::GetWindowHeight()) {
+            ScreenSize.x = ImGui::GetWindowWidth();
+            ScreenSize.y = ImGui::GetWindowHeight();
+            renderer->SetFrameSize(ScreenSize.x, ScreenSize.y);
         }
 
         auto tex = renderer->GetFrame();
@@ -479,12 +402,9 @@ void Editor::Render() {
         if (draggableTransform != nullptr) {
             auto mPos = ImGui::GetMousePos();
 
-            ImVec2 viewportPos = ImGui::GetMainViewport()->WorkPos;
-            glm::vec2 local_mouse_pos(mPos.x - viewportPos.x, mPos.y - viewportPos.y);
-            std::cout << "Local Mouse: " << local_mouse_pos.x << ", " << local_mouse_pos.y << std::endl;
-            // glm::vec2 worldPos = ScreenToWorld(local_mouse_pos, glm::vec2(size.x, size.y), glm::vec4(renderer->vo * 2, 1920 + (renderer->vo * 2), 1080 + (renderer->ho * 2), renderer->ho * 2));
-            glm::vec2 worldPos = ScreenToWorld(local_mouse_pos, glm::vec2(size.x, size.y), CommancheRenderer::ProjectionMat);
-            std::cout << "World Mouse: " << worldPos.x << ", " << worldPos.y << std::endl;
+            ImVec2 viewportPos = ImGui::GetMainViewport()->WorkPos; glm::vec2 local_mouse_pos(mPos.x - viewportPos.x, mPos.y - viewportPos.y);
+
+            glm::vec2 worldPos = Cursor::GetCursorWorldPosition(local_mouse_pos);
             float gridSize = 25.0f; // define the grid size
             worldPos.x = std::round(worldPos.x / gridSize) * gridSize;
             worldPos.y = std::round(worldPos.y / gridSize) * gridSize;

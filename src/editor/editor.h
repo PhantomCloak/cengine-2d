@@ -15,6 +15,7 @@ class Editor {
     Editor() = default;
     void Init(CommancheRenderer* renderer);
     void Render();
+    static glm::vec2 ScreenSize;
     private:
     void Keybindings();
     void onMousePressed(MousePressedEvent& event);

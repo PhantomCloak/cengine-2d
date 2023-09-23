@@ -9,7 +9,7 @@ class Cursor {
 public:
     static void Setup(void* window);
     static glm::vec2 GetCursorPosition();
-    static glm::vec2 GetCursorWorldPosition();
+    static glm::vec2 GetCursorWorldPosition(glm::vec2 screenPoint);
                                 
 private:
     static GLFWwindow* wnd;

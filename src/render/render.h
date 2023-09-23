@@ -33,10 +33,10 @@ class CommancheRenderer {
     void Destroy();
     static glm::mat4 ProjectionMat;
     glm::mat4 view;
-    int screenWidth = 0;
-    int screenHeight = 0;
-    int ho;
-    int vo;
+    static int screenWidth;
+    static int screenHeight;
+    static int ho;
+    static int vo;
     private:
     unsigned int framebuffer, textureColorbuffer;
 };
