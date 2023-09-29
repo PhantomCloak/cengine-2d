@@ -21,8 +21,14 @@ brew install glm
 ```
 ## Features
 
+### Scripting
+Powered by LUA
+
+#### Entity Component System
+Powered by FLECS
+
 #### Physics Engine
 Powered by Box2D
 
-#### Renderer
-Powered by OpenGL 3.3
+#### Render & Shading
+Self-made OpenGL 3 Renderer
