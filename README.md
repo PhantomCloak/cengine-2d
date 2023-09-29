@@ -21,6 +21,9 @@ brew install glm
 ```
 ## Features
 
+### Scripting
+Powered by LUA
+
 #### Entity Component System
 Powered by FLECS
 
