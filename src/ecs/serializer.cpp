@@ -4,7 +4,7 @@
 #include "../ecs/world.h"
 #include "../game/components.h"
 #include "../render/render_primitives.h"
-#include "../scene/scene.h"
+//#include "../scene/scene.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -109,18 +109,18 @@ giri::json::JSON SerializeComponent(BoxCollider component) {
 }
 
 void DeserializeEntity(giri::json::JSON json) {
-    Entity entity = Scene::CreateEntity();
-    giri::json::JSON componentsNode = json["components"];
+    //Entity entity = Scene::CreateEntity();
+    //giri::json::JSON componentsNode = json["components"];
 
-    if (componentsNode.hasKey("sprite")) {
-        Sprite comp = DeserializeSprite(componentsNode["sprite"]);
-        entity.AddComponent<Sprite>(comp);
-    }
+    //if (componentsNode.hasKey("sprite")) {
+    //    Sprite comp = DeserializeSprite(componentsNode["sprite"]);
+    //    entity.AddComponent<Sprite>(comp);
+    //}
 
-    if (componentsNode.hasKey("transform")) {
-        RectTransform comp = DeserializeTransform(componentsNode["transform"]);
-        entity.AddComponent<RectTransform>(comp);
-    }
+    //if (componentsNode.hasKey("transform")) {
+    //    RectTransform comp = DeserializeTransform(componentsNode["transform"]);
+    //    entity.AddComponent<RectTransform>(comp);
+    //}
 }
 
 
@@ -151,55 +151,55 @@ giri::json::JSON SerializeComponent(RigidBody component) {
 }
 
 void EngineSerializer::SerializeSceneToFile(const std::string& path) {
-    std::vector<Entity> entities = Scene::GetEntities();
+    //std::vector<Entity> entities = Scene::GetEntities();
 
-    giri::json::JSON jsonState = giri::json::Object();
-    giri::json::JSON arrEntities = giri::json::Array();
-    giri::json::JSON arrSystems = giri::json::Array();
-    arrSystems = SerializeWorldStorage(Scene::world->storage);
-
-
-    for (int i = 0; i < entities.size(); i++) {
-        auto entity = entities[i];
-        giri::json::JSON enttityJsonNode = giri::json::Object();
-        giri::json::JSON componentNode = giri::json::Array();
-
-        if (entity.HasComponent<RectTransform>())
-            componentNode["transform"] = SerializeComponent(entity.GetComponent<RectTransform>());
-        if (entity.HasComponent<Sprite>())
-            componentNode["sprite"] = SerializeComponent(entity.GetComponent<Sprite>());
-
-        enttityJsonNode["components"] = componentNode;
-        arrEntities[i] = enttityJsonNode;
-    }
-
-    jsonState["entities"] = arrEntities;
-    jsonState["systems"] = arrSystems;
+    //giri::json::JSON jsonState = giri::json::Object();
+    //giri::json::JSON arrEntities = giri::json::Array();
+    //giri::json::JSON arrSystems = giri::json::Array();
+    //arrSystems = SerializeWorldStorage(Scene::world->storage);
 
 
-    std::ofstream myfile;
-    myfile.open(path);
-    myfile << jsonState.ToString();
-    myfile.close();
+    //for (int i = 0; i < entities.size(); i++) {
+    //    auto entity = entities[i];
+    //    giri::json::JSON enttityJsonNode = giri::json::Object();
+    //    giri::json::JSON componentNode = giri::json::Array();
+
+    //    if (entity.HasComponent<RectTransform>())
+    //        componentNode["transform"] = SerializeComponent(entity.GetComponent<RectTransform>());
+    //    if (entity.HasComponent<Sprite>())
+    //        componentNode["sprite"] = SerializeComponent(entity.GetComponent<Sprite>());
+
+    //    enttityJsonNode["components"] = componentNode;
+    //    arrEntities[i] = enttityJsonNode;
+    //}
+
+    //jsonState["entities"] = arrEntities;
+    //jsonState["systems"] = arrSystems;
+
+
+    //std::ofstream myfile;
+    //myfile.open(path);
+    //myfile << jsonState.ToString();
+    //myfile.close();
 }
 
 void EngineSerializer::DeserializeFileToScene(const std::string path) {
-    std::ifstream fs(path);
-    std::stringstream buffer;
-    buffer << fs.rdbuf();
+    //std::ifstream fs(path);
+    //std::stringstream buffer;
+    //buffer << fs.rdbuf();
 
-    std::string jsonOutput = buffer.str();
+    //std::string jsonOutput = buffer.str();
 
-    giri::json::JSON jsonRootNode = giri::json::JSON::Load(jsonOutput);
-    giri::json::JSON entitiesNode = jsonRootNode["entities"];
-    giri::json::JSON systemsNode = jsonRootNode["systems"]["parameters"];
+    //giri::json::JSON jsonRootNode = giri::json::JSON::Load(jsonOutput);
+    //giri::json::JSON entitiesNode = jsonRootNode["entities"];
+    //giri::json::JSON systemsNode = jsonRootNode["systems"]["parameters"];
 
-    for (auto& entity : entitiesNode.ArrayRange()) {
-        DeserializeEntity(entity);
-    }
+    //for (auto& entity : entitiesNode.ArrayRange()) {
+    //    DeserializeEntity(entity);
+    //}
 
-    for (auto& system : systemsNode.ArrayRange()) {
-        std::string systemId = system.ToString();
-        Scene::SetSystemStatus(systemId, true);
-    }
+    //for (auto& system : systemsNode.ArrayRange()) {
+    //    std::string systemId = system.ToString();
+    //    Scene::SetSystemStatus(systemId, true);
+    //}
 }
