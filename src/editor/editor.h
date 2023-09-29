@@ -17,6 +17,8 @@ class Editor {
     void Render();
     static glm::vec2 ScreenSize;
     SystemExplorer* explorer;
+    glm::vec2 ViewportPos;
+    glm::vec2 ViewportSize;
     private:
     void Keybindings();
     const int gridSize = 25;

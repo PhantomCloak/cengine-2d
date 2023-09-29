@@ -1,11 +1,12 @@
 #pragma once
 #include "editor_window.h"
+#include "flecs.h"
 
 class Entity;
 class EntityInspector : EditorWindow {
   public:
-    static void SetEntity(Entity entity);
+    static void SetEntity(flecs::entity entity);
     void RenderWindow() override;
   private:
-    static Entity e;
+    static flecs::entity e;
 };

@@ -14,6 +14,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "systems/editor_systems.h"
 #include <filesystem>
 #include <functional>
 #include <memory>
@@ -28,13 +29,14 @@
 std::unordered_map<int, bool> windowFlags;
 bool tileSetIsInit = false;
 
-static int zIndexStart = 800;
+static int zIndexStart = 8000;
 glm::vec2 Editor::ScreenSize;
 
-RectTransform* draggableTransform;
-Entity* draggableEntity;
+flecs::id draggableEntity;
 
 void Editor::Init(CommancheRenderer* renderer) {
+    Log::Inf("Editor booting...");
+
     MapLuaSerializer ser;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -63,6 +65,10 @@ void Editor::Init(CommancheRenderer* renderer) {
     fileView = new FileView();
     explorer = new SystemExplorer();
     entityInspector = new EntityInspector();
+
+    Log::Inf("Editor started");
+
+    EditorSystems::Init(Scene::ecs, this);
 }
 
 
@@ -226,20 +232,13 @@ void MapEditor() {
 
 
         if (ImGui::ImageButton(identifier.c_str(), (void*)(intptr_t)selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
-            Entity piece = Scene::CreateEntity();
-            piece.Group("tiles");
+            flecs::entity piece = Scene::CreateEntity("tile" + std::to_string(zIndexStart));
 
-            piece.AddComponent<Sprite>(selectedTextureId, zIndexStart, currentColumn * tileSize, currentRow * tileSize, 16, 16);
-            piece.AddComponent<RectTransform>(glm::vec2(0, 0), glm::vec2(250, 250));
-
-            if (collider) {
-                piece.AddComponent<BoxCollider>(16, 16);
-            }
-
-            draggableTransform = &piece.GetComponent<RectTransform>();
+            piece.set<Sprite>({ selectedTextureId, zIndexStart, static_cast<float>(currentColumn * tileSize), static_cast<float>(currentRow * tileSize), 16, 16 });
+            piece.set<DragableComponent>({ true });
+            piece.set<RectTransform>({ glm::vec2(0, 0), glm::vec2(100, 100) });
             zIndexStart++;
         }
-        // currentGrid++;
         ImGui::SameLine();
     }
 
@@ -256,21 +255,20 @@ void AssetsMenu() {
 }
 
 
-static Entity selectedEntityId = -1;
+static flecs::entity selectedEntityId;
 
 void SceneList() {
     static bool selectableEntityList[1024];
     if (ImGui::Begin("Scene List")) {
 
         for (auto entity : Scene::GetEntities()) {
-            std::string txt = "Entity: " + std::to_string(entity.GetId());
+            std::string txt = entity.name().c_str() + std::string(" : ") + std::to_string(entity.id());
 
-            if (ImGui::Selectable(txt.c_str(), &selectableEntityList[entity.GetId()])) {
-                Log::Inf("HELLO");
+            if (ImGui::Selectable(txt.c_str(), &selectableEntityList[entity.id()])) {
                 for (int i = 0; i < sizeof(selectableEntityList); i++)
                     selectableEntityList[i] = false;
 
-                selectableEntityList[entity.GetId()] = true;
+                selectableEntityList[entity.id()] = true;
                 selectedEntityId = entity;
             }
         }
@@ -376,16 +374,18 @@ void Editor::Render() {
 
         ImGui::Image((void*)tex, avail, uv0, uv1);
 
-        if (draggableTransform != nullptr) {
+        // auto entity = Scene::ecs->entity(draggableEntity);
+        // if (entity.is_valid()) {
 
-            auto mPos = Cursor::GetCursorPosition();
-            ImVec2 viewportPos = ImGui::GetMainViewport()->WorkPos;
+        //    auto mPos = Cursor::GetCursorPosition();
+        //    ViewportPos = glm::vec2(ImGui::GetMainViewport()->WorkPos.x, ImGui::GetMainViewport()->WorkPos.y);
 
-            glm::vec2 local_mouse_pos(mPos.x - viewportPos.x, mPos.y - viewportPos.y);
-            glm::vec2 worldPos = EditorUtils::InterpolateToGrid(Cursor::GetCursorWorldPosition(local_mouse_pos), gridSize);
+        //    glm::vec2 local_mouse_pos(mPos.x - ViewportPos.x, mPos.y - ViewportPos.y);
+        //    glm::vec2 worldPos = EditorUtils::InterpolateToGrid(Cursor::GetCursorWorldPosition(local_mouse_pos), gridSize);
 
-            draggableTransform->pos = worldPos;
-        }
+        //    //draggableTransform->pos = worldPos;
+        //    //entity.get_ref<RectTransform>()->pos = worldPos;
+        //}
 
         ImGui::End();
         ImGui::PopStyleVar();

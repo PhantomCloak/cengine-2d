@@ -24,9 +24,9 @@ void SystemExplorer::RenderWindow() {
 
     if (ImGui::Begin("SystemExplorer")) {
         ImGui::BeginGroupPanel("Monitor");
-        for (auto& systemEntry : Scene::world->storage->systems) {
-            ImGui::Checkbox(_labelPrefix(systemEntry.first.name()).c_str(), &systemEntry.second->isActive);
-        }
+        //for (auto& systemEntry : Scene::world->storage->systems) {
+        //    ImGui::Checkbox(_labelPrefix(systemEntry.first.name()).c_str(), &systemEntry.second->isActive);
+        //}
         ImGui::EndGroupPanel();
         ImGui::End();
     }
