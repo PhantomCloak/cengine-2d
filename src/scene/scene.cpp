@@ -3,18 +3,31 @@
 #include "../game/game.h"
 #include "../io/cursor.h"
 #include "../scripting/lua_manager.h"
+#include "../systems/systems.h"
 
-World* Scene::world = nullptr;
 CommancheRenderer* Scene::renderer = nullptr;
 std::string Scene::currentScenePath = "";
+
+flecs::world* Scene::ecs;
+
 #if EDITOR
 Editor* Scene::editor = nullptr;
 #endif
 
-
 void Scene::Init() {
-    world = new World();
+    ecs = new flecs::world();
 
+    ecs->system("RenderStart")
+    .kind(flecs::PreUpdate)
+    .iter([](flecs::iter it) {
+        renderer->RenderStart();
+    });
+
+    ecs->system("RenderEnd")
+    .kind(flecs::PostUpdate)
+    .iter([](flecs::iter it) {
+        renderer->RenderEnd();
+    });
     renderer = new CommancheRenderer();
 
     AssetManager::Initialize(renderer);
@@ -45,32 +58,34 @@ void Scene::Init() {
     renderer->Initialize("Twelve Villages", screenW, screenH);
     renderer->InitializeShaders("./src/shaders");
 
+    Systems::Init(ecs);
 
     // Add All systems at once
-    Scene::LoadSystem<RenderSystem>(renderer);
-    Scene::LoadSystem<RenderText2D>(renderer);
-    Scene::LoadSystem<RenderDebug>(renderer);
-    Scene::LoadSystem<PhysicsController>();
-
-    Keyboard::Setup(renderer->wnd);
-    Cursor::Setup(renderer->wnd);
+    // Scene::LoadSystem<RenderSystem>(renderer);
+    // Scene::LoadSystem<RenderText2D>(renderer);
+    // Scene::LoadSystem<RenderDebug>(renderer);
+    // Scene::LoadSystem<PhysicsController>();
+    //
 
 #if EDITOR
     editor = new Editor();
     editor->Init(renderer);
 #endif
+
+    Keyboard::Setup(renderer->wnd);
+    Cursor::Setup(renderer->wnd);
 }
 
-Entity Scene::CreateEntity() {
-    return world->CreateEntity();
+flecs::entity Scene::CreateEntity(std::string entityName) {
+    return ecs->entity(entityName.c_str());
 }
 
-void Scene::DestroyEntity(Entity entity) {
-    // world->De
+void Scene::DestroyEntity(flecs::entity entity) {
+    entity.destruct();
 }
 
 void Scene::Update() {
-    world->Update();
+    ecs->progress();
 }
 
 void Scene::Destroy() {
@@ -78,12 +93,14 @@ void Scene::Destroy() {
 }
 
 void Scene::Render() {
-    renderer->RenderStart();
-    Scene::GetSystem<RenderSystem>().Update();
-    Scene::GetSystem<RenderText2D>().Update();
-    //Scene::GetSystem<RenderDebug>().Update();
-    Scene::GetSystem<PhysicsController>().Update();
-    renderer->RenderEnd();
+    // renderer->RenderStart();
+    //  Scene::GetSystem<RenderSystem>().Update();
+    //  Scene::GetSystem<RenderText2D>().Update();
+    //  Scene::GetSystem<PhysicsController>().Update();
+    //  ecs->system<RectTransform, Sprite>("RenderSystem").kind(0).iter(&Systems::RenderSystem);
+    //  Scene::Update();
+    ////ecs->progress();
+    // renderer->RenderEnd();
 
 #if EDITOR
     editor->Render();
@@ -92,6 +109,10 @@ void Scene::Render() {
     renderer->RenderApply();
 }
 
-std::vector<Entity> Scene::GetEntities() {
-    return world->GetEntities();
+std::vector<flecs::entity> Scene::GetEntities() {
+    std::vector<flecs::entity> entities;
+    ecs->each([&](flecs::entity e, RectTransform& transform) {
+        entities.push_back(e);
+    });
+    return entities;
 }

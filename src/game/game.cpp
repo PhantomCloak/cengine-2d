@@ -28,6 +28,7 @@ void Game::Initialize() {
 }
 
 
+int selectedTextureId;
 void Game::Setup() {
     // Setup Systems
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/pre_load");
@@ -39,12 +40,12 @@ void Game::Setup() {
 
     static const std::vector<std::string>& loadedAssets = AssetManager::GetLoadedTextures();
 
-    Scene::CreateEntity();
-    auto obj = Scene::CreateEntity();
-    static int selectedTextureId = AssetManager::GetTexture("dawn_like_door0");
+    auto obj = Scene::CreateEntity("door_tile2");
+    selectedTextureId = AssetManager::GetTexture("desert");
+    auto inf = CommancheRenderer::Instance->GetTextureInfo(selectedTextureId);
 
-    obj.AddComponent<RectTransform>(glm::vec2(500, 250), glm::vec2(500, 500), glm::vec2(16, 16));
-    obj.AddComponent<Sprite>(selectedTextureId, 2000, 0.1f, 0.1f);
+    obj.set<RectTransform>({glm::vec2(1920, 1080), glm::vec2(1920 * 2, 1080 * 2), glm::vec2(500, 500)});
+    obj.set<Sprite>({selectedTextureId, 20, 0, 0, (float)inf.width, (float)inf.height});
 }
 
 void Game::Update() {
@@ -54,6 +55,7 @@ void Game::Update() {
         sleepProgram(timeToWait);
     }
 
+    CommancheRenderer::Instance->DrawRectRangle(selectedTextureId, 100, 100, 1000, 1000, 0, 0, 0);
     tickLastFrame = getTime();
 
     Scene::Update();

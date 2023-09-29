@@ -28,6 +28,8 @@ std::unordered_map<int, GLShape*> glShapes;
 std::unordered_map<int, Shader> glShaders;
 std::unordered_map<int, Texture> glTextures;
 
+CommancheRenderer* CommancheRenderer::Instance;
+
 int PPM = 0;
 
 GLLine* test;
@@ -65,6 +67,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 
 void CommancheRenderer::Initialize(const std::string& title, int windowWidth, int windowHeight) {
+    Instance = this;
     glfwInit();
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

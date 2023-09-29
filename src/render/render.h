@@ -38,6 +38,7 @@ class CommancheRenderer {
     static int screenHeight;
     static int ho;
     static int vo;
+    static CommancheRenderer* Instance;
     private:
     unsigned int framebuffer, textureColorbuffer;
 };

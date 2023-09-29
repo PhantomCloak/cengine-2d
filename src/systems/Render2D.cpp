@@ -33,17 +33,17 @@ void RenderSystem::Update() {
         return a.sprite->zIndex < b.sprite->zIndex;
     });
 
-    for (RenderObject& renderObj : renderSortList) {
-            renderer->CDrawImage(renderObj.sprite->texture,
-                            renderObj.transform->pos.x,
-                            renderObj.transform->pos.y,
-                            renderObj.transform->size.x,
-                            renderObj.transform->size.y,
-                            renderObj.transform->rotation,
-                            renderObj.sprite->srcRect.x,
-                            renderObj.sprite->srcRect.y,
-                            renderObj.sprite->srcRect.width,
-                            renderObj.sprite->srcRect.height);
-    }
-    renderer->DrawGrids();
+    //for (RenderObject& renderObj : renderSortList) {
+    //        renderer->CDrawImage(renderObj.sprite->texture,
+    //                        renderObj.transform->pos.x,
+    //                        renderObj.transform->pos.y,
+    //                        renderObj.transform->size.x,
+    //                        renderObj.transform->size.y,
+    //                        renderObj.transform->rotation,
+    //                        renderObj.sprite->srcRect.x,
+    //                        renderObj.sprite->srcRect.y,
+    //                        renderObj.sprite->srcRect.width,
+    //                        renderObj.sprite->srcRect.height);
+    //}
+    //renderer->DrawGrids();
 };
