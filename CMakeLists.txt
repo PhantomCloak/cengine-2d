@@ -49,6 +49,7 @@ file(GLOB SOURCES
     "./src/physics/*.cpp"
     "./src/systems/*.cpp"
     "./src/editor/*.cpp"
+    "./src/editor/systems/*.cpp"
     "./src/scene/*.cpp"
     "./src/common/*.cpp"
     "./src/assetmgr/*.cpp"
