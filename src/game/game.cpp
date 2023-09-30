@@ -40,14 +40,14 @@ void Game::Setup() {
 
     //static const std::vector<std::string>& loadedAssets = AssetManager::GetLoadedTextures();
 
-    //auto obj = Scene::CreateEntity("door_tile2");
-    //selectedTextureId = AssetManager::GetTexture("desert");
-    //auto inf = CommancheRenderer::Instance->GetTextureInfo(selectedTextureId);
+    auto obj = Scene::CreateEntity("door_tile2");
+    selectedTextureId = AssetManager::GetTexture("desert");
+    auto inf = CommancheRenderer::Instance->GetTextureInfo(selectedTextureId);
 
     //Scene::ecs.component<Test>();
 
-    //obj.set<RectTransform>({glm::vec2(1920, 1080), glm::vec2(1920 * 2, 1080 * 2), glm::vec2(500, 500), 31});
-    //obj.set<Sprite>({selectedTextureId, 20, 0, 0, (float)inf.width, (float)inf.height});
+    obj.set<RectTransform>({glm::vec2(1920, 1080), glm::vec2(1920 * 2, 1080 * 2), glm::vec2(500, 500), 31});
+    obj.set<Sprite>({selectedTextureId, 20, 0, 0, (float)inf.width, (float)inf.height});
     //obj.set<Test>({31, 62});
 }
 
