@@ -5,7 +5,6 @@
 #include "../io/keyboard.h"
 #include "../log/log.h"
 #include "../scene/scene.h"
-#include "../components/Test.h"
 #include "../scripting/lua_manager.h"
 #include "wapper.h"
 #include <filesystem>
