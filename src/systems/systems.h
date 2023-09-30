@@ -5,6 +5,6 @@
 
 class Systems {
 public:
-    static void Init(flecs::world* world);
+    static void Init(flecs::world& world);
     static void RenderSystem(flecs::iter& it, RectTransform* transform, Sprite* sprite);
 };

@@ -5,6 +5,7 @@
 #include "../io/keyboard.h"
 #include "../log/log.h"
 #include "../scene/scene.h"
+#include "../components/Test.h"
 #include "../scripting/lua_manager.h"
 #include "wapper.h"
 #include <filesystem>
@@ -38,14 +39,17 @@ void Game::Setup() {
     Physics::Initialize();
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/after_load");
 
-    static const std::vector<std::string>& loadedAssets = AssetManager::GetLoadedTextures();
+    //static const std::vector<std::string>& loadedAssets = AssetManager::GetLoadedTextures();
 
-    auto obj = Scene::CreateEntity("door_tile2");
-    selectedTextureId = AssetManager::GetTexture("desert");
-    auto inf = CommancheRenderer::Instance->GetTextureInfo(selectedTextureId);
+    //auto obj = Scene::CreateEntity("door_tile2");
+    //selectedTextureId = AssetManager::GetTexture("desert");
+    //auto inf = CommancheRenderer::Instance->GetTextureInfo(selectedTextureId);
 
-    obj.set<RectTransform>({glm::vec2(1920, 1080), glm::vec2(1920 * 2, 1080 * 2), glm::vec2(500, 500)});
-    obj.set<Sprite>({selectedTextureId, 20, 0, 0, (float)inf.width, (float)inf.height});
+    //Scene::ecs.component<Test>();
+
+    //obj.set<RectTransform>({glm::vec2(1920, 1080), glm::vec2(1920 * 2, 1080 * 2), glm::vec2(500, 500), 31});
+    //obj.set<Sprite>({selectedTextureId, 20, 0, 0, (float)inf.width, (float)inf.height});
+    //obj.set<Test>({31, 62});
 }
 
 void Game::Update() {
@@ -55,7 +59,7 @@ void Game::Update() {
         sleepProgram(timeToWait);
     }
 
-    CommancheRenderer::Instance->DrawRectRangle(selectedTextureId, 100, 100, 1000, 1000, 0, 0, 0);
+    //CommancheRenderer::Instance->DrawRectRangle(selectedTextureId, 100, 100, 1000, 1000, 0, 0, 0);
     tickLastFrame = getTime();
 
     Scene::Update();

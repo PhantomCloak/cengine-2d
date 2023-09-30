@@ -105,7 +105,7 @@ void SaveDialog() {
     ImGui::Spacing();
     ImGui::Spacing();
     if (ImGui::Button("OK")) {
-        EngineSerializer::SerializeSceneToFile("./assets/maps/" + std::string(mapNameBuff) + ".json");
+        EngineSerializer::SerializeSceneToFile("./assets/maps/" + std::string(mapNameBuff) + ".json", Scene::ecs);
         windowFlags[EDITOR_SHOW_SAVE_DIALOG] = false;
     }
     ImGui::End();
@@ -145,7 +145,7 @@ void LoadDialog() {
     ImGui::Spacing();
     ImGui::Spacing();
     if (ImGui::Button("OK")) {
-        EngineSerializer::DeserializeFileToScene(names[ctx]);
+        EngineSerializer::DeserializeFileToScene(names[ctx], Scene::ecs);
         windowFlags[EDITOR_SHOW_LOAD_DIALOG] = false;
     }
     ImGui::End();
@@ -336,7 +336,7 @@ void Editor::Render() {
 
     if (Keyboard::IsKeyPressing(KeyCode::Key_U) && tff) {
         tff = false;
-        EngineSerializer::DeserializeFileToScene("./assets/maps/brew.json");
+        EngineSerializer::DeserializeFileToScene("./assets/maps/brew.json", Scene::ecs);
     }
 
     if (ImGui::BeginMainMenuBar()) {

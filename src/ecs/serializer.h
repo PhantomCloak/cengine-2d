@@ -3,6 +3,7 @@
 #include "../game/entities.h"
 #include "../game/components.h"
 #include "../game/systems.h"
+#include "flecs.h"
 #include "json.hpp"
 
 enum {
@@ -13,6 +14,6 @@ enum {
 
 class EngineSerializer {
     public:
-    static void SerializeSceneToFile(const std::string& path);
-    static void DeserializeFileToScene(const std::string path);
+    static void SerializeSceneToFile(const std::string& path, flecs::world& world);
+    static void DeserializeFileToScene(const std::string path, flecs::world& world);
 };

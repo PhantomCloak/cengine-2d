@@ -2,6 +2,11 @@
 #include "game/game.h"
 #include <sol/sol.hpp>
 #include "eventmgr/EventBus.h"
+#include "flecs.h"
+
+struct Example {
+  double x, y;
+};
 
 int main(int argc, char* argv[]) {
     Game game;

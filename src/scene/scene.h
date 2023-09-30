@@ -29,7 +29,7 @@ class Scene {
 
     static void Destroy();
 
-    static flecs::world* ecs;
+    static flecs::world ecs;
 
     private:
     static std::string currentScenePath;
@@ -42,7 +42,7 @@ class Scene {
 
 template <typename TSystem, typename... TArgs>
 void Scene::AddSystem(TArgs&&... args) {
-    ecs->system<TSystem>(std::forward<TArgs>(args)...);
+  ecs.system<TSystem>(std::forward<TArgs>(args)...);
 }
 
 template <typename TComponent, typename... TArgs>

@@ -6,10 +6,10 @@ struct RenderObject {
     std::shared_ptr<Sprite> sprite;
 };
 
-void Systems::Init(flecs::world* ref){
-       ref->component<RectTransform>();
-       ref->component<Sprite>();
-       ref->system<RectTransform, Sprite>("RenderSystem")
+void Systems::Init(flecs::world& ref){
+       ref.component<RectTransform>();
+       ref.component<Sprite>();
+       ref.system<RectTransform, Sprite>("RenderSystem")
                .iter(&Systems::RenderSystem);
 }
 

@@ -4,7 +4,6 @@
 #include "../ecs/world.h"
 #include "../game/components.h"
 #include "../render/render_primitives.h"
-//#include "../scene/scene.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -13,193 +12,77 @@
 #define NAMEOF(variable) #variable
 
 
-// Types
-giri::json::JSON SerializeType(CommancheRect rect) {
-    giri::json::JSON selfJson = giri::json::JSON();
+bool hasRegisterTypesInit = false;
+void RegisterTypes(flecs::world& world) {
+    if (hasRegisterTypesInit)
+        return;
+    hasRegisterTypesInit = true;
 
-    selfJson[NAMEOF(rect.x)] = rect.x;
-    selfJson[NAMEOF(rect.y)] = rect.y;
-    selfJson[NAMEOF(rect.width)] = rect.width;
-    selfJson[NAMEOF(rect.height)] = rect.height;
+    world.component<std::string>()
+    .opaque(flecs::String) // Opaque type that maps to string
+    .serialize([](const flecs::serializer* s, const std::string* data) {
+        const char* str = data->c_str();
+        return s->value(flecs::String, &str); // Forward to serializer
+    })
+    .assign_string([](std::string* data, const char* value) {
+        *data = value; // Assign new value to std::string
+    });
 
-    return selfJson;
+    world.component<CommancheRect>()
+    .member<float>("x")
+    .member<float>("y")
+    .member<float>("height")
+    .member<float>("width");
+
+    world.component<glm::vec2>("vec2")
+    .member<float>("x")
+    .member<float>("y");
+
+    world.component<RectTransform>()
+    .member<glm::vec2>("pos")
+    .member<glm::vec2>("size")
+    .member<glm::vec2>("scale")
+    .member<int>("rotation");
+
+    world.component<Sprite>()
+    .member<int>("texture")
+    .member<int>("zIndex")
+    .member<bool>("isFixed")
+    .member<CommancheRect>("srcRect");
+
+    world.component<BoxCollider>()
+    .member<float>("width")
+    .member<float>("height")
+    .member<glm::vec2>("offset");
+
+    world.component<RigidBody>()
+    .member<glm::vec2>("velocityLinear");
 }
 
-CommancheRect DeserializeRectType(giri::json::JSON json) {
-    CommancheRect rect;
-    rect.x = json[NAMEOF(rect.x)].ToFloat();
-    rect.y = json[NAMEOF(rect.y)].ToFloat();
-    rect.width = json[NAMEOF(rect.width)].ToFloat();
-    rect.height = json[NAMEOF(rect.height)].ToFloat();
-    return rect;
+void EngineSerializer::SerializeSceneToFile(const std::string& path, flecs::world& world) {
+    RegisterTypes(world);
+    flecs::snapshot snapshot(world);
+    snapshot.take();
+
+    const ecs_world_to_json_desc_t desc = { 0 };
+    const char* json_1 = ecs_world_to_json(world.c_ptr(), &desc);
+    std::cout << json_1;
+
+    std::string json(json_1);
+
+    std::ofstream outfile;
+    outfile.open(path);
+    outfile << json;
+    outfile.close();
 }
 
-giri::json::JSON SerializeType(glm::vec2 vec2) {
-    giri::json::JSON selfJson = giri::json::JSON();
-    selfJson[NAMEOF(vec2.x)] = vec2.x;
-    selfJson[NAMEOF(vec2.y)] = vec2.y;
-    return selfJson;
-}
+void EngineSerializer::DeserializeFileToScene(const std::string path, flecs::world& world) {
+    RegisterTypes(world);
+    std::ifstream fs(path);
+    std::stringstream buffer;
+    buffer << fs.rdbuf();
+    std::string jsonOutput = buffer.str();
 
-glm::vec2 DeserializeVec2Type(giri::json::JSON json) {
-    return glm::vec2(json["vec2.x"].ToFloat(), json["vec2.y"].ToFloat());
-}
-
-giri::json::JSON SerializeComponent(Sprite component) {
-    giri::json::JSON selfJson = giri::json::JSON();
-    giri::json::JSON arrParam = giri::json::JSON();
-
-    arrParam["texture"] = AssetManager::GetTexture(component.texture).c_str();
-    arrParam["zIndex"] = component.zIndex;
-    arrParam["srcRect"] = SerializeType(component.srcRect);
-
-    selfJson["parameters"] = arrParam;
-
-    return selfJson;
-}
-
-Sprite DeserializeSprite(giri::json::JSON json) {
-    Sprite component;
-    giri::json::JSON& parameterNode = json["parameters"];
-
-    component.texture = AssetManager::GetTexture(parameterNode["texture"].ToString());
-    component.zIndex = parameterNode["zIndex"].ToInt();
-    component.srcRect = DeserializeRectType(parameterNode["srcRect"]);
-
-    return component;
-}
-
-RectTransform DeserializeTransform(giri::json::JSON json) {
-    RectTransform component;
-    giri::json::JSON& parameterNode = json["parameters"];
-
-    component.pos = DeserializeVec2Type(parameterNode[NAMEOF(component.pos)]);
-    component.size = DeserializeVec2Type(parameterNode[NAMEOF(component.size)]);
-    component.rotation = parameterNode[NAMEOF(component.rotation)].ToInt();
-    component.scale = DeserializeVec2Type(parameterNode[NAMEOF(component.scale)]);
-
-    return component;
-}
-
-giri::json::JSON SerializeComponent(RectTransform component) {
-    giri::json::JSON selfJson = giri::json::JSON();
-    giri::json::JSON arrParam = giri::json::JSON();
-
-    arrParam[NAMEOF(component.pos)] = SerializeType(component.pos);
-    arrParam[NAMEOF(component.rotation)] = component.rotation;
-    arrParam[NAMEOF(component.size)] = SerializeType(component.size);
-    arrParam[NAMEOF(component.scale)] = SerializeType(component.scale);
-
-    selfJson["parameters"] = arrParam;
-
-    return selfJson;
-}
-
-giri::json::JSON SerializeComponent(BoxCollider component) {
-    giri::json::JSON selfJson = giri::json::JSON();
-    giri::json::JSON arrParam = giri::json::JSON();
-
-    arrParam[NAMEOF(component.width)] = component.width;
-    arrParam[NAMEOF(component.height)] = component.height;
-    arrParam[NAMEOF(component.offset)] = SerializeType(component.offset);
-
-    selfJson["parameters"] = arrParam;
-
-    return selfJson;
-}
-
-void DeserializeEntity(giri::json::JSON json) {
-    //Entity entity = Scene::CreateEntity();
-    //giri::json::JSON componentsNode = json["components"];
-
-    //if (componentsNode.hasKey("sprite")) {
-    //    Sprite comp = DeserializeSprite(componentsNode["sprite"]);
-    //    entity.AddComponent<Sprite>(comp);
-    //}
-
-    //if (componentsNode.hasKey("transform")) {
-    //    RectTransform comp = DeserializeTransform(componentsNode["transform"]);
-    //    entity.AddComponent<RectTransform>(comp);
-    //}
-}
-
-
-giri::json::JSON SerializeWorldStorage(WorldStorage* storage) {
-    giri::json::JSON selfJson = giri::json::JSON();
-    giri::json::JSON arrParam = giri::json::JSON();
-    arrParam = arrParam["systems"];
-
-    for (auto systemEntry : storage->systems) {
-      arrParam.append(systemEntry.first.name());
-    }
-
-    selfJson["parameters"] = arrParam;
-
-    return selfJson;
-}
-
-
-giri::json::JSON SerializeComponent(RigidBody component) {
-    giri::json::JSON selfJson = giri::json::JSON();
-    giri::json::JSON arrParam = giri::json::JSON();
-
-    arrParam["velocity"] = SerializeType(component.velocityLinear);
-
-    selfJson["parameters"] = arrParam;
-
-    return selfJson;
-}
-
-void EngineSerializer::SerializeSceneToFile(const std::string& path) {
-    //std::vector<Entity> entities = Scene::GetEntities();
-
-    //giri::json::JSON jsonState = giri::json::Object();
-    //giri::json::JSON arrEntities = giri::json::Array();
-    //giri::json::JSON arrSystems = giri::json::Array();
-    //arrSystems = SerializeWorldStorage(Scene::world->storage);
-
-
-    //for (int i = 0; i < entities.size(); i++) {
-    //    auto entity = entities[i];
-    //    giri::json::JSON enttityJsonNode = giri::json::Object();
-    //    giri::json::JSON componentNode = giri::json::Array();
-
-    //    if (entity.HasComponent<RectTransform>())
-    //        componentNode["transform"] = SerializeComponent(entity.GetComponent<RectTransform>());
-    //    if (entity.HasComponent<Sprite>())
-    //        componentNode["sprite"] = SerializeComponent(entity.GetComponent<Sprite>());
-
-    //    enttityJsonNode["components"] = componentNode;
-    //    arrEntities[i] = enttityJsonNode;
-    //}
-
-    //jsonState["entities"] = arrEntities;
-    //jsonState["systems"] = arrSystems;
-
-
-    //std::ofstream myfile;
-    //myfile.open(path);
-    //myfile << jsonState.ToString();
-    //myfile.close();
-}
-
-void EngineSerializer::DeserializeFileToScene(const std::string path) {
-    //std::ifstream fs(path);
-    //std::stringstream buffer;
-    //buffer << fs.rdbuf();
-
-    //std::string jsonOutput = buffer.str();
-
-    //giri::json::JSON jsonRootNode = giri::json::JSON::Load(jsonOutput);
-    //giri::json::JSON entitiesNode = jsonRootNode["entities"];
-    //giri::json::JSON systemsNode = jsonRootNode["systems"]["parameters"];
-
-    //for (auto& entity : entitiesNode.ArrayRange()) {
-    //    DeserializeEntity(entity);
-    //}
-
-    //for (auto& system : systemsNode.ArrayRange()) {
-    //    std::string systemId = system.ToString();
-    //    Scene::SetSystemStatus(systemId, true);
-    //}
+    const ecs_from_json_desc_t desc = { 0 };
+    ecs_world_from_json(world.c_ptr(), jsonOutput.c_str(), &desc);
 }

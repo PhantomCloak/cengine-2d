@@ -8,22 +8,22 @@
 CommancheRenderer* Scene::renderer = nullptr;
 std::string Scene::currentScenePath = "";
 
-flecs::world* Scene::ecs;
+flecs::world Scene::ecs;
 
 #if EDITOR
 Editor* Scene::editor = nullptr;
 #endif
 
 void Scene::Init() {
-    ecs = new flecs::world();
+    //ecs()();
 
-    ecs->system("RenderStart")
+    ecs.system("RenderStart")
     .kind(flecs::PreUpdate)
     .iter([](flecs::iter it) {
         renderer->RenderStart();
     });
 
-    ecs->system("RenderEnd")
+    ecs.system("RenderEnd")
     .kind(flecs::PostUpdate)
     .iter([](flecs::iter it) {
         renderer->RenderEnd();
@@ -36,10 +36,10 @@ void Scene::Init() {
     if (currentScenePath.size() <= 0) {
         Log::Inf("No active scene deteced creating new scene on assets/default.json");
         currentScenePath = "assets/default.json";
-        EngineSerializer::SerializeSceneToFile(currentScenePath);
+        // EngineSerializer::SerializeSceneToFile(currentScenePath);
     }
 
-    EngineSerializer::DeserializeFileToScene(currentScenePath);
+    // EngineSerializer::DeserializeFileToScene(currentScenePath);
 
     // LuaManager::RegisterCppToLuaFunc("addTile", &Map::PlaceTile, map);
     // LuaManager::RegisterCppToLuaFunc("getEntityFromTileIndex", &Map::GetEntityFromTileIndex, map);
@@ -77,7 +77,7 @@ void Scene::Init() {
 }
 
 flecs::entity Scene::CreateEntity(std::string entityName) {
-    return ecs->entity(entityName.c_str());
+    return ecs.entity(entityName.c_str());
 }
 
 void Scene::DestroyEntity(flecs::entity entity) {
@@ -85,7 +85,7 @@ void Scene::DestroyEntity(flecs::entity entity) {
 }
 
 void Scene::Update() {
-    ecs->progress();
+    ecs.progress();
 }
 
 void Scene::Destroy() {
@@ -111,7 +111,7 @@ void Scene::Render() {
 
 std::vector<flecs::entity> Scene::GetEntities() {
     std::vector<flecs::entity> entities;
-    ecs->each([&](flecs::entity e, RectTransform& transform) {
+    ecs.each([&](flecs::entity e, RectTransform& transform) {
         entities.push_back(e);
     });
     return entities;

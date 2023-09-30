@@ -3,21 +3,23 @@
 #include "../editor_utils.h"
 
 Editor* EditorSystems::editorRef;
-flecs::world* ecs;
 
-void EditorSystems::Init(flecs::world* world, Editor* editor) {
-    world->component<RectTransform>();
-    world->component<DragableComponent>();
+void EditorSystems::Init(flecs::world& world, Editor* editor) {
+    world.component<RectTransform>();
+    world.component<DragableComponent>();
     //world->system<RectTransform, DragableComponent>("Editor_DraggableSystem")
     //.each(EditorSystems::DraggableSystem);
 
 
-     world->system<RectTransform, DragableComponent>().each([](flecs::entity entity, RectTransform& transform, const DragableComponent& comp) {
+     world.system<RectTransform, DragableComponent>().each([](flecs::entity entity, RectTransform& transform, const DragableComponent& comp) {
          EditorSystems::DraggableSystem(entity, transform);
      });
 
+     flecs::snapshot snap = world.snapshot();
+     snap.c_ptr();
+       
     editorRef = editor;
-    ecs = world;
+    //ecs = world;
 }
 
 void EditorSystems::DraggableSystem(flecs::entity entity, RectTransform& transform) {
@@ -27,6 +29,6 @@ void EditorSystems::DraggableSystem(flecs::entity entity, RectTransform& transfo
     transform.pos = worldPos;
 
     if (Cursor::HasCursorClicked()) {
-        ecs->entity(entity).remove<DragableComponent>();
+        //ecs->entity(entity).remove<DragableComponent>();
     }
 }
