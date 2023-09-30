@@ -15,8 +15,6 @@ Editor* Scene::editor = nullptr;
 #endif
 
 void Scene::Init() {
-    //ecs()();
-
     ecs.system("RenderStart")
     .kind(flecs::PreUpdate)
     .iter([](flecs::iter it) {
@@ -36,14 +34,7 @@ void Scene::Init() {
     if (currentScenePath.size() <= 0) {
         Log::Inf("No active scene deteced creating new scene on assets/default.json");
         currentScenePath = "assets/default.json";
-        // EngineSerializer::SerializeSceneToFile(currentScenePath);
     }
-
-    // EngineSerializer::DeserializeFileToScene(currentScenePath);
-
-    // LuaManager::RegisterCppToLuaFunc("addTile", &Map::PlaceTile, map);
-    // LuaManager::RegisterCppToLuaFunc("getEntityFromTileIndex", &Map::GetEntityFromTileIndex, map);
-    // LuaManager::RegisterCppToLuaFunc("addCollider", &Wrapper::AddCollider, wrapper);
 
     LuaManager::RegisterCppToLuaFunc("addTexture", &AssetManager::AddTexture);
 
@@ -59,13 +50,6 @@ void Scene::Init() {
     renderer->InitializeShaders("./src/shaders");
 
     Systems::Init(ecs);
-
-    // Add All systems at once
-    // Scene::LoadSystem<RenderSystem>(renderer);
-    // Scene::LoadSystem<RenderText2D>(renderer);
-    // Scene::LoadSystem<RenderDebug>(renderer);
-    // Scene::LoadSystem<PhysicsController>();
-    //
 
 #if EDITOR
     editor = new Editor();

@@ -61,7 +61,6 @@ void Editor::Init(CommancheRenderer* renderer) {
     logs.push_back("Hello World");
     logs.push_back("Hello World");
 
-    MapLuaSerializer ser;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -115,6 +114,9 @@ void FileMenu() {
 void EntitiesMenu() {
     if (ImGui::BeginMenu("Entity")) {
         if (ImGui::MenuItem("New")) {
+            flecs::entity e =Scene::CreateEntity("chewbacca");
+            e.add<RectTransform>();
+            Log::Inf("CHEWBACCA CALLED");
         }
         ImGui::EndMenu();
     }

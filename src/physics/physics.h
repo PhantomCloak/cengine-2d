@@ -4,12 +4,13 @@
 #include "../log/log.h"
 #include "physics_metadata.h"
 #include <map>
+#include "flecs.h"
 
 #define PIXELS_PER_METER 1
 
 class Physics {
     public:
-    static void Initialize();
+    static void Initialize(flecs::world& ecs);
     static void Update();
     static std::map<int, PhysicsResult> GetUpdatedEntries();
     static bool HasRegistered(int body);

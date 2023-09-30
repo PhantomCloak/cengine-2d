@@ -65,8 +65,7 @@ void EngineSerializer::SerializeSceneToFile(const std::string& path, flecs::worl
     snapshot.take();
 
     const ecs_world_to_json_desc_t desc = { 0 };
-    const char* json_1 = ecs_world_to_json(world.c_ptr(), &desc);
-    std::cout << json_1;
+    const char* json_1 = ecs_world_to_json(world.c_ptr(), &desc); std::cout << json_1;
 
     std::string json(json_1);
 

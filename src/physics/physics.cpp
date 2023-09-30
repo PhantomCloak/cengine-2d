@@ -5,10 +5,46 @@ const b2Vec2 grav = b2Vec2(0.0f, 10.0f * PIXELS_PER_METER);
 static b2World* world = nullptr;
 static std::map<int, bool> registeredBody;
 
-void Physics::Initialize() {
+void Physics::Initialize(flecs::world& ecs) {
     if (world == nullptr) {
         world = new b2World(grav);
     }
+
+    ecs.system<RectTransform, RigidBody>()
+    .kind(flecs::PreUpdate)
+    .each([](flecs::entity e, RectTransform& transform, RigidBody& body) {
+        body.rigId = e.id();
+
+        if (!Physics::HasRegistered(e.id())) {
+            Physics::RegisterBody(body, transform);
+        }
+
+        Physics::SetPosition(body, transform.pos);
+        Physics::SetVelocity(body, body.velocityLinear);
+        Physics::Update();
+    });
+
+
+    ecs.system<RectTransform, RigidBody>()
+    .kind(flecs::OnUpdate)
+    .each([](flecs::entity e, RectTransform& transform, RigidBody& body) {
+        if (body.isStatic)
+            return;
+
+        std::map<int, PhysicsResult> updatedPhysicsObjs = Physics::GetUpdatedEntries();
+        PhysicsResult& result = updatedPhysicsObjs[e.id()];
+
+        transform.pos = result.position;
+        transform.rotation = result.rotation;
+        body.velocityLinear = result.velocityLinear;
+        body.velocityAngular = result.velocityAngular;
+        body.mass = result.mass;
+    });
+
+    ecs.system<RectTransform, RigidBody>()
+    .kind(flecs::PostUpdate)
+    .each([](flecs::entity e, RectTransform& transform, RigidBody& body) {
+    });
 }
 
 b2Body* findBodyById(int id) {
@@ -38,7 +74,7 @@ void Physics::SetPosition(RigidBody body, glm::vec2 pos) {
     bBody->SetTransform(b2Vec2(pos.x, pos.y), bBody->GetAngle());
 }
 
-void Physics::SetVelocity(RigidBody body, glm::vec2 velocity){
+void Physics::SetVelocity(RigidBody body, glm::vec2 velocity) {
     b2Body* bBody = findBodyById(body.rigId);
     bBody->SetLinearVelocity(b2Vec2(velocity.x, velocity.y));
 }
@@ -58,7 +94,7 @@ void Physics::RegisterBody(RigidBody body, RectTransform transform) {
 
     b2PolygonShape shape;
 
-    shape.SetAsBox(((transform.size.x * transform.scale.x) / PIXELS_PER_METER ) / 2, ((transform.size.y * transform.scale.y) / PIXELS_PER_METER) / 2);
+    shape.SetAsBox(((transform.size.x * transform.scale.x) / PIXELS_PER_METER) / 2, ((transform.size.y * transform.scale.y) / PIXELS_PER_METER) / 2);
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &shape;
 
@@ -93,8 +129,8 @@ std::map<int, PhysicsResult> Physics::GetUpdatedEntries() {
 
     std::map<int, PhysicsResult> results;
 
-    if(body == NULL)
-      return results;
+    if (body == NULL)
+        return results;
 
     b2Body* curBody = body;
 

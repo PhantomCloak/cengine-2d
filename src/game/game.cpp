@@ -34,21 +34,15 @@ void Game::Setup() {
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/pre_load");
     Log::Warn("Engine is starting");
 
-    // Setup Assets
-    Physics::Initialize();
+    Physics::Initialize(Scene::ecs);
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/after_load");
 
-    //static const std::vector<std::string>& loadedAssets = AssetManager::GetLoadedTextures();
-
-    auto obj = Scene::CreateEntity("door_tile2");
+    flecs::entity obj = Scene::CreateEntity("door_tile2");
     selectedTextureId = AssetManager::GetTexture("desert");
     auto inf = CommancheRenderer::Instance->GetTextureInfo(selectedTextureId);
 
-    //Scene::ecs.component<Test>();
-
     obj.set<RectTransform>({glm::vec2(1920, 1080), glm::vec2(1920 * 2, 1080 * 2), glm::vec2(500, 500), 31});
     obj.set<Sprite>({selectedTextureId, 20, 0, 0, (float)inf.width, (float)inf.height});
-    //obj.set<Test>({31, 62});
 }
 
 void Game::Update() {
@@ -58,12 +52,10 @@ void Game::Update() {
         sleepProgram(timeToWait);
     }
 
-    //CommancheRenderer::Instance->DrawRectRangle(selectedTextureId, 100, 100, 1000, 1000, 0, 0, 0);
     tickLastFrame = getTime();
 
     Scene::Update();
 
-    // bus->ClearEvents();
     Keyboard::FlushPressedKeys();
 }
 
