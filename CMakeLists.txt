@@ -23,7 +23,6 @@ include_directories(
     "./libs"
     "./libs/lua"
     "./libs/imgui"
-    "./libs/SimpleJSON"
     "./libs/box2d/include"
     "./libs/imgui/backends"
     "/opt/homebrew/include"
