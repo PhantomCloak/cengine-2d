@@ -54,6 +54,10 @@ glm::vec2 Cursor::GetCursorWorldPosition(glm::vec2 screenPoint) {
     return glm::vec2(0, 0);
 }
 
-bool Cursor::HasCursorClicked() {
+bool Cursor::HasLeftCursorClicked() {
   return glfwGetMouseButton(wnd, 0);
+}
+
+bool Cursor::HasRightCursorClicked() {
+  return glfwGetMouseButton(wnd, 1);
 }

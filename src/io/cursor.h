@@ -10,7 +10,8 @@ public:
     static void Setup(void* window);
     static glm::vec2 GetCursorPosition();
     static glm::vec2 GetCursorWorldPosition(glm::vec2 screenPoint);
-    static bool HasCursorClicked();
+    static bool HasLeftCursorClicked();
+    static bool HasRightCursorClicked();
                                 
 private:
     static GLFWwindow* wnd;

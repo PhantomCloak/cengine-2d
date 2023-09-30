@@ -4,10 +4,6 @@
 #include "eventmgr/EventBus.h"
 #include "flecs.h"
 
-struct Example {
-  double x, y;
-};
-
 int main(int argc, char* argv[]) {
     Game game;
     game.Initialize();

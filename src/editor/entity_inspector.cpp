@@ -84,7 +84,7 @@ void EntityInspector::RenderWindow() {
     //}
 
     if (ImGui::Button("Add Component")) {
-        //ImGui::OpenPopup("SC");
+        ImGui::OpenPopup("SC");
     }
 
     if (ImGui::BeginPopup("SC")) {

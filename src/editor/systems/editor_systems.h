@@ -7,6 +7,6 @@
 class EditorSystems {
 public:
     static void Init(flecs::world& world, Editor* editor);
-    static void DraggableSystem(flecs::entity it, RectTransform& transform);
+    static void DraggableSystem(flecs::world& world, flecs::entity it, RectTransform& transform, const DragableComponent& comp);
     static Editor* editorRef;
 };

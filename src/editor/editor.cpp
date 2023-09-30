@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 #include <stdio.h>
+#include <unordered_map>
 
 
 #define EDITOR_SHOW_MAP_EDITOR 1
@@ -34,8 +35,31 @@ glm::vec2 Editor::ScreenSize;
 
 flecs::id draggableEntity;
 
+std::vector<std::string> logs;            // The original list of logs
+std::vector<std::string> filteredLogs;    // The logs after applying the search filter
+std::string combinedLog;                  // Combined logs in one string for display
+char searchBuffer[256] = { 0 };           // Buffer to hold the search text
+
+
 void Editor::Init(CommancheRenderer* renderer) {
     Log::Inf("Editor booting...");
+
+    logs.push_back("merhaba");
+    logs.push_back("henlo ");
+    logs.push_back("hewla");
+    logs.push_back("dkasodjksaodas");
+    logs.push_back("yea hello yea");
+    logs.push_back("mutnity");
+    logs.push_back("trypoi");
+    logs.push_back("hell World");
+    logs.push_back("crack world");
+    logs.push_back("missing");
+    logs.push_back("fucking");
+    logs.push_back("hjex");
+    logs.push_back("Hello World");
+    logs.push_back("Hello World");
+    logs.push_back("Hello World");
+    logs.push_back("Hello World");
 
     MapLuaSerializer ser;
     IMGUI_CHECKVERSION();
@@ -125,6 +149,49 @@ static std::string _labelPrefix(const char* const label) {
 
     return labelID;
 }
+
+void RebuildLog() {
+    std::ostringstream combined;
+    for (const auto& log : filteredLogs) {
+        combined << log << "\n";
+    }
+    combinedLog = combined.str();
+}
+
+void FilterLogs() {
+    if (strlen(searchBuffer) == 0) {
+        // If search buffer is empty, show all logs
+        filteredLogs = logs;
+    } else {
+        filteredLogs.clear();
+        std::string searchStr(searchBuffer);
+        for (const auto& log : logs) {
+            if (log.find(searchStr) != std::string::npos) {
+                filteredLogs.push_back(log);
+            }
+        }
+    }
+    RebuildLog();
+}
+
+void Draw() {
+    static bool s = true;
+    if (ImGui::Begin("Log Viewer", &s)) {
+        ImGui::InputText("Search", searchBuffer, sizeof(searchBuffer));
+
+        FilterLogs();
+
+        // Start a child region with a specific size and make it scrollable
+        ImGui::BeginChild("LogRegion", ImVec2(0, ImGui::GetContentRegionAvail().y), false, ImGuiWindowFlags_HorizontalScrollbar);
+
+        // ReadOnly Text Container with Scrolling
+        ImGui::InputTextMultiline("##logs", &combinedLog[0], combinedLog.size(), ImVec2(-FLT_MIN, -FLT_MIN), ImGuiInputTextFlags_ReadOnly);
+
+        ImGui::EndChild(); // End the child region
+    }
+    ImGui::End();
+}
+
 
 void LoadDialog() {
     ImGui::Begin("Load Menu");
@@ -257,19 +324,26 @@ void AssetsMenu() {
 
 static flecs::entity selectedEntityId;
 
-void SceneList() {
-    static bool selectableEntityList[1024];
-    if (ImGui::Begin("Scene List")) {
 
+void SceneList() {
+    static std::unordered_map<flecs::entity_t, bool> selectableEntityList;
+
+    if (ImGui::Begin("Scene List")) {
         for (auto entity : Scene::GetEntities()) {
             std::string txt = entity.name().c_str() + std::string(" : ") + std::to_string(entity.id());
 
-            if (ImGui::Selectable(txt.c_str(), &selectableEntityList[entity.id()])) {
-                for (int i = 0; i < sizeof(selectableEntityList); i++)
-                    selectableEntityList[i] = false;
+            bool isSelected = selectableEntityList[entity.id()];
+            if (ImGui::Selectable(txt.c_str(), &isSelected)) {
+                // Clear all previous selections
+                for (auto& pair : selectableEntityList) {
+                    pair.second = false;
+                }
 
+                // Set the current entity as selected
                 selectableEntityList[entity.id()] = true;
                 selectedEntityId = entity;
+            } else {
+                selectableEntityList[entity.id()] = isSelected; // Update the map with the current state
             }
         }
         ImGui::End();
@@ -309,6 +383,7 @@ void renderDockingSpace() {
 }
 
 void WindowController(Editor* instance) {
+
     if (windowFlags[EDITOR_SHOW_MAP_EDITOR]) {
         MapEditor();
     }
@@ -318,9 +393,13 @@ void WindowController(Editor* instance) {
     if (windowFlags[EDITOR_SHOW_LOAD_DIALOG]) {
         LoadDialog();
     }
+    ImGui::Begin("Bottom Bar");
+
     if (windowFlags[EDITOR_SYSTEM_EXPLORER_DIALOG]) {
         instance->explorer->RenderWindow();
     }
+
+    ImGui::End();
 }
 
 void Editor::Render() {
@@ -355,6 +434,7 @@ void Editor::Render() {
     }
 
     SceneList();
+    Draw();
     fileView->RenderWindow();
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -389,9 +469,9 @@ void Editor::Render() {
 
         ImGui::End();
         ImGui::PopStyleVar();
+        ImGui::EndFrame();
     }
 
-    ImGui::EndFrame();
     ImGui::Render();
 
     ImGui::UpdatePlatformWindows();

@@ -21,13 +21,13 @@ static std::string _labelPrefix(const char* const label) {
 
 void SystemExplorer::RenderWindow() {
     static std::unordered_map<int, bool> isOnOff;
-
-    if (ImGui::Begin("SystemExplorer")) {
+    static bool s = false;
+    if (ImGui::Begin("SystemExplorer", &s)) {
         ImGui::BeginGroupPanel("Monitor");
-        //for (auto& systemEntry : Scene::world->storage->systems) {
-        //    ImGui::Checkbox(_labelPrefix(systemEntry.first.name()).c_str(), &systemEntry.second->isActive);
-        //}
+        // for (auto& systemEntry : Scene::world->storage->systems) {
+        //     ImGui::Checkbox(_labelPrefix(systemEntry.first.name()).c_str(), &systemEntry.second->isActive);
+        // }
         ImGui::EndGroupPanel();
-        ImGui::End();
     }
+    ImGui::End();
 }

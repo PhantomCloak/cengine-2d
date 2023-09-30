@@ -90,6 +90,6 @@ void FileView::RenderWindow() {
         }
 
         createFileTile("", ctx, &hoverList[0], sizeof(hoverList), false);
-        ImGui::End();
     }
+    ImGui::End();
 }

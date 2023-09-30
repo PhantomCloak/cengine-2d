@@ -7,28 +7,23 @@ Editor* EditorSystems::editorRef;
 void EditorSystems::Init(flecs::world& world, Editor* editor) {
     world.component<RectTransform>();
     world.component<DragableComponent>();
-    //world->system<RectTransform, DragableComponent>("Editor_DraggableSystem")
-    //.each(EditorSystems::DraggableSystem);
 
+    world.system<RectTransform, DragableComponent>().each([&world](flecs::entity entity, RectTransform& transform, const DragableComponent& comp) {
+        DraggableSystem(world, entity, transform, comp);
+    });
 
-     world.system<RectTransform, DragableComponent>().each([](flecs::entity entity, RectTransform& transform, const DragableComponent& comp) {
-         EditorSystems::DraggableSystem(entity, transform);
-     });
-
-     flecs::snapshot snap = world.snapshot();
-     snap.c_ptr();
-       
     editorRef = editor;
-    //ecs = world;
 }
 
-void EditorSystems::DraggableSystem(flecs::entity entity, RectTransform& transform) {
+void EditorSystems::DraggableSystem(flecs::world& world, flecs::entity entity, RectTransform& transform, const DragableComponent& comp) {
     auto mPos = Cursor::GetCursorPosition();
     glm::vec2 local_mouse_pos(mPos.x - editorRef->ViewportPos.x, mPos.y - editorRef->ViewportPos.y);
     glm::vec2 worldPos = EditorUtils::InterpolateToGrid(Cursor::GetCursorWorldPosition(local_mouse_pos), 25);
     transform.pos = worldPos;
 
-    if (Cursor::HasCursorClicked()) {
-        //ecs->entity(entity).remove<DragableComponent>();
+    if (Cursor::HasLeftCursorClicked()) {
+        world.entity(entity).remove<DragableComponent>();
+    } else if (Cursor::HasRightCursorClicked()) {
+        entity.destruct();
     }
 }
