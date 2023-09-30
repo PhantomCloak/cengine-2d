@@ -15,7 +15,7 @@
 	url = https://github.com/erincatto/box2d
 [submodule "libs/stb"]
 	path = libs/stb
-	url = https://github.com/nothings/stb
+	url = git@github.com:nothings/stb.git
 [submodule "libs/flecs"]
 	path = libs/flecs
 	url = git@github.com:SanderMertens/flecs.git
