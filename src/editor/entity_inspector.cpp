@@ -98,9 +98,6 @@ void EntityInspector::RenderWindow() {
             // Code to add Component 2
         }
 
-        if (ImGui::MenuItem("Sprite")) {
-            // code to add sprite
-        }
         ImGui::EndPopup();
     }
 }
