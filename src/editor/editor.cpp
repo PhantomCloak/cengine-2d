@@ -10,6 +10,7 @@
 #include "../io/filesystem.h"
 #include "../libs/imgui/imgui.h"
 #include "../scene/scene.h"
+#include "editor_style.h"
 #include "editor_utils.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -76,6 +77,7 @@ void Editor::Init(CommancheRenderer* renderer) {
 
 
     ImGui::StyleColorsDark();
+    EditorStyle::Init();
 
     ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)renderer->wnd, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
@@ -93,7 +95,6 @@ void Editor::Init(CommancheRenderer* renderer) {
 
     EditorSystems::Init(Scene::ecs, this);
 }
-
 
 void FileMenu() {
     if (ImGui::BeginMenu("File")) {
