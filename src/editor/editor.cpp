@@ -112,12 +112,30 @@ void FileMenu() {
     }
 }
 
+std::string AutoEntityNaming() {
+    static int nextEntityNumber = 1;
+    std::string baseName = "new entity";
+
+    auto entityList = Scene::GetEntities();
+
+    for (int i = 0; i < entityList.size(); i++) {
+        if (entityList[i].name().c_str() == (baseName + std::to_string(nextEntityNumber))) {
+            nextEntityNumber++;
+            i = -1;
+        }
+    }
+
+    std::string newName = baseName + std::to_string(nextEntityNumber);
+    nextEntityNumber++;
+    return newName;
+}
+
 void EntitiesMenu() {
     if (ImGui::BeginMenu("Entity")) {
         if (ImGui::MenuItem("New")) {
-            flecs::entity e =Scene::CreateEntity("chewbacca");
+            flecs::entity e = Scene::CreateEntity(AutoEntityNaming());
             e.add<RectTransform>();
-            Log::Inf("CHEWBACCA CALLED");
+            Log::Inf("Entity created: " + std::string(e.name().c_str()));
         }
         ImGui::EndMenu();
     }
