@@ -31,5 +31,5 @@ Powered by FLECS
 Powered by Box2D
 
 #### Render & Shading
-- RAYLIB
+- RAYLIB (with ANGLE)
 - Custom OpenGL Renderer
