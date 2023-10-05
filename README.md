@@ -31,4 +31,5 @@ Powered by FLECS
 Powered by Box2D
 
 #### Render & Shading
-Self-made OpenGL 3 Renderer
+- RAYLIB
+- Custom OpenGL Renderer
