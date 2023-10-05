@@ -2,7 +2,7 @@
 
 check progress at [here](https://www.youtube.com/playlist?list=PL2dQtIx06FzXMnB5aWsK_OJ6UocCFF-Ga)
 
-<img width="2672" alt="image" src="https://user-images.githubusercontent.com/34552014/215361052-f2e86742-1947-4fc5-b710-a89293f40a1f.png">
+<img width="2032" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/7ce5bb54-6be5-4feb-a6ff-450fdc77aaa0">
 
 ## Setup
 
