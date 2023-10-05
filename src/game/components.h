@@ -13,5 +13,4 @@
 #include "../components/Label.h"
 #include "../components/MapTile.h"
 #include "../components/Serializable.h"
-#include "../components/Mesh.h"
 #include "../components/DebugTile.h"

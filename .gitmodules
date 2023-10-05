@@ -16,3 +16,12 @@
 [submodule "libs/flecs"]
 	path = libs/flecs
 	url = git@github.com:SanderMertens/flecs.git
+[submodule "libs/rlImGui"]
+	path = libs/rlImGui
+	url = git@github.com:raylib-extras/rlImGui.git
+[submodule "libs/raylib"]
+	path = libs/raylib
+	url = git@github.com:raysan5/raylib.git
+[submodule "libs/angle"]
+	path = libs/angle
+	url = git@github.com:google/angle.git

@@ -14,17 +14,17 @@ class RenderDebug : public System {
     CommancheRenderer* renderer;
     RenderDebug(CommancheRenderer* renderer) {
         this->renderer = renderer;
-        RequireComponent<RectTransform>();
+        RequireComponent<RectTransformC>();
         RequireComponent<Sprite>();
         RequireComponent<DebugTile>();
     };
 
     void Update() {
         for (auto entity : GetEntities()) {
-          auto& transform = entity.GetComponent<RectTransform>();
+          auto& transform = entity.GetComponent<RectTransformC>();
           auto sprite = entity.GetComponent<Sprite>();
 
-          renderer->DrawRectRangle(sprite.texture, transform.pos.x, transform.pos.y, transform.size.x, transform.size.y, 0, 0, 0);
+          //renderer->DrawRectRangle(sprite.texture, transform.pos.x, transform.pos.y, transform.size.x, transform.size.y, 0, 0, 0);
         }
     }
 };

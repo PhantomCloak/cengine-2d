@@ -10,7 +10,7 @@ std::vector<std::string> MapLuaSerializer::EntityToEntry(std::vector<Entity> ent
     std::vector<std::string> entries;
     entries.push_back("tiles = {}");
     for (auto entity : entities) {
-        auto transform = &entity.GetComponent<Transform>();
+        auto transform = &entity.GetComponent<TransformC>();
         auto sprite = &entity.GetComponent<Sprite>();
         auto tile = &entity.GetComponent<MapTile>();
 

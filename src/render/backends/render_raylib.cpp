@@ -1,8 +1,10 @@
 #pragma once
 
+#include "../../assetmgr/AssetManager.h"
 #include "../render.h"
 #include "glm/glm.hpp"
 #include "raylib.h"
+#include "rlImGui.h"
 #include <GLFW/glfw3.h>
 #include <filesystem>
 #include <ft2build.h>
@@ -13,6 +15,15 @@
 
 std::unordered_map<int, Shader> ryShaders;
 std::unordered_map<int, Texture2D> ryTextures;
+glm::mat4 CommancheRenderer::ProjectionMat;
+
+int CommancheRenderer::vo = 0;
+int CommancheRenderer::ho = 0;
+
+int CommancheRenderer::screenWidth = 1920;
+int CommancheRenderer::screenHeight = 1080;
+
+CommancheRenderer* CommancheRenderer::Instance;
 
 int GenerateTextureFromText(const std::string& text, int fontId, Color textColor) {
     return -1;
@@ -21,9 +32,26 @@ int GenerateTextureFromText(const std::string& text, int fontId, Color textColor
 int CommancheRenderer::LoadFont(const std::string& path, int fontSize) {
     return -1;
 }
+
+void CommancheRenderer::UpdateRenderTexture(glm::vec2 size) {
+  viewTexture = LoadRenderTexture(size.x, size.y);
+
+    camX.target = (Vector2){ size.x / 2.0f, size.y / 2.0f };
+    camX.offset = (Vector2){ size.x / 2.0f, size.y / 2.0f };
+    camX.zoom = 1.0f;
+}
 void CommancheRenderer::Initialize(const std::string& title, int windowWidth, int windowHeight) {
-    InitWindow(windowWidth, windowHeight, title.c_str());
-        SetTargetFPS(60);
+    Instance = this;
+    printf("Initializing Raylib with window size %d x %d\n", windowWidth, windowHeight);
+
+
+    InitWindow(1920, 1080, title.c_str());
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
+    SetTargetFPS(60);
+    rlImGuiSetup(true);
+
+    //viewTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    //UpdateRenderTexture(glm::vec2(GetScreenWidth(), GetScreenHeight()));
 }
 
 void CommancheRenderer::InitializeShaders(const std::string& defaultShaderPath) {
@@ -31,16 +59,28 @@ void CommancheRenderer::InitializeShaders(const std::string& defaultShaderPath) 
 }
 
 int CommancheRenderer::GetFrame() {
-    return 0;
+    return viewTexture.id;
 }
 
+void CommancheRenderer::DrawGrids() {
+    // LoadShader()
+}
 
-void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width, float height, float rotation, int offsetX, int offsetY) {
-    Texture2D texture = ryTextures[textureId];
-    Vector2 position = { x, y };
-    Vector2 origin = { (float)offsetX, (float)offsetY };
-    Vector2 scale = { width / texture.width, height / texture.height };
-    DrawTexturePro(texture, { 0.0f, 0.0f, static_cast<float>(texture.width), static_cast<float>(texture.height) }, { position.x, position.y, width, height }, origin, rotation, WHITE);
+void CommancheRenderer::DrawRectRangle(float x, float y, float width, float height, float rotation) {
+    Rectangle destRec = { x, y, width, height };
+    Vector2 origin = { width / 2.0f, height / 2.0f };
+    DrawRectanglePro(destRec, origin, rotation, RED);
+}
+
+void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight) {
+
+    Texture2D texture = AssetManager::textureMapAct[textureId];
+
+    Rectangle sourceRec = { srcX, srcY, srcWidth, srcHeight };
+    Rectangle destRec = { x, y, width, height };
+    Vector2 origin = { width / 2.0f, height / 2.0f };
+
+    DrawTexturePro(texture, sourceRec, destRec, origin, rotation, WHITE); // WHITE means no tint
 }
 
 bool CommancheRenderer::IsShaderValid(int shaderId) {
@@ -62,7 +102,6 @@ void CommancheRenderer::CDrawText(int fontId, std::string message, int x, int y,
     clr.g = color.g;
     clr.b = color.b;
 
-    // DrawText(message.c_str(), x, y, size, 2, clr);
     DrawText("text", 0, 0, 10, GRAY);
 }
 
@@ -80,26 +119,38 @@ CommancheTextureInfo CommancheRenderer::GetTextureInfo(int id) {
     Texture2D texture = ryTextures[id];
 
     CommancheTextureInfo inf;
-    inf.width = texture.width;
-    inf.height = texture.height;
+    // inf.width = texture.width;
+    // inf.height = texture.height;
 
     return inf;
 }
 
+void CommancheRenderer::OffsetCamera(float vertical, float horizontal) {
+    // camX.offset.x -= vertical;
+    // camX.offset.y -= horizontal;
+    // vo += vertical;
+    // ho += horizontal;
+}
 void CommancheRenderer::SetFrameSize(int width, int height) {
 }
 
 
-void CommancheRenderer::RenderStart() {
+void CommancheRenderer::BeginDraw() {
     ClearBackground(RAYWHITE);
+    BeginTextureMode(viewTexture);
+    BeginMode2D(camX);
+}
+
+void CommancheRenderer::EndDraw() {
+    EndMode2D();
+    EndTextureMode();
+}
+void CommancheRenderer::RenderStart() {
     BeginDrawing();
 }
 
 void CommancheRenderer::RenderEnd() {
     EndDrawing();
-}
-
-void CommancheRenderer::RenderApply() {
 }
 
 void CommancheRenderer::Destroy() {

@@ -15,7 +15,7 @@ class CharacterSystem : public System {
 
         RequireComponent<Sprite>();
         RequireComponent<RigidBody>();
-        RequireComponent<RectTransform>();
+        RequireComponent<RectTransformC>();
         RequireComponent<CharacterController>();
     }
 

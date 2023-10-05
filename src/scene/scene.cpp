@@ -10,22 +10,13 @@ std::string Scene::currentScenePath = "";
 
 flecs::world Scene::ecs;
 
-#if EDITOR
 Editor* Scene::editor = nullptr;
-#endif
 
 void Scene::Init() {
-    ecs.system("RenderStart")
-    .kind(flecs::PreUpdate)
-    .iter([](flecs::iter it) {
-        renderer->RenderStart();
-    });
+    Systems::Init(ecs);
+    editor = new Editor();
+    editor->Init(renderer);
 
-    ecs.system("RenderEnd")
-    .kind(flecs::PostUpdate)
-    .iter([](flecs::iter it) {
-        renderer->RenderEnd();
-    });
     renderer = new CommancheRenderer();
 
     AssetManager::Initialize(renderer);
@@ -49,13 +40,6 @@ void Scene::Init() {
     renderer->Initialize("Twelve Villages", screenW, screenH);
     renderer->InitializeShaders("./src/shaders");
 
-    Systems::Init(ecs);
-
-#if EDITOR
-    editor = new Editor();
-    editor->Init(renderer);
-#endif
-
     Keyboard::Setup(renderer->wnd);
     Cursor::Setup(renderer->wnd);
 }
@@ -77,25 +61,12 @@ void Scene::Destroy() {
 }
 
 void Scene::Render() {
-    // renderer->RenderStart();
-    //  Scene::GetSystem<RenderSystem>().Update();
-    //  Scene::GetSystem<RenderText2D>().Update();
-    //  Scene::GetSystem<PhysicsController>().Update();
-    //  ecs->system<RectTransform, Sprite>("RenderSystem").kind(0).iter(&Systems::RenderSystem);
-    //  Scene::Update();
-    ////ecs->progress();
-    // renderer->RenderEnd();
-
-#if EDITOR
-    editor->Render();
-#endif
-
-    renderer->RenderApply();
+  editor->Render();
 }
 
 std::vector<flecs::entity> Scene::GetEntities() {
     std::vector<flecs::entity> entities;
-    ecs.each([&](flecs::entity e, RectTransform& transform) {
+    ecs.each([&](flecs::entity e, RectTransformC& transform) {
         entities.push_back(e);
     });
     return entities;

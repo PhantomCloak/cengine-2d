@@ -38,7 +38,7 @@ void RegisterTypes(flecs::world& world) {
     .member<float>("x")
     .member<float>("y");
 
-    world.component<RectTransform>()
+    world.component<RectTransformC>()
     .member<glm::vec2>("pos")
     .member<glm::vec2>("size")
     .member<glm::vec2>("scale")

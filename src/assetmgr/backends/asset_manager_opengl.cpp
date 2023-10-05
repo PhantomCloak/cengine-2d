@@ -1,6 +1,6 @@
-#include "AssetManager.h"
-#include "../log/log.h"
-#include "../scripting/lua_manager.h"
+#include "../AssetManager.h"
+#include "../../log/log.h"
+#include "../../scripting/lua_manager.h"
 #include <glm/glm.hpp>
 
 std::map<std::string, int> textures;

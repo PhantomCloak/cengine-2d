@@ -10,9 +10,9 @@ void Physics::Initialize(flecs::world& ecs) {
         world = new b2World(grav);
     }
 
-    ecs.system<RectTransform, RigidBody>()
+    ecs.system<RectTransformC, RigidBody>()
     .kind(flecs::PreUpdate)
-    .each([](flecs::entity e, RectTransform& transform, RigidBody& body) {
+    .each([](flecs::entity e, RectTransformC& transform, RigidBody& body) {
         body.rigId = e.id();
 
         if (!Physics::HasRegistered(e.id())) {
@@ -25,9 +25,9 @@ void Physics::Initialize(flecs::world& ecs) {
     });
 
 
-    ecs.system<RectTransform, RigidBody>()
+    ecs.system<RectTransformC, RigidBody>()
     .kind(flecs::OnUpdate)
-    .each([](flecs::entity e, RectTransform& transform, RigidBody& body) {
+    .each([](flecs::entity e, RectTransformC& transform, RigidBody& body) {
         if (body.isStatic)
             return;
 
@@ -41,9 +41,9 @@ void Physics::Initialize(flecs::world& ecs) {
         body.mass = result.mass;
     });
 
-    ecs.system<RectTransform, RigidBody>()
+    ecs.system<RectTransformC, RigidBody>()
     .kind(flecs::PostUpdate)
-    .each([](flecs::entity e, RectTransform& transform, RigidBody& body) {
+    .each([](flecs::entity e, RectTransformC& transform, RigidBody& body) {
     });
 }
 
@@ -79,7 +79,7 @@ void Physics::SetVelocity(RigidBody body, glm::vec2 velocity) {
     bBody->SetLinearVelocity(b2Vec2(velocity.x, velocity.y));
 }
 
-void Physics::RegisterBody(RigidBody body, RectTransform transform) {
+void Physics::RegisterBody(RigidBody body, RectTransformC transform) {
     PhysicsMetadata* meta = new PhysicsMetadata();
     meta->identifier = body.rigId;
 

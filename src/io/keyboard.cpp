@@ -1,5 +1,6 @@
 #include "keyboard.h"
 #include "GLFW/glfw3.h"
+#include "raylib.h"
 #include <iostream>
 #include <unordered_map>
 
@@ -36,7 +37,7 @@ void Keyboard::Poll() {
 }
 
 bool Keyboard::IsKeyPressing(int keyCode) {
-    return glfwGetKey(k_window, keyCode) == GLFW_PRESS;
+  return IsKeyDown(keyCode);
 }
 
 void Keyboard::FlushPressedKeys() {

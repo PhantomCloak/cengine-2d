@@ -12,6 +12,7 @@
 
 class Editor {
     public:
+    float x, y;
     Editor() = default;
     void Init(CommancheRenderer* renderer);
     void Render();
@@ -19,6 +20,8 @@ class Editor {
     SystemExplorer* explorer;
     glm::vec2 ViewportPos;
     glm::vec2 ViewportSize;
+    static Editor* Instance;
+    glm::vec2 DockedOffset;
     private:
     void Keybindings();
     const int gridSize = 25;

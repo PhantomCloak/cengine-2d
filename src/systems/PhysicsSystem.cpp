@@ -5,7 +5,7 @@ void PhysicsController::Update() {
         return;
 
     for (auto entity : GetEntities()) {
-        RectTransform transform = entity.GetComponent<RectTransform>();
+        RectTransformC transform = entity.GetComponent<RectTransformC>();
         RigidBody& rigidBody = entity.GetComponent<RigidBody>();
         rigidBody.rigId = entity.GetId();
 
@@ -21,7 +21,7 @@ void PhysicsController::Update() {
 
     std::map<int, PhysicsResult> updatedPhysicsObjs = Physics::GetUpdatedEntries();
     for (auto entity : GetEntities()) {
-        RectTransform& transform = entity.GetComponent<RectTransform>();
+        RectTransformC& transform = entity.GetComponent<RectTransformC>();
         RigidBody& rigidBody = entity.GetComponent<RigidBody>();
 
         PhysicsResult& result = updatedPhysicsObjs[entity.GetId()];

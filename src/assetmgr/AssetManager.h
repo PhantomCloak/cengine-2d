@@ -22,5 +22,7 @@ class AssetManager {
     static std::vector<std::string> GetLoadedTextures();
     static void AddFont(const std::string& assetId, const std::string& path, int fontSize);
     static int GetFont(const std::string& assetId);
+    static AssetManager* Instance;
+    static std::map<int, Texture2D> textureMapAct;
 };
 #endif

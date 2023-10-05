@@ -2,18 +2,18 @@
 #include "../render/render.h"
 
 struct RenderObject {
-    std::shared_ptr<RectTransform> transform;
+    std::shared_ptr<RectTransformC> transform;
     std::shared_ptr<Sprite> sprite;
 };
 
 void Systems::Init(flecs::world& ref){
-       ref.component<RectTransform>();
+       ref.component<RectTransformC>();
        ref.component<Sprite>();
-       ref.system<RectTransform, Sprite>("RenderSystem")
+       ref.system<RectTransformC, Sprite>("RenderSystem")
                .iter(&Systems::RenderSystem);
 }
 
-void Systems::RenderSystem(flecs::iter& it, RectTransform* transform, Sprite* sprite) {
+void Systems::RenderSystem(flecs::iter& it, RectTransformC* transform, Sprite* sprite) {
     std::vector<RenderObject> renderSortList;
 
     for (auto i = 0; i < it.count(); i++) {
@@ -23,7 +23,7 @@ void Systems::RenderSystem(flecs::iter& it, RectTransform* transform, Sprite* sp
 
         RenderObject renderObj = {
             .sprite = std::make_unique<Sprite>(sprite[i]),
-            .transform = std::make_unique<RectTransform>(transform[i])
+            .transform = std::make_unique<RectTransformC>(transform[i])
         };
 
         renderSortList.push_back(renderObj);

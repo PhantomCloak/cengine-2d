@@ -26,7 +26,7 @@ class PhysicsController : public System {
     public:
     PhysicsController() {
         RequireComponent<Sprite>();
-        RequireComponent<RectTransform>();
+        RequireComponent<RectTransformC>();
         RequireComponent<RigidBody>();
     };
 

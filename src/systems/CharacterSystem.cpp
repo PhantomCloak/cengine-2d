@@ -7,7 +7,7 @@ void CharacterSystem::Update() {
     for (auto entity : GetEntities()) {
         auto& characterController = entity.GetComponent<CharacterController>();
         auto& rigidbody = entity.GetComponent<RigidBody>();
-        auto& transform = entity.GetComponent<RectTransform>();
+        auto& transform = entity.GetComponent<RectTransformC>();
 
         if (Keyboard::IsKeyPressed(KeyCode::Key_W)) {
             Physics::AddForce(rigidbody, characterController.upVelocity);

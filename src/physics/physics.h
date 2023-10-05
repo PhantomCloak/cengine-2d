@@ -14,7 +14,7 @@ class Physics {
     static void Update();
     static std::map<int, PhysicsResult> GetUpdatedEntries();
     static bool HasRegistered(int body);
-    static void RegisterBody(RigidBody body, RectTransform transform);
+    static void RegisterBody(RigidBody body, RectTransformC transform);
     static void SetPosition(RigidBody body, glm::vec2 pos);
     static void SetVelocity(RigidBody body, glm::vec2 velocity);
     static void AddForce(RigidBody body, glm::vec2 forceVector);

@@ -66,7 +66,7 @@ int Map::PlaceTile(std::string assetId, int x, int y, int zIndex, int tileIndex)
 
     tile.AddComponent<Sprite>(AssetManager::GetTexture(assetId), zIndex, start.x, start.y);
     tile.AddComponent<MapTile>(tileIndex);
-    tile.AddComponent<Transform>(glm::vec2(x, y), glm::vec2(tileScale, tileScale), 0);
+    tile.AddComponent<TransformC>(glm::vec2(x, y), glm::vec2(tileScale, tileScale), 0);
 
     return tile.GetId();
 }

@@ -1,12 +1,11 @@
 #include "cursor.h"
-#include "../render/render.h"
+#include "../editor/editor.h"
 #include "../log/log.h"
+#include "../render/render.h"
 #include "imgui.h"
+#include "raylib.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
-#if EDITOR
-#include "../editor/editor.h"
-#endif
 
 GLFWwindow* Cursor::wnd;
 void Cursor::Setup(void* window) {
@@ -16,27 +15,20 @@ void Cursor::Setup(void* window) {
 glm::vec2 Cursor::GetCursorPosition() {
     double x = 0;
     double y = 0;
-    glfwGetCursorPos(wnd, &x, &y);
+    auto v = GetMousePosition();
+    x = v.x;
+    y = v.y;
     return glm::vec2(x, y);
 }
 
 glm::vec2 Cursor::GetCursorWorldPosition(glm::vec2 screenPoint) {
-    glm::mat4& ProjectionMat = CommancheRenderer::ProjectionMat;
-
-    float left = (-1.0f - ProjectionMat[3][0]) / ProjectionMat[0][0];
-    float right = (1.0f - ProjectionMat[3][0]) / ProjectionMat[0][0];
-    float bottom = (-1.0f - ProjectionMat[3][1]) / ProjectionMat[1][1];
-    float top = (1.0f - ProjectionMat[3][1]) / ProjectionMat[1][1];
-
-    left = CommancheRenderer::vo * 2;
-    right *= 2;
-    bottom *= 2;
-    top = CommancheRenderer::ho * 2;
+    float left = CommancheRenderer::vo;
+    float right = CommancheRenderer::screenWidth;
+    float bottom = CommancheRenderer::screenHeight;
+    float top = CommancheRenderer::ho;
 
     glm::vec2 screenSize;
-#if EDITOR
     screenSize = Editor::ScreenSize;
-#endif
     // Calculate scales
     float Sx = screenSize.x / (right - left);
     float Sy = screenSize.y / (top - bottom);
@@ -55,9 +47,9 @@ glm::vec2 Cursor::GetCursorWorldPosition(glm::vec2 screenPoint) {
 }
 
 bool Cursor::HasLeftCursorClicked() {
-  return glfwGetMouseButton(wnd, 0);
+    return IsMouseButtonPressed(0);
 }
 
 bool Cursor::HasRightCursorClicked() {
-  return glfwGetMouseButton(wnd, 1);
+    return IsMouseButtonPressed(1);
 }

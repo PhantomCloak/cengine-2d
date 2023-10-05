@@ -8,9 +8,7 @@
 #include <string>
 #include "flecs.h"
 
-#if EDITOR
 #include "../editor/editor.h"
-#endif
 
 class Scene {
     public:
@@ -35,9 +33,7 @@ class Scene {
     static std::string currentScenePath;
     static CommancheRenderer* renderer;
 
-#if EDITOR
     static Editor* editor;
-#endif
 };
 
 template <typename TSystem, typename... TArgs>

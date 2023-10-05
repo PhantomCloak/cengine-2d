@@ -9,7 +9,7 @@
 #include "../render/render.h"
 
 struct RenderObject {
-    std::shared_ptr<RectTransform> transform;
+    std::shared_ptr<RectTransformC> transform;
     std::shared_ptr<Sprite> sprite;
 };
 
@@ -23,7 +23,7 @@ class RenderSystem : public System {
     public:
     RenderSystem(CommancheRenderer* renderer) {
         this->renderer = renderer;
-        RequireComponent<RectTransform>();
+        RequireComponent<RectTransformC>();
         RequireComponent<Sprite>();
     };
 

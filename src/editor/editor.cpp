@@ -15,6 +15,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "imgui_internal.h"
+#include "rlImGui.h"
 #include "systems/editor_systems.h"
 #include <filesystem>
 #include <functional>
@@ -36,15 +38,15 @@ glm::vec2 Editor::ScreenSize;
 
 flecs::id draggableEntity;
 
-std::vector<std::string> logs;            // The original list of logs
-std::vector<std::string> filteredLogs;    // The logs after applying the search filter
-std::string combinedLog;                  // Combined logs in one string for display
-char searchBuffer[256] = { 0 };           // Buffer to hold the search text
+std::vector<std::string> logs;         // The original list of logs
+std::vector<std::string> filteredLogs; // The logs after applying the search filter
+std::string combinedLog;               // Combined logs in one string for display
+char searchBuffer[256] = { 0 };        // Buffer to hold the search text
 
-
+Editor* Editor::Instance;
 void Editor::Init(CommancheRenderer* renderer) {
+    Instance = this;
     Log::Inf("Editor booting...");
-
     logs.push_back("merhaba");
     logs.push_back("henlo ");
     logs.push_back("hewla");
@@ -55,7 +57,7 @@ void Editor::Init(CommancheRenderer* renderer) {
     logs.push_back("hell World");
     logs.push_back("crack world");
     logs.push_back("missing");
-    logs.push_back("fucking");
+    logs.push_back("foon");
     logs.push_back("hjex");
     logs.push_back("Hello World");
     logs.push_back("Hello World");
@@ -64,6 +66,7 @@ void Editor::Init(CommancheRenderer* renderer) {
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImGui::StyleColorsDark();
 
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
@@ -76,19 +79,14 @@ void Editor::Init(CommancheRenderer* renderer) {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 
-    ImGui::StyleColorsDark();
     EditorStyle::Init();
 
-    ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)renderer->wnd, true);
-    ImGui_ImplOpenGL3_Init("#version 330 core");
+    // this->renderer = renderer;
 
-    this->renderer = renderer;
+    // AssetManager::AddTexture("folder", "./assets/editor/folder-icon.png");
+    // AssetManager::AddTexture("file", "./assets/editor/file-icon.png");
 
-    AssetManager::AddTexture("folder", "./assets/editor/folder-icon.png");
-    AssetManager::AddTexture("file", "./assets/editor/file-icon.png");
-
-    fileView = new FileView();
-    explorer = new SystemExplorer();
+    // fileView = new FileView();
     entityInspector = new EntityInspector();
 
     Log::Inf("Editor started");
@@ -105,9 +103,6 @@ void FileMenu() {
             windowFlags[EDITOR_SHOW_LOAD_DIALOG] = true;
         }
 
-        if (ImGui::MenuItem("System Explorer")) {
-            windowFlags[EDITOR_SYSTEM_EXPLORER_DIALOG] = true;
-        }
         ImGui::EndMenu();
     }
 }
@@ -115,8 +110,8 @@ void FileMenu() {
 void EntitiesMenu() {
     if (ImGui::BeginMenu("Entity")) {
         if (ImGui::MenuItem("New")) {
-            flecs::entity e =Scene::CreateEntity("chewbacca");
-            e.add<RectTransform>();
+            flecs::entity e = Scene::CreateEntity("chewbacca");
+            e.add<RectTransformC>();
             Log::Inf("CHEWBACCA CALLED");
         }
         ImGui::EndMenu();
@@ -177,7 +172,7 @@ void FilterLogs() {
     RebuildLog();
 }
 
-void Draw() {
+void LogView() {
     static bool s = true;
     if (ImGui::Begin("Log Viewer", &s)) {
         ImGui::InputText("Search", searchBuffer, sizeof(searchBuffer));
@@ -223,18 +218,18 @@ void LoadDialog() {
 
 void Editor::Keybindings() {
     if (Keyboard::IsKeyPressing(KeyCode::Key_RArrow)) {
-        renderer->OffsetCamera(25, 0);
+        CommancheRenderer::Instance->OffsetCamera(25, 0);
     }
 
     if (Keyboard::IsKeyPressing(KeyCode::Key_LArrow)) {
-        renderer->OffsetCamera(-25, 0);
+        CommancheRenderer::Instance->OffsetCamera(-25, 0);
     }
 
     if (Keyboard::IsKeyPressing(KeyCode::Key_UArrow)) {
-        renderer->OffsetCamera(0, -25);
+        CommancheRenderer::Instance->OffsetCamera(0, -25);
     }
     if (Keyboard::IsKeyPressing(KeyCode::Key_DArrow)) {
-        renderer->OffsetCamera(0, 25);
+        CommancheRenderer::Instance->OffsetCamera(0, 25);
     }
 }
 
@@ -301,12 +296,12 @@ void MapEditor() {
         ImVec2 uv1 = ImVec2(EditorUtils::pixelCordToUvX2((currentColumn + 1) * tileSize, selectedMafInf.width), EditorUtils::pixelCordToUvY2((currentRow + 1) * tileSize, selectedMafInf.height));
 
 
-        if (ImGui::ImageButton(identifier.c_str(), (void*)(intptr_t)selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
+        if (ImGui::ImageButton(identifier.c_str(), (Texture*)&selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
             flecs::entity piece = Scene::CreateEntity("tile" + std::to_string(zIndexStart));
 
             piece.set<Sprite>({ selectedTextureId, zIndexStart, static_cast<float>(currentColumn * tileSize), static_cast<float>(currentRow * tileSize), 16, 16 });
             piece.set<DragableComponent>({ true });
-            piece.set<RectTransform>({ glm::vec2(0, 0), glm::vec2(100, 100) });
+            piece.set<RectTransformC>({ glm::vec2(0, 0), glm::vec2(100, 100) });
             zIndexStart++;
         }
         ImGui::SameLine();
@@ -337,7 +332,6 @@ void SceneList() {
 
             bool isSelected = selectableEntityList[entity.id()];
             if (ImGui::Selectable(txt.c_str(), &isSelected)) {
-                // Clear all previous selections
                 for (auto& pair : selectableEntityList) {
                     pair.second = false;
                 }
@@ -349,8 +343,8 @@ void SceneList() {
                 selectableEntityList[entity.id()] = isSelected; // Update the map with the current state
             }
         }
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 
@@ -377,8 +371,6 @@ void renderDockingSpace() {
     if (opt_fullscreen)
         ImGui::PopStyleVar(2);
 
-    ImGuiIO& io = ImGui::GetIO();
-
     ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 
@@ -396,88 +388,74 @@ void WindowController(Editor* instance) {
     if (windowFlags[EDITOR_SHOW_LOAD_DIALOG]) {
         LoadDialog();
     }
-    ImGui::Begin("Bottom Bar");
-
-    if (windowFlags[EDITOR_SYSTEM_EXPLORER_DIALOG]) {
-        instance->explorer->RenderWindow();
-    }
-
-    ImGui::End();
 }
+
+
+ImVec2 lastRect;
 
 void Editor::Render() {
     Keybindings();
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    renderDockingSpace();
 
-    WindowController(this);
-
-    static bool tff = true;
-
-    if (Keyboard::IsKeyPressing(KeyCode::Key_U) && tff) {
-        tff = false;
-        EngineSerializer::DeserializeFileToScene("./assets/maps/brew.json", Scene::ecs);
-    }
+    rlImGuiBegin();
 
     if (ImGui::BeginMainMenuBar()) {
         FileMenu();
         EntitiesMenu();
         AssetsMenu();
-        ImGui::EndMainMenuBar();
     }
+    ImGui::EndMainMenuBar();
+
+
+    renderDockingSpace();
+    WindowController(this);
+
+    LogView();
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+    static bool Open = true;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+    ImGui::Begin("FOO");
+    ImGui::Text("view = %d", GetFPS());
+    ImGui::End();
+
+    if (ImGui::Begin("2D View", &Open, ImGuiWindowFlags_NoNav)) {
+
+        auto currentRect = ImGui::GetContentRegionAvail();
+        if (lastRect.x != currentRect.x || lastRect.y != currentRect.y) {
+            lastRect = currentRect;
+            Log::Inf("AKAJAJ");
+            CommancheRenderer::Instance->UpdateRenderTexture(glm::vec2(currentRect.x, currentRect.y));
+        }
+
+        x = GetMousePosition().x;
+        y = GetMousePosition().y;
+
+        ImVec2 windowPos = ImGui::GetWindowPos();
+        ImVec2 contentAvail = ImGui::GetContentRegionAvail();
+
+        float subX = (ImGui::GetWindowSize().x - contentAvail.x);
+        float subY = (ImGui::GetWindowSize().y - contentAvail.y);
+
+        x -= subX;
+        x -= windowPos.x;
+
+        y -= subY;
+        y -= windowPos.y;
+        rlImGuiImageRenderTextureFit(&CommancheRenderer::Instance->viewTexture, true);
+    }
+    ImGui::End();
+    ImGui::PopStyleVar();
+    ImGui::PopStyleVar();
 
     if (ImGui::Begin("Properties")) {
         if (selectedEntityId != -1) {
             EntityInspector::SetEntity(selectedEntityId);
             entityInspector->RenderWindow();
         }
-        ImGui::End();
     }
+    ImGui::End();
 
     SceneList();
-    Draw();
-    fileView->RenderWindow();
-
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    if (ImGui::Begin("Viewport", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
-
-        if (ScreenSize != EditorUtils::GetWindowSize()) {
-            ScreenSize = EditorUtils::GetWindowSize();
-            renderer->SetFrameSize(ScreenSize.x, ScreenSize.y);
-        }
-
-        auto tex = renderer->GetFrame();
-
-        static ImVec2 uv0 = { 0, 1 };
-        static ImVec2 uv1 = { 1, 0 };
-        ImVec2 avail = ImGui::GetContentRegionAvail();
-
-
-        ImGui::Image((void*)tex, avail, uv0, uv1);
-
-        // auto entity = Scene::ecs->entity(draggableEntity);
-        // if (entity.is_valid()) {
-
-        //    auto mPos = Cursor::GetCursorPosition();
-        //    ViewportPos = glm::vec2(ImGui::GetMainViewport()->WorkPos.x, ImGui::GetMainViewport()->WorkPos.y);
-
-        //    glm::vec2 local_mouse_pos(mPos.x - ViewportPos.x, mPos.y - ViewportPos.y);
-        //    glm::vec2 worldPos = EditorUtils::InterpolateToGrid(Cursor::GetCursorWorldPosition(local_mouse_pos), gridSize);
-
-        //    //draggableTransform->pos = worldPos;
-        //    //entity.get_ref<RectTransform>()->pos = worldPos;
-        //}
-
-        ImGui::End();
-        ImGui::PopStyleVar();
-        ImGui::EndFrame();
-    }
-
-    ImGui::Render();
-
-    ImGui::UpdatePlatformWindows();
-    ImGui::RenderPlatformWindowsDefault();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    rlImGuiEnd();
 }

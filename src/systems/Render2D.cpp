@@ -13,7 +13,7 @@ void RenderSystem::Update() {
     std::vector<RenderObject> renderSortList;
 
     for (auto entity : GetEntities()) {
-        auto& transform = entity.GetComponent<RectTransform>();
+        auto& transform = entity.GetComponent<RectTransformC>();
         auto sprite = entity.GetComponent<Sprite>();
         bool term = entity.HasComponent<DebugTile>();
 
@@ -23,7 +23,7 @@ void RenderSystem::Update() {
 
         RenderObject renderObj = {
             .sprite = std::make_unique<Sprite>(sprite),
-            .transform = std::make_unique<RectTransform>(transform)
+            .transform = std::make_unique<RectTransformC>(transform)
         };
 
         renderSortList.push_back(renderObj);
