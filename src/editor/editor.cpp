@@ -16,7 +16,6 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_internal.h"
-#include "rlImGui.h"
 #include "systems/editor_systems.h"
 #include <filesystem>
 #include <functional>
@@ -24,6 +23,10 @@
 #include <stdio.h>
 #include <unordered_map>
 
+#if RENDER_BACKEND_RAYLIB
+#include "raylib.h"
+#include "rlImGui.h"
+#endif
 
 #define EDITOR_SHOW_MAP_EDITOR 1
 #define EDITOR_SHOW_SAVE_DIALOG 2
@@ -64,9 +67,15 @@ void Editor::Init(CommancheRenderer* renderer) {
     logs.push_back("Hello World");
     logs.push_back("Hello World");
 
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
+
+#if RENDER_BACKEND_OPENGL
+    ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)renderer->wnd, true);
+    ImGui_ImplOpenGL3_Init("#version 330 core");
+#endif
 
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
@@ -296,7 +305,7 @@ void MapEditor() {
         ImVec2 uv1 = ImVec2(EditorUtils::pixelCordToUvX2((currentColumn + 1) * tileSize, selectedMafInf.width), EditorUtils::pixelCordToUvY2((currentRow + 1) * tileSize, selectedMafInf.height));
 
 
-        if (ImGui::ImageButton(identifier.c_str(), (Texture*)&selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
+        if (ImGui::ImageButton(identifier.c_str(), (void*)&selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
             flecs::entity piece = Scene::CreateEntity("tile" + std::to_string(zIndexStart));
 
             piece.set<Sprite>({ selectedTextureId, zIndexStart, static_cast<float>(currentColumn * tileSize), static_cast<float>(currentRow * tileSize), 16, 16 });
@@ -391,12 +400,67 @@ void WindowController(Editor* instance) {
 }
 
 
-ImVec2 lastRect;
 
+void Fit(int image, int width, int height, bool center = false) {
+    ImVec2 area = ImGui::GetContentRegionAvail();
+
+    float scale = area.x / width;
+
+    float y = height * scale;
+    if (y > area.y) {
+        scale = area.y / height;
+    }
+
+    int sizeX = int(width * scale);
+    int sizeY = int(height * scale);
+
+    if (center) {
+        ImGui::SetCursorPosX(0);
+        ImGui::SetCursorPosX(area.x / 2 - sizeX / 2);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (area.y / 2 - sizeY / 2));
+    }
+
+    CommancheRect sourceRect = CommancheRect{ 0, 0, float(width), -float(height) };
+    float destWidth = float(sizeX);
+    float destHeight = float(sizeY);
+    ImVec2 uv0;
+    ImVec2 uv1;
+
+    if (sourceRect.width < 0) {
+        uv0.x = -((float)sourceRect.x / width);
+        uv1.x = (uv0.x - (float)(fabs(sourceRect.width) / width));
+    } else {
+        uv0.x = (float)sourceRect.x / width;
+        uv1.x = uv0.x + (float)(sourceRect.width / width);
+    }
+
+    if (sourceRect.height < 0) {
+        uv0.y = -((float)sourceRect.y / height);
+        uv1.y = (uv0.y - (float)(fabs(sourceRect.height) / height));
+    } else {
+        uv0.y = (float)sourceRect.y / height;
+        uv1.y = uv0.y + (float)(sourceRect.height / height);
+    }
+
+    static int imgIdx = 0;
+
+    imgIdx = image;
+    ImGui::Image((void*)&imgIdx, ImVec2(float(destWidth), float(destHeight)), uv0, uv1);
+}
+
+ImVec2 lastRect;
 void Editor::Render() {
     Keybindings();
 
+#if RENDER_BACKEND_OPENGL
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+#endif
+
+#if RENDER_BACKEND_RAYLIB
     rlImGuiBegin();
+#endif
 
     if (ImGui::BeginMainMenuBar()) {
         FileMenu();
@@ -410,26 +474,19 @@ void Editor::Render() {
     WindowController(this);
 
     LogView();
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
     static bool Open = true;
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
-    ImGui::Begin("FOO");
-    ImGui::Text("view = %d", GetFPS());
-    ImGui::End();
-
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     if (ImGui::Begin("2D View", &Open, ImGuiWindowFlags_NoNav)) {
 
         auto currentRect = ImGui::GetContentRegionAvail();
         if (lastRect.x != currentRect.x || lastRect.y != currentRect.y) {
             lastRect = currentRect;
-            Log::Inf("AKAJAJ");
             CommancheRenderer::Instance->UpdateRenderTexture(glm::vec2(currentRect.x, currentRect.y));
         }
-
-        x = GetMousePosition().x;
-        y = GetMousePosition().y;
+        x = Cursor::GetCursorPosition().x;
+        y = Cursor::GetCursorPosition().y;
 
         ImVec2 windowPos = ImGui::GetWindowPos();
         ImVec2 contentAvail = ImGui::GetContentRegionAvail();
@@ -442,10 +499,11 @@ void Editor::Render() {
 
         y -= subY;
         y -= windowPos.y;
-        rlImGuiImageRenderTextureFit(&CommancheRenderer::Instance->viewTexture, true);
+
+        int frameId = CommancheRenderer::Instance->GetFrame();
+        Fit(frameId, currentRect.x, currentRect.y, true);
     }
     ImGui::End();
-    ImGui::PopStyleVar();
     ImGui::PopStyleVar();
 
     if (ImGui::Begin("Properties")) {
@@ -457,5 +515,15 @@ void Editor::Render() {
     ImGui::End();
 
     SceneList();
+#if RENDER_BACKEND_RAYLIB
     rlImGuiEnd();
+#endif
+#if RENDER_BACKEND_OPENGL
+    ImGui::Render();
+
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+#endif
 }

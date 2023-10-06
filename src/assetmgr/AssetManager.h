@@ -23,6 +23,8 @@ class AssetManager {
     static void AddFont(const std::string& assetId, const std::string& path, int fontSize);
     static int GetFont(const std::string& assetId);
     static AssetManager* Instance;
+#if RENDER_BACKEND_RAYLIB
     static std::map<int, Texture2D> textureMapAct;
+#endif
 };
 #endif

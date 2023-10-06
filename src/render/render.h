@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../log/log.h"
-#include "raylib.h"
 #include "render_primitives.h"
 #include "glm/glm.hpp"
 #include <string>
@@ -21,7 +20,6 @@ class CommancheRenderer {
     void CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight);
     void CDrawText(int fontId, std::string message, int x, int y, int size, CommancheColorRGB color = { 255, 255, 255 });
     void CDrawLine(float startx, float starty, float endx, float endy, CommancheColorRGB color = {255, 255, 255});
-    void SetFrameSize(int width, int height);
     int GetFrame();
     int CLoadTexture(const std::string& path);
     int LoadShader(const std::string& path, const std::string shaderName);
@@ -42,8 +40,9 @@ class CommancheRenderer {
     static int ho;
     static int vo;
     static CommancheRenderer* Instance;
-    RenderTexture viewTexture;
-    Camera2D camX = { 0 };
+    CommancheRenderTexture viewTexture;
+    bool isTextureModeEnabled = false;
+    CommancheCamera camX = { 0 };
     private:
     unsigned int framebuffer, textureColorbuffer;
 };

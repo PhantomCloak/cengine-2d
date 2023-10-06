@@ -9,17 +9,14 @@ CommancheRenderer* Scene::renderer = nullptr;
 std::string Scene::currentScenePath = "";
 
 flecs::world Scene::ecs;
-
-Editor* Scene::editor = nullptr;
+#if EDITOR
+Editor* editor = nullptr;
+#endif
 
 void Scene::Init() {
-    Systems::Init(ecs);
-    editor = new Editor();
-    editor->Init(renderer);
-
     renderer = new CommancheRenderer();
-
     AssetManager::Initialize(renderer);
+    Systems::Init(ecs);
     LuaManager::InitSandbox();
 
     if (currentScenePath.size() <= 0) {
@@ -30,8 +27,8 @@ void Scene::Init() {
     LuaManager::RegisterCppToLuaFunc("addTexture", &AssetManager::AddTexture);
 
     LuaManager::LoadLuaFile("./assets/scripts/config.lua");
-    sol::table initCfg = LuaManager::LoadLuaTable("config");
 
+    sol::table initCfg = LuaManager::LoadLuaTable("config");
     sol::table displayCfg = LuaManager::LoadLuaTable("config");
 
     int screenW = displayCfg["resolution"]["width"];
@@ -40,7 +37,14 @@ void Scene::Init() {
     renderer->Initialize("Twelve Villages", screenW, screenH);
     renderer->InitializeShaders("./src/shaders");
 
-    Keyboard::Setup(renderer->wnd);
+#if EDITOR
+    renderer->isTextureModeEnabled = false;
+    editor = new Editor();
+    editor->Init(renderer);
+#endif
+
+
+    Keyboard::Setup();
     Cursor::Setup(renderer->wnd);
 }
 
@@ -61,7 +65,9 @@ void Scene::Destroy() {
 }
 
 void Scene::Render() {
-  editor->Render();
+#if EDITOR
+    editor->Render();
+#endif
 }
 
 std::vector<flecs::entity> Scene::GetEntities() {

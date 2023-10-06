@@ -9,7 +9,7 @@ struct KeyEvent {
 
 class Keyboard {
     public:
-    static void Setup(void* windowPtr);
+    static void Setup();
     static bool IsKeyPressed(int keyCode);
     static bool IsKeyPressing(int keyCode);
     static std::vector<KeyEvent> GetPressedKeys();

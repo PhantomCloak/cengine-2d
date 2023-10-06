@@ -39,26 +39,46 @@ void Game::Setup() {
 
     flecs::entity obj = Scene::CreateEntity("door_tile2");
     selectedTextureId = AssetManager::GetTexture("desert");
-    // auto inf = CommancheRenderer::Instance->GetTextureInfo(selectedTextureId);
 
     obj.set<RectTransformC>({ glm::vec2(1920, 1080), glm::vec2(1920 * 2, 1080 * 2), glm::vec2(500, 500), 0 });
     obj.set<Sprite>({ selectedTextureId, 20, 0, 0, 1920, 1080 });
 }
 
+
 void Game::Update() {
-    // int timeToWait = FRAME_TIME_LENGTH - (getTime() - tickLastFrame);
+    // Get the current time
+    static std::chrono::time_point<std::chrono::steady_clock> oldTime = std::chrono::high_resolution_clock::now();
+    static int fps;
+    fps++;
 
-    // CommancheRenderer::Instance->DrawRectRangle(100, 100, 50, 50, 0);
-    // if (timeToWait > 0 && timeToWait <= FRAME_TIME_LENGTH) {
-    //     sleepProgram(timeToWait);
-    // }
 
-    // tickLastFrame = getTime();
-    //std::cout << "FPS: " << GetFPS() << std::endl;
-
+    // Update the game scene
     Scene::Update();
-    Keyboard::FlushPressedKeys();
+
+    if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - oldTime) >= std::chrono::seconds{ 1 }) {
+        oldTime = std::chrono::high_resolution_clock::now();
+        printf("Immediate FPS: %d\n", fps);
+        std::cout << "FPS: " << fps << std::endl;
+        fps = 0;
+    }
+
+    // Print FPS
 }
+// void Game::Update() {
+//     int timeToWait = FRAME_TIME_LENGTH - (getTime() - tickLastFrame);
+//
+//     if (timeToWait > 0 && timeToWait <= FRAME_TIME_LENGTH) {
+//          sleepProgram(timeToWait);
+//     }
+//
+//     tickLastFrame = getTime();
+//
+//     Scene::Update();
+//     //DrawFPS(100, 100);
+//
+//
+//     Keyboard::FlushPressedKeys();
+// }
 
 void Game::ProcessInput() {
     Keyboard::Poll();

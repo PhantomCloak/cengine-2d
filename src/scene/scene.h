@@ -32,8 +32,6 @@ class Scene {
     private:
     static std::string currentScenePath;
     static CommancheRenderer* renderer;
-
-    static Editor* editor;
 };
 
 template <typename TSystem, typename... TArgs>
