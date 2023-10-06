@@ -445,7 +445,13 @@ void Fit(int image, int width, int height, bool center = false) {
     static int imgIdx = 0;
 
     imgIdx = image;
+
+#if RENDER_BACKEND_OPENGL
+    ImGui::Image((void*)imgIdx, ImVec2(float(destWidth), float(destHeight)), uv0, uv1);
+#endif
+#if RENDER_BACKEND_RAYLIB
     ImGui::Image((void*)&imgIdx, ImVec2(float(destWidth), float(destHeight)), uv0, uv1);
+#endif
 }
 
 ImVec2 lastRect;

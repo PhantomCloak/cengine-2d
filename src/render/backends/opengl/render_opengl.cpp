@@ -71,6 +71,8 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
     Instance = this;
     glfwInit();
 
+    std::string titleStr = title + " - Backend [OpenGL]";
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);

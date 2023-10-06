@@ -43,10 +43,9 @@ void CommancheRenderer::UpdateRenderTexture(glm::vec2 size) {
 }
 void CommancheRenderer::Initialize(const std::string& title, int windowWidth, int windowHeight) {
     Instance = this;
-    printf("Initializing Raylib with window size %d x %d\n", windowWidth, windowHeight);
 
-
-    InitWindow(1920, 1080, title.c_str());
+    std::string titleStr = title + " - Backend [Raylib]";
+    InitWindow(1920, 1080, titleStr.c_str());
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     rlImGuiSetup(true);
 }
