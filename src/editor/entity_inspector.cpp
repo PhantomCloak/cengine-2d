@@ -54,20 +54,27 @@ void EntityInspector::RenderWindow() {
         ImGui::BeginGroupPanel("RigidBody");
         ImGui::InputFloat(_labelPrefix("velocity x:").c_str(), &comp->velocityLinear.x);
         ImGui::InputFloat(_labelPrefix("velocity y:").c_str(), &comp->velocityLinear.y);
+        ImGui::Spacing();
         ImGui::InputFloat(_labelPrefix("mass:").c_str(), &comp->mass);
         ImGui::InputFloat(_labelPrefix("restution:").c_str(), &comp->restution);
+        ImGui::Spacing();
         ImGui::Checkbox(_labelPrefix("is static:").c_str(), &comp->isStatic);
         ImGui::Checkbox(_labelPrefix("is fixed rot:").c_str(), &comp->isFixedRot);
         ImGui::EndGroupPanel();
     }
     if (e != 0 && e.has<Sprite>()) {
-        // auto comp = e.GetComponent<Sprite>();
-        // ImGui::BeginGroupPanel("Sprite");
-        // ImGui::InputInt(_labelPrefix("texture id:").c_str(), &comp.texture);
-        // ImGui::InputInt(_labelPrefix("z index:").c_str(), &comp.zIndex);
-        // ImGui::InputFloat(_labelPrefix("src x:").c_str(), &comp.srcRect.x);
-        // ImGui::InputFloat(_labelPrefix("src y:").c_str(), &comp.srcRect.y);
-        // ImGui::EndGroupPanel();
+        flecs::ref<Sprite> comp = e.get_ref<Sprite>();
+        ImGui::BeginGroupPanel("Sprite");
+        static ImVec4 pickedColor = ImVec4((float)comp->color.r / 255, (float)comp->color.g / 255, (float)comp->color.b / 255, (float)comp->color.a / 255); // initial color
+        if (ImGui::ColorEdit4(_labelPrefix("color: ").c_str(), (float*)&pickedColor)) {
+          comp->color = CommancheColorRGBA({static_cast<int>(pickedColor.x * 255), static_cast<int>(pickedColor.y * 255), static_cast<int>(pickedColor.z * 255), static_cast<int>(pickedColor.w * 255)});
+        }
+        ImGui::InputInt(_labelPrefix("z index:").c_str(), &comp->zIndex);
+        ImGui::InputInt(_labelPrefix("texture id:").c_str(), &comp->texture);
+        ImGui::Spacing();
+        ImGui::InputFloat(_labelPrefix("src x:").c_str(), &comp->srcRect.x);
+        ImGui::InputFloat(_labelPrefix("src y:").c_str(), &comp->srcRect.y);
+        ImGui::EndGroupPanel();
     }
     if (e != 0 && e.has<CharacterController>()) {
         // auto comp = e.GetComponent<CharacterController>();

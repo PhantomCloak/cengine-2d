@@ -1,4 +1,5 @@
 #include "filesystem.h"
+#include "nfd.h"
 #include <dirent.h>
 #include <filesystem>
 #include <iostream>
@@ -50,4 +51,25 @@ std::string FileSys::GetParentDirectory(std::string path) {
 void FileSys::OpenFileOSDefaults(std::string path) {
     std::string command = "open " + path;
     system(command.c_str());
+}
+
+void FileSys::OpenFilePicker(std::function<void(std::string filePath)>&& callback) {
+    NFD_Init();
+
+    nfdchar_t* outPath;
+    nfdfilteritem_t filterItem[1] = { { "Image", "png,jpg" } };
+    nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
+
+    if (result == NFD_OKAY) {
+        puts("Success!");
+        puts(outPath);
+        callback(outPath);
+        NFD_FreePath(outPath);
+    } else if (result == NFD_CANCEL) {
+        puts("User pressed cancel.");
+    } else {
+        printf("Error: %s\n", NFD_GetError());
+    }
+
+    NFD_Quit();
 }

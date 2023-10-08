@@ -9,5 +9,6 @@ class FileSys {
     static std::string GetParentDirectory(std::string path);
     static std::string GetFileExtension(std::string path);
     static std::string GetFileName(std::string path);
+    static void OpenFilePicker(std::function<void(std::string filePath)>&& callback);
     static void OpenFileOSDefaults(std::string path);
 };

@@ -45,7 +45,8 @@ void Systems::RenderSystem(flecs::iter& it, RectTransformC* transform, Sprite* s
         renderObj.sprite->srcRect.x,
         renderObj.sprite->srcRect.y,
         renderObj.sprite->srcRect.width,
-        renderObj.sprite->srcRect.height);
+        renderObj.sprite->srcRect.height,
+        renderObj.sprite->color);
     }
 
     CommancheRenderer::Instance->DrawGrids();

@@ -25,3 +25,6 @@
 [submodule "libs/angle"]
 	path = libs/angle
 	url = git@github.com:google/angle.git
+[submodule "libs/nativefiledialog-extended"]
+	path = libs/nativefiledialog-extended
+	url = git@github.com:btzy/nativefiledialog-extended.git

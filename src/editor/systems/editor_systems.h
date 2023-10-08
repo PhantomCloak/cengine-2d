@@ -8,6 +8,6 @@ class EditorSystems {
 public:
     static void Init(flecs::world& world, Editor* editor);
     static void DraggableSystem(flecs::world& world, flecs::entity it, RectTransformC& transform, const DragableComponent& comp);
-    static void ClickInspectSystem(flecs::world& world, flecs::entity it, RectTransformC& transform);
+    static void ClickInspectSystem(flecs::world& world, flecs::entity it, RectTransformC& transform, Sprite& sprite);
     static Editor* editorRef;
 };

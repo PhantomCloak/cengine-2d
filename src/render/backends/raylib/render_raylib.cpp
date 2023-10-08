@@ -122,7 +122,7 @@ void CommancheRenderer::DrawRectRangle(float x, float y, float width, float heig
     DrawRectanglePro(destRec, origin, rotation, RED);
 }
 
-void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight) {
+void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight, CommancheColorRGBA color) {
 
     screenWidth = GetScreenWidth();
     screenHeight = GetScreenHeight();
@@ -136,7 +136,7 @@ void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width,
     Rectangle destRec = { x, y, width, height };
     Vector2 origin = { width / 2.0f, height / 2.0f };
 
-    DrawTexturePro(texture, sourceRec, destRec, origin, rotation, WHITE); // WHITE means no tint
+    DrawTexturePro(texture, sourceRec, destRec, origin, rotation, Color({ static_cast<unsigned char>(color.r), static_cast<unsigned char>(color.g), static_cast<unsigned char>(color.b), static_cast<unsigned char>(color.a) })); // WHITE means no tint
 }
 
 bool CommancheRenderer::IsShaderValid(int shaderId) {

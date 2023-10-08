@@ -16,6 +16,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_internal.h"
+#include "nfd.h"
 #include "systems/editor_systems.h"
 #include <filesystem>
 #include <functional>
@@ -245,7 +246,7 @@ void Editor::Keybindings() {
 void MapEditor() {
     static bool isOpen = false;
     ImGui::Begin("Tile Editor", &isOpen);
-    //CommancheRenderer::Instance->DrawGrids();
+    // CommancheRenderer::Instance->DrawGrids();
 
     static const std::vector<std::string>& loadedAssets = AssetManager::GetLoadedTextures();
     static const char* selectedItem = loadedAssets[0].c_str();
@@ -326,9 +327,17 @@ void AssetsMenu() {
             windowFlags[EDITOR_SHOW_MAP_EDITOR] = true;
         }
         if (ImGui::MenuItem("Refresh Asset Database")) {
-            //windowFlags[EDITOR_SHOW_MAP_EDITOR] = true;
+            // windowFlags[EDITOR_SHOW_MAP_EDITOR] = true;
         }
         if (ImGui::MenuItem("Import Asset")) {
+            FileSys::OpenFilePicker([](std::string filePath) {
+                std::string fileName = FileSys::GetFileName(filePath);
+                std::string fileExtension = FileSys::GetFileExtension(filePath);
+
+                if (fileExtension == "png" || fileExtension == "jpg") {
+                    AssetManager::AddTexture(fileName, filePath);
+                }
+            });
         }
 
         ImGui::EndMenu();
@@ -407,7 +416,6 @@ void WindowController(Editor* instance) {
 }
 
 
-
 void Fit(int image, int width, int height, bool center = false) {
     ImVec2 area = ImGui::GetContentRegionAvail();
 
@@ -460,6 +468,26 @@ void Fit(int image, int width, int height, bool center = false) {
     ImGui::Image((void*)&imgIdx, ImVec2(float(destWidth), float(destHeight)), uv0, uv1);
 #endif
 }
+
+// Assuming you've already set up ImGui and its rendering in your application
+
+// Declare a static color variable to hold the RGB values
+static ImVec4 pickedColor = ImVec4(0.45f, 0.60f, 0.40f, 1.00f); // initial color
+
+void YourRenderFunction() {
+    // Create a window in ImGui
+    ImGui::Begin("Color Picker Example");
+
+    // Color Picker
+    if (ImGui::ColorEdit4("Color Picker", (float*)&pickedColor)) {
+        // Color value changed
+        // Do something with the picked color if needed
+    }
+
+    // End the window
+    ImGui::End();
+}
+
 
 ImVec2 lastRect;
 void Editor::Render() {

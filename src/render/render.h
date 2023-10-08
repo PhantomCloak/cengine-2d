@@ -16,7 +16,7 @@ class CommancheRenderer {
     bool IsTextureValid(int textureId);
     bool IsShaderValid(int shaderId);
     void DrawRectRangle(float x, float y, float width, float height, float rotation);
-    void CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight);
+    void CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight, CommancheColorRGBA color);
     void CDrawText(int fontId, std::string message, int x, int y, int size, CommancheColorRGB color = { 255, 255, 255 });
     void CDrawLine(float startx, float starty, float endx, float endy, CommancheColorRGB color = { 255, 255, 255 });
     int GetFrame();

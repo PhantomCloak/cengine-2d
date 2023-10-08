@@ -1,0 +1,6 @@
+.cache
+imgui.ini
+*.dSYM
+.DS_Store
+[bB]uild
+[Dd]ebug*/
