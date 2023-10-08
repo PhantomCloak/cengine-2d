@@ -1,7 +1,7 @@
 #include "physics.h"
 #include <iostream>
 
-const b2Vec2 grav = b2Vec2(0.0f, 10.0f * PIXELS_PER_METER);
+const b2Vec2 grav = b2Vec2(0.0f, 27.0f);
 static b2World* world = nullptr;
 static std::map<int, bool> registeredBody;
 
@@ -87,6 +87,7 @@ void Physics::RegisterBody(RigidBody body, RectTransformC transform) {
     bodyDef.type = body.isStatic ? b2_staticBody : b2_dynamicBody;
     bodyDef.position.Set(transform.pos.x, transform.pos.y);
     bodyDef.userData.pointer = (uintptr_t)meta;
+    bodyDef.angle = transform.rotation * (b2_pi / 180.0f);
 
     b2Body* bBody = world->CreateBody(&bodyDef);
 
@@ -94,7 +95,7 @@ void Physics::RegisterBody(RigidBody body, RectTransformC transform) {
 
     b2PolygonShape shape;
 
-    shape.SetAsBox(((transform.size.x * transform.scale.x) / PIXELS_PER_METER) / 2, ((transform.size.y * transform.scale.y) / PIXELS_PER_METER) / 2);
+    shape.SetAsBox((transform.size.x * transform.scale.x) / 2, (transform.size.y * transform.scale.y) / 2);
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &shape;
 

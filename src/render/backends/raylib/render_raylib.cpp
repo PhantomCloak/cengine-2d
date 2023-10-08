@@ -1,10 +1,12 @@
 #pragma once
 
 #include "../../../assetmgr/AssetManager.h"
+#include "../../../core/coordinate_system.h"
 #include "../../render.h"
 #include "glm/glm.hpp"
 #include "raylib.h"
 #include "rlImGui.h"
+#include "rlgl.h"
 #include <GLFW/glfw3.h>
 #include <filesystem>
 #include <glm/gtc/matrix_transform.hpp>
@@ -46,6 +48,7 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
 
     std::string titleStr = title + " - Backend [Raylib]";
     InitWindow(1920, 1080, titleStr.c_str());
+    SetTargetFPS(60);
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     rlImGuiSetup(true);
 }
@@ -55,20 +58,77 @@ void CommancheRenderer::InitializeShaders(const std::string& defaultShaderPath) 
 }
 
 int CommancheRenderer::GetFrame() {
-  return viewTexture.texture.id;
+    return viewTexture.texture.id;
 }
 
 void CommancheRenderer::DrawGrids() {
-    // LoadShader()
+    static bool isInit = false;
+    static Vector2 vertices[81 * 4];
+    static int lastScreenWidth = -1;  // Initialize with a value that is unlikely to be a screen width
+    static int lastScreenHeight = -1; // Initialize with a value that is unlikely to be a screen height
+
+
+    const int gridSize = 80;
+    float gridWidth = 5;
+    float gridHeight = 5;
+
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+
+    // Convert grid dimensions to current screen resolution
+    CoordinateCalculator::ConvertMetersToPixels(gridWidth, gridHeight);
+
+    if (!isInit || screenWidth != lastScreenWidth || screenHeight != lastScreenHeight) { // Check if screen dimensions have changed
+        int index = 0;
+
+        for (int i = 0; i <= gridSize; i++) {
+            // Horizontal lines
+            vertices[index].x = 0;
+            vertices[index].y = i * gridHeight;
+            index++;
+            vertices[index].x = screenWidth;
+            vertices[index].y = i * gridHeight;
+            index++;
+
+            // Vertical lines
+            vertices[index].x = i * gridWidth;
+            vertices[index].y = 0;
+            index++;
+            vertices[index].x = i * gridWidth;
+            vertices[index].y = screenHeight;
+            index++;
+        }
+
+        lastScreenWidth = screenWidth;
+        lastScreenHeight = screenHeight;
+        isInit = true;
+    }
+
+    // Set the line color
+    Color gridColor = { 0, 0, 0, 77 }; // RGBA: (0, 0, 0, 0.3 * 255)
+
+    // Draw the grid lines
+    for (int i = 0; i < (gridSize + 1) * 4; i += 2) {
+        DrawLineV(vertices[i], vertices[i + 1], gridColor);
+    }
 }
 
+
 void CommancheRenderer::DrawRectRangle(float x, float y, float width, float height, float rotation) {
+    CoordinateCalculator::ConvertMetersToPixels(x, y);
+
     Rectangle destRec = { x, y, width, height };
     Vector2 origin = { width / 2.0f, height / 2.0f };
     DrawRectanglePro(destRec, origin, rotation, RED);
 }
 
 void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight) {
+
+    screenWidth = GetScreenWidth();
+    screenHeight = GetScreenHeight();
+
+    CoordinateCalculator::ConvertMetersToPixels(x, y);
+    CoordinateCalculator::ConvertMetersToPixels(width, height);
 
     Texture2D texture = AssetManager::textureMapAct[textureId];
 
@@ -101,7 +161,7 @@ void CommancheRenderer::CDrawText(int fontId, std::string message, int x, int y,
     DrawText("text", 0, 0, 10, GRAY);
 }
 
-int CommancheRenderer::LoadShader(const std::string& path, const std::string shaderName) {
+int CommancheRenderer::CLoadShader(const std::string& path, const std::string shaderName) {
     return 0;
 }
 
@@ -122,8 +182,8 @@ CommancheTextureInfo CommancheRenderer::GetTextureInfo(int id) {
 }
 
 void CommancheRenderer::OffsetCamera(float vertical, float horizontal) {
-    // camX.offset.x -= vertical;
-    // camX.offset.y -= horizontal;
+    camX.offset.x -= vertical;
+    camX.offset.y -= horizontal;
     // vo += vertical;
     // ho += horizontal;
 }

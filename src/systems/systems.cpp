@@ -1,17 +1,19 @@
 #include "systems.h"
+#include "../editor/editor.h"
 #include "../render/render.h"
-
+#include "../io/cursor.h"
 struct RenderObject {
     std::shared_ptr<RectTransformC> transform;
     std::shared_ptr<Sprite> sprite;
 };
 
-void Systems::Init(flecs::world& ref){
-       ref.component<RectTransformC>();
-       ref.component<Sprite>();
-       ref.system<RectTransformC, Sprite>("RenderSystem")
-               .iter(&Systems::RenderSystem);
+void Systems::Init(flecs::world& ref) {
+    ref.component<RectTransformC>();
+    ref.component<Sprite>();
+    ref.system<RectTransformC, Sprite>("RenderSystem")
+    .iter(&Systems::RenderSystem);
 }
+
 
 void Systems::RenderSystem(flecs::iter& it, RectTransformC* transform, Sprite* sprite) {
     std::vector<RenderObject> renderSortList;
@@ -34,19 +36,17 @@ void Systems::RenderSystem(flecs::iter& it, RectTransformC* transform, Sprite* s
     });
 
     for (RenderObject& renderObj : renderSortList) {
-            CommancheRenderer::Instance->CDrawImage(renderObj.sprite->texture,
-                            renderObj.transform->pos.x,
-                            renderObj.transform->pos.y,
-                            renderObj.transform->size.x,
-                            renderObj.transform->size.y,
-                            renderObj.transform->rotation,
-                            renderObj.sprite->srcRect.x,
-                            renderObj.sprite->srcRect.y,
-                            renderObj.sprite->srcRect.width,
-                            renderObj.sprite->srcRect.height);
+        CommancheRenderer::Instance->CDrawImage(renderObj.sprite->texture,
+        renderObj.transform->pos.x,
+        renderObj.transform->pos.y,
+        renderObj.transform->size.x,
+        renderObj.transform->size.y,
+        renderObj.transform->rotation,
+        renderObj.sprite->srcRect.x,
+        renderObj.sprite->srcRect.y,
+        renderObj.sprite->srcRect.width,
+        renderObj.sprite->srcRect.height);
     }
 
     CommancheRenderer::Instance->DrawGrids();
 }
-
-

@@ -42,13 +42,16 @@ class EventBus {
 
     template <typename TEvent, typename... TArgs>
     void PushEvent(TArgs&&... args) {
+
         const std::type_info& type = typeid(TEvent);
+
         if (queueStorage.find(std::type_index(type)) == queueStorage.end()) {
             queueStorage[std::type_index(type)] = new EventQueue<TEvent>();
         }
 
-        auto v = queueStorage.at(std::type_index(type));
-        EventQueue<TEvent>* ref = static_cast<EventQueue<TEvent>*>(v);
+        auto queue = queueStorage.at(std::type_index(type));
+
+        EventQueue<TEvent>* ref = static_cast<EventQueue<TEvent>*>(queue);
         TEvent event(std::forward<TArgs>(args)...);
         ref->Add(event);
     }

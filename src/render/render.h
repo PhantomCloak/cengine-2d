@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../log/log.h"
-#include "render_primitives.h"
 #include "glm/glm.hpp"
+#include "render_primitives.h"
 #include <string>
 
 class CommancheRenderer {
@@ -15,14 +15,13 @@ class CommancheRenderer {
     void SetPPM(int val);
     bool IsTextureValid(int textureId);
     bool IsShaderValid(int shaderId);
-    //void CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float offsetX = 0, float offsetY = 0);
     void DrawRectRangle(float x, float y, float width, float height, float rotation);
     void CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight);
     void CDrawText(int fontId, std::string message, int x, int y, int size, CommancheColorRGB color = { 255, 255, 255 });
-    void CDrawLine(float startx, float starty, float endx, float endy, CommancheColorRGB color = {255, 255, 255});
+    void CDrawLine(float startx, float starty, float endx, float endy, CommancheColorRGB color = { 255, 255, 255 });
     int GetFrame();
     int CLoadTexture(const std::string& path);
-    int LoadShader(const std::string& path, const std::string shaderName);
+    int CLoadShader(const std::string& path, const std::string shaderName);
     void UpdateRenderTexture(glm::vec2 size);
     CommancheTextureInfo GetTextureInfo(int id);
     int LoadFont(const std::string& path, int size);
@@ -43,6 +42,7 @@ class CommancheRenderer {
     CommancheRenderTexture viewTexture;
     bool isTextureModeEnabled = false;
     CommancheCamera camX = { 0 };
+
     private:
     unsigned int framebuffer, textureColorbuffer;
 };

@@ -11,7 +11,7 @@
 #define SCREEN_HEIGHT 1080
 #define SCREEN_WIDTH 1920
 
-const int FPS = 500;
+const int FPS = 60;
 const int FRAME_TIME_LENGTH = (1000 / FPS);
 
 

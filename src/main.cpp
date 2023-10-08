@@ -6,7 +6,7 @@ int main(int argc, char* argv[]) {
     game.Setup();
 
     while (game.isRunning) {
-        //game.ProcessInput();
+        game.ProcessInput();
 #if EDITOR
         CommancheRenderer::Instance->BeginDraw();
         game.Update();

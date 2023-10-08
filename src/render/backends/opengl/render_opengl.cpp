@@ -353,7 +353,7 @@ void CommancheRenderer::CDrawText(int fontId, std::string message, int x, int y,
 }
 
 
-int CommancheRenderer::LoadShader(const std::string& path, const std::string shaderName) {
+int CommancheRenderer::CLoadShader(const std::string& path, const std::string shaderName) {
 
     std::string vertexShaderPath;
     std::string fragmentShaderPath;

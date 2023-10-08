@@ -1,4 +1,5 @@
 #include "editor_systems.h"
+#include "../../core/coordinate_system.h"
 #include "../../io/cursor.h"
 #include "../editor_utils.h"
 
@@ -16,12 +17,14 @@ void EditorSystems::Init(flecs::world& world, Editor* editor) {
 }
 
 void EditorSystems::DraggableSystem(flecs::world& world, flecs::entity entity, RectTransformC& transform, const DragableComponent& comp) {
-    //auto mPos = GetScreenToWorld2D(Vector2{ Editor::Instance->x, Editor::Instance->y }, CommancheRenderer::Instance->camX);
-    //transform.pos = glm::vec2(mPos.x, mPos.y);
+    auto mPos = Cursor::GetCursorWorldPosition(glm::vec2(Editor::Instance->x, Editor::Instance->y), CommancheRenderer::Instance->camX);
+    glm::vec2 pos = glm::vec2(mPos.x, mPos.y);
 
-    //if (Cursor::HasLeftCursorClicked()) {
-    //    world.entity(entity).remove<DragableComponent>();
-    //} else if (Cursor::HasRightCursorClicked()) {
-    //    entity.destruct();
-    //}
+    transform.pos = EditorUtils::InterpolateToGrid(pos, 2.5);
+
+    if (Cursor::HasLeftCursorClicked()) {
+        world.entity(entity).remove<DragableComponent>();
+    } else if (Cursor::HasRightCursorClicked()) {
+        entity.destruct();
+    }
 }

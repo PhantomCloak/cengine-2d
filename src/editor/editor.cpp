@@ -245,6 +245,7 @@ void Editor::Keybindings() {
 void MapEditor() {
     static bool isOpen = false;
     ImGui::Begin("Tile Editor", &isOpen);
+    //CommancheRenderer::Instance->DrawGrids();
 
     static const std::vector<std::string>& loadedAssets = AssetManager::GetLoadedTextures();
     static const char* selectedItem = loadedAssets[0].c_str();
@@ -310,7 +311,7 @@ void MapEditor() {
 
             piece.set<Sprite>({ selectedTextureId, zIndexStart, static_cast<float>(currentColumn * tileSize), static_cast<float>(currentRow * tileSize), 16, 16 });
             piece.set<DragableComponent>({ true });
-            piece.set<RectTransformC>({ glm::vec2(0, 0), glm::vec2(100, 100) });
+            piece.set<RectTransformC>({ glm::vec2(0, 0), glm::vec2(5, 5) });
             zIndexStart++;
         }
         ImGui::SameLine();
@@ -324,6 +325,12 @@ void AssetsMenu() {
         if (ImGui::MenuItem("Map Editor")) {
             windowFlags[EDITOR_SHOW_MAP_EDITOR] = true;
         }
+        if (ImGui::MenuItem("Refresh Asset Database")) {
+            //windowFlags[EDITOR_SHOW_MAP_EDITOR] = true;
+        }
+        if (ImGui::MenuItem("Import Asset")) {
+        }
+
         ImGui::EndMenu();
     }
 }

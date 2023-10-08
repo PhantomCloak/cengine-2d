@@ -50,15 +50,15 @@ void EntityInspector::RenderWindow() {
         ImGui::EndGroupPanel();
     }
     if (e != 0 && e.has<RigidBody>()) {
-        // auto& comp = e.GetComponent<RigidBody>();
-        // ImGui::BeginGroupPanel("RigidBody");
-        // ImGui::InputFloat(_labelPrefix("velocity x:").c_str(), &comp.velocityLinear.x);
-        // ImGui::InputFloat(_labelPrefix("velocity y:").c_str(), &comp.velocityLinear.y);
-        // ImGui::InputFloat(_labelPrefix("mass:").c_str(), &comp.mass);
-        // ImGui::InputFloat(_labelPrefix("restution:").c_str(), &comp.restution);
-        // ImGui::Checkbox(_labelPrefix("is static:").c_str(), &comp.isStatic);
-        // ImGui::Checkbox(_labelPrefix("is fixed rot:").c_str(), &comp.isFixedRot);
-        // ImGui::EndGroupPanel();
+        flecs::ref<RigidBody> comp = e.get_ref<RigidBody>();
+        ImGui::BeginGroupPanel("RigidBody");
+        ImGui::InputFloat(_labelPrefix("velocity x:").c_str(), &comp->velocityLinear.x);
+        ImGui::InputFloat(_labelPrefix("velocity y:").c_str(), &comp->velocityLinear.y);
+        ImGui::InputFloat(_labelPrefix("mass:").c_str(), &comp->mass);
+        ImGui::InputFloat(_labelPrefix("restution:").c_str(), &comp->restution);
+        ImGui::Checkbox(_labelPrefix("is static:").c_str(), &comp->isStatic);
+        ImGui::Checkbox(_labelPrefix("is fixed rot:").c_str(), &comp->isFixedRot);
+        ImGui::EndGroupPanel();
     }
     if (e != 0 && e.has<Sprite>()) {
         // auto comp = e.GetComponent<Sprite>();
@@ -85,21 +85,20 @@ void EntityInspector::RenderWindow() {
     }
 
     ImGui::Spacing();
+
     if (ImGui::Button("Add Component")) {
         ImGui::OpenPopup("SC");
     }
-    //ImGui::End();
 
-    // if (ImGui::BeginPopup("SC")) {
+    if (ImGui::BeginPopup("SC")) {
 
-    //    if (ImGui::MenuItem("RigidBody")) {
-    //        Scene::AddComponentToEntity<RigidBody>(e);
-    //        // Code to add Component 1
-    //    }
+        if (ImGui::MenuItem("RigidBody")) {
+            Scene::AddComponentToEntity<RigidBody>(e);
+        }
 
-    //    if (ImGui::MenuItem("Box Collider")) {
-    //        // Code to add Component 2
-    //    }
-    //}
-    // ImGui::EndPopup();
+        // if (ImGui::MenuItem("Box Collider")) {
+        //     // Code to add Component 2
+        // }
+        ImGui::EndPopup();
+    }
 }

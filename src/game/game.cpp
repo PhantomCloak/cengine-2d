@@ -40,45 +40,31 @@ void Game::Setup() {
     flecs::entity obj = Scene::CreateEntity("door_tile2");
     selectedTextureId = AssetManager::GetTexture("desert");
 
-    obj.set<RectTransformC>({ glm::vec2(1920, 1080), glm::vec2(1920 * 2, 1080 * 2), glm::vec2(500, 500), 0 });
+    obj.set<RectTransformC>({ glm::vec2(50, 28), glm::vec2(100, 56.25) });
     obj.set<Sprite>({ selectedTextureId, 20, 0, 0, 1920, 1080 });
-}
 
+    selectedTextureId = AssetManager::GetTexture("box");
+    flecs::entity floor = Scene::CreateEntity("floor");
+    floor.set<RectTransformC>({ glm::vec2(50, 40), glm::vec2(2, 10), glm::vec2(1, 1), 90 });
+    floor.set<Sprite>({ selectedTextureId, 20, 0, 0, 64, 64 });
+    floor.set<RigidBody>({ true, 0.25, true });
+}
 
 void Game::Update() {
-    // Get the current time
-    static std::chrono::time_point<std::chrono::steady_clock> oldTime = std::chrono::high_resolution_clock::now();
-    static int fps;
-    fps++;
+    int timeToWait = FRAME_TIME_LENGTH - (getTime() - tickLastFrame);
 
-
-    // Update the game scene
-    Scene::Update();
-
-    if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - oldTime) >= std::chrono::seconds{ 1 }) {
-        oldTime = std::chrono::high_resolution_clock::now();
-        printf("Immediate FPS: %d\n", fps);
-        std::cout << "FPS: " << fps << std::endl;
-        fps = 0;
+    if (timeToWait > 0 && timeToWait <= FRAME_TIME_LENGTH) {
+        sleepProgram(timeToWait / 4);
     }
 
-    // Print FPS
+    tickLastFrame = getTime();
+
+    Scene::Update();
+    DrawFPS(100, 100);
+
+
+    Keyboard::FlushPressedKeys();
 }
-// void Game::Update() {
-//     int timeToWait = FRAME_TIME_LENGTH - (getTime() - tickLastFrame);
-//
-//     if (timeToWait > 0 && timeToWait <= FRAME_TIME_LENGTH) {
-//          sleepProgram(timeToWait);
-//     }
-//
-//     tickLastFrame = getTime();
-//
-//     Scene::Update();
-//     //DrawFPS(100, 100);
-//
-//
-//     Keyboard::FlushPressedKeys();
-// }
 
 void Game::ProcessInput() {
     Keyboard::Poll();

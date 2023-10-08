@@ -1,4 +1,5 @@
 #include "../../cursor.h"
+#include "../../../core/coordinate_system.h"
 #include "raylib.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -17,8 +18,11 @@ glm::vec2 Cursor::GetCursorPosition() {
     return glm::vec2(x, y);
 }
 
-glm::vec2 Cursor::GetCursorWorldPosition(glm::vec2 screenPoint) {
+glm::vec2 Cursor::GetCursorWorldPosition(glm::vec2 screenPoint, CommancheCamera cam) {
+    auto mPos = GetScreenToWorld2D(Vector2{ screenPoint.x, screenPoint.y }, cam);
 
+    CoordinateCalculator::ConvertPixelsToMeters(mPos.x, mPos.y);
+    return glm::vec2(mPos.x, mPos.y);
 }
 
 bool Cursor::HasLeftCursorClicked() {
