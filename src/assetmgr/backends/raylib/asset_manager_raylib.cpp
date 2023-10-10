@@ -16,14 +16,17 @@ void AssetManager::Initialize(CommancheRenderer* render) {
     Log::Inf("Asset manager initialized with raylib");
 }
 
-void AssetManager::AddTexture(const std::string& assetId, const std::string& path) {
+int AssetManager::AddTexture(const std::string& assetId, const std::string& path) {
     Texture2D texture = LoadTexture(path.c_str());
     if (!texture.id) {
         Log::Warn("Texture loading failed for ID: " + assetId);
-        return;
+        return -1;
     }
     textureMap[assetId] = texture;
     textureMapAct[texture.id] = texture;
+    Log::Inf("Texture loaded for ID: " + assetId);
+
+    return texture.id;
 }
 
 void AssetManager::AddShader(const std::string& assetId, const std::string& path) {

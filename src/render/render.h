@@ -32,6 +32,7 @@ class CommancheRenderer {
     void Destroy();
     void BeginDraw();
     void EndDraw();
+    float GetFps();
     static glm::mat4 ProjectionMat;
     glm::mat4 view;
     static int screenWidth;

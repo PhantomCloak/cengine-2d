@@ -48,7 +48,7 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
 
     std::string titleStr = title + " - Backend [Raylib]";
     InitWindow(1920, 1080, titleStr.c_str());
-    SetTargetFPS(60);
+    SetTargetFPS(80);
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     rlImGuiSetup(true);
 }
@@ -64,8 +64,8 @@ int CommancheRenderer::GetFrame() {
 void CommancheRenderer::DrawGrids() {
     static bool isInit = false;
     static Vector2 vertices[81 * 4];
-    static int lastScreenWidth = -1;  // Initialize with a value that is unlikely to be a screen width
-    static int lastScreenHeight = -1; // Initialize with a value that is unlikely to be a screen height
+    static int lastScreenWidth = -1;
+    static int lastScreenHeight = -1; 
 
 
     const int gridSize = 80;
@@ -75,10 +75,9 @@ void CommancheRenderer::DrawGrids() {
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
 
-    // Convert grid dimensions to current screen resolution
     CoordinateCalculator::ConvertMetersToPixels(gridWidth, gridHeight);
 
-    if (!isInit || screenWidth != lastScreenWidth || screenHeight != lastScreenHeight) { // Check if screen dimensions have changed
+    if (!isInit || screenWidth != lastScreenWidth || screenHeight != lastScreenHeight) { 
         int index = 0;
 
         for (int i = 0; i <= gridSize; i++) {
@@ -104,15 +103,17 @@ void CommancheRenderer::DrawGrids() {
         isInit = true;
     }
 
-    // Set the line color
-    Color gridColor = { 0, 0, 0, 77 }; // RGBA: (0, 0, 0, 0.3 * 255)
+    Color gridColor = { 0, 0, 0, 77 };
 
-    // Draw the grid lines
     for (int i = 0; i < (gridSize + 1) * 4; i += 2) {
         DrawLineV(vertices[i], vertices[i + 1], gridColor);
     }
 }
 
+
+float CommancheRenderer::GetFps() {
+  return GetFPS();
+}
 
 void CommancheRenderer::DrawRectRangle(float x, float y, float width, float height, float rotation) {
     CoordinateCalculator::ConvertMetersToPixels(x, y);

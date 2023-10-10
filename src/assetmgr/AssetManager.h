@@ -1,5 +1,4 @@
-#ifndef ASSET_MANAGER
-#define ASSET_MANAGER
+#pragma once
 
 #include <string>
 #include <map>
@@ -13,7 +12,7 @@ struct TextureInf{
 class AssetManager {
   public:
     static void Initialize(CommancheRenderer* render);
-    static void AddTexture(const std::string& assetId, const std::string& path);
+    static int AddTexture(const std::string& assetId, const std::string& path);
     static void AddShader(const std::string& assetId, const std::string& path);
     static int GetTexture(const std::string& assetId);
     static int GetShader(const std::string& shaderId);
@@ -22,9 +21,13 @@ class AssetManager {
     static std::vector<std::string> GetLoadedTextures();
     static void AddFont(const std::string& assetId, const std::string& path, int fontSize);
     static int GetFont(const std::string& assetId);
+
+    static std::string GetAssetRootPath() {
+      return "assets/";
+    }
+
     static AssetManager* Instance;
 #if RENDER_BACKEND_RAYLIB
     static std::map<int, Texture2D> textureMapAct;
 #endif
 };
-#endif

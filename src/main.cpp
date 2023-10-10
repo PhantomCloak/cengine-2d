@@ -4,7 +4,6 @@ int main(int argc, char* argv[]) {
     Game game;
     game.Initialize();
     game.Setup();
-
     while (game.isRunning) {
         game.ProcessInput();
 #if EDITOR
@@ -23,4 +22,3 @@ int main(int argc, char* argv[]) {
     }
     return 0;
 }
-

@@ -7,26 +7,34 @@
 #include "../components/Camera.h"
 #include "../game/map.h"
 #include "../events/KeyPressedEvent.h"
+#include "editor_menu_bar.h"
 #include "fileview.h"
+#include "log_viewer.h"
 #include "system_explorer.h"
 #include "entity_inspector.h"
+#include "viewport.h"
+#include "tile_placer.h"
+#include "tilemap_importer.h"
+#include "scene_list.h"
 
 class Editor {
     public:
-    float x, y;
     Editor() = default;
     void Init(CommancheRenderer* renderer);
+    static glm::vec2 GetCursorPosition();
+    static glm::vec2 GetViewPortSize();
     void Render();
-    static glm::vec2 ScreenSize;
-    SystemExplorer* explorer;
-    glm::vec2 ViewportPos;
-    glm::vec2 ViewportSize;
-    static Editor* Instance;
-    glm::vec2 DockedOffset;
     private:
+    static std::unique_ptr<Editor> Instance;
     void Keybindings();
-    const int gridSize = 25;
     FileView* fileView;
-    EntityInspector* entityInspector;
-    CommancheRenderer* renderer;
+    SystemExplorer* explorer;
+    std::unique_ptr<TilePlacer> tilePlacer;
+    std::unique_ptr<SceneList> sceneList;
+    std::unique_ptr<TileMapImporter> importer;
+    std::unique_ptr<EditorViewPort> viewport;
+    std::unique_ptr<LogView> logView;
+    std::unique_ptr<EntityInspector> entityInspector;
+    std::unique_ptr<CommancheRenderer> renderer;
+    std::unique_ptr<EditorMenuBar> menuBar;
 };

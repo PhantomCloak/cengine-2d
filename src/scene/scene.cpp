@@ -18,7 +18,6 @@ void Scene::Init() {
     AssetManager::Initialize(renderer);
     Systems::Init(ecs);
     LuaManager::InitSandbox();
-
     if (currentScenePath.size() <= 0) {
         Log::Inf("No active scene deteced creating new scene on assets/default.json");
         currentScenePath = "assets/default.json";
@@ -42,7 +41,6 @@ void Scene::Init() {
     editor = new Editor();
     editor->Init(renderer);
 #endif
-
 
     Keyboard::Setup();
     Cursor::Setup(renderer->wnd);

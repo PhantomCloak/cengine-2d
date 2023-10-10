@@ -14,3 +14,4 @@
 #include "../components/MapTile.h"
 #include "../components/Serializable.h"
 #include "../components/DebugTile.h"
+#include "../components/DragableComponent.h"

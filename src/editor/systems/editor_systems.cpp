@@ -36,8 +36,9 @@ void EditorSystems::Init(flecs::world& world, Editor* editor) {
         if (entitySelected) {
             return false; // Skip this entity since another was already selected
         }
-        auto cursorPosition = Cursor::GetCursorWorldPosition(glm::vec2(Editor::Instance->x, Editor::Instance->y), CommancheRenderer::Instance->camX);
-        printf("cursor pos: %f, %f\n", cursorPosition.x, cursorPosition.y);
+
+        auto worldCursorPos = Cursor::GetCursorWorldPosition(Editor::GetCursorPosition(), CommancheRenderer::Instance->camX);
+        printf("cursor pos: %f, %f\n", worldCursorPos.x, worldCursorPos.y);
 
         // Compute AABB for entity
         float minX = transform.pos.x;
@@ -46,8 +47,8 @@ void EditorSystems::Init(flecs::world& world, Editor* editor) {
         float maxY = transform.pos.y + transform.size.y;
 
         // AABB check
-        if (cursorPosition.x >= minX && cursorPosition.x <= maxX &&
-        cursorPosition.y >= minY && cursorPosition.y <= maxY) {
+        if (worldCursorPos.x >= minX && worldCursorPos.x <= maxX &&
+        worldCursorPos.y >= minY && worldCursorPos.y <= maxY) {
             sprite.color = CommancheColorRGBA({ 0, 255, 0, 255 });
             entitySelected = true;
             return false; // Stop iteration once an entity is selected
@@ -61,7 +62,7 @@ void EditorSystems::Init(flecs::world& world, Editor* editor) {
 }
 
 void EditorSystems::DraggableSystem(flecs::world& world, flecs::entity entity, RectTransformC& transform, const DragableComponent& comp) {
-    auto mPos = Cursor::GetCursorWorldPosition(glm::vec2(Editor::Instance->x, Editor::Instance->y), CommancheRenderer::Instance->camX);
+    auto mPos = Cursor::GetCursorWorldPosition(Editor::GetCursorPosition(), CommancheRenderer::Instance->camX);
     glm::vec2 pos = glm::vec2(mPos.x, mPos.y);
 
     transform.pos = EditorUtils::InterpolateToGrid(pos, 2.5);

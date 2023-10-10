@@ -7,6 +7,7 @@
 #include "../scene/scene.h"
 #include "../scripting/lua_manager.h"
 #include "raylib.h"
+#include "../io/filesystem.h"
 #include "wapper.h"
 #include <filesystem>
 #include <iostream>
@@ -30,6 +31,17 @@ void Game::Initialize() {
 int selectedTextureId;
 void Game::Setup() {
     // Setup Systems
+
+    std::vector<std::string> files = FileSys::GetFilesInDirectory("./assets/tile_maps");
+
+    for(auto file : files)
+    {
+      if(FileSys::GetFileExtension(file) != "png")
+        continue;
+
+      AssetManager::AddTexture(FileSys::GetFileName(file), file);
+    }
+
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/pre_load");
     Log::Warn("Engine is starting");
 

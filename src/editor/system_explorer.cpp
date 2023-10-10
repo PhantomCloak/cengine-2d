@@ -1,5 +1,6 @@
 #include "system_explorer.h"
 #include "../scene/scene.h"
+#include "flecs.h"
 #include "imgui.h"
 #include <string>a
 
@@ -24,9 +25,7 @@ void SystemExplorer::RenderWindow() {
     static bool s = false;
     if (ImGui::Begin("SystemExplorer", &s)) {
         ImGui::BeginGroupPanel("Monitor");
-        // for (auto& systemEntry : Scene::world->storage->systems) {
-        //     ImGui::Checkbox(_labelPrefix(systemEntry.first.name()).c_str(), &systemEntry.second->isActive);
-        // }
+
         ImGui::EndGroupPanel();
     }
     ImGui::End();
