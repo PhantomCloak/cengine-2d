@@ -28,3 +28,9 @@
 [submodule "libs/nativefiledialog-extended"]
 	path = libs/nativefiledialog-extended
 	url = git@github.com:btzy/nativefiledialog-extended.git
+[submodule "libs/SimpleJSON"]
+	path = libs/SimpleJSON
+	url = git@github.com:nbsdx/SimpleJSON.git
+[submodule "libs/native_message_box"]
+	path = libs/native_message_box
+	url = git@github.com:thegabman/native_message_box.git
