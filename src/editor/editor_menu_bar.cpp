@@ -141,4 +141,9 @@ void EditorMenuBar::RenderWindow() {
         ImGui::Text("FPS: %.1f", (float)60);
     }
     ImGui::EndMainMenuBar();
+
+    if(enabledWindows[EDITOR_SHOW_LOAD_DIALOG])
+        LoadDialog();
+    else if(enabledWindows[EDITOR_SHOW_SAVE_DIALOG])
+        SaveDialog();
 }

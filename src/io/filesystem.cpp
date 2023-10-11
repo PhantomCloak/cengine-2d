@@ -1,10 +1,8 @@
 #include "filesystem.h"
 #include "nfd.h"
-#include <dirent.h>
 #include <filesystem>
 #include <sstream>
 #include <fstream>
-#include <iostream>
 
 
 std::vector<std::string> FileSys::GetFilesInDirectory(std::string path) {
@@ -55,7 +53,7 @@ void FileSys::OpenFileOSDefaults(std::string path) {
     system(command.c_str());
 }
 
-void FileSys::OpenFilePickerDialog(std::function<void(std::string filePath)>&& callback) {
+void FileSys::OpenFilePickerDialog(std::function<void(std::string filePath)> callback) {
     static bool hasInit = false;
 
     if (!hasInit) {
@@ -71,7 +69,8 @@ void FileSys::OpenFilePickerDialog(std::function<void(std::string filePath)>&& c
         callback(outPath);
         NFD_FreePath(outPath);
     } else if (result == NFD_CANCEL) {
-        puts("User pressed cancel.");
+        printf("User pressed cancel.");
+        callback(std::string(""));
     } else {
         printf("Error: %s\n", NFD_GetError());
     }

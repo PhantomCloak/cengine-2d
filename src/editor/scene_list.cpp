@@ -15,8 +15,8 @@ void SceneList::RenderWindow() {
     if (ImGui::Begin("Scene List")) {
         for (auto entity : Scene::GetEntities()) {
             std::string txt = entity.name().c_str() + std::string(" : ") + std::to_string(entity.id());
-
             bool isSelected = selectableEntityList[entity.id()];
+
             if (ImGui::Selectable(txt.c_str(), &isSelected)) {
                 for (auto& pair : selectableEntityList) {
                     pair.second = false;
@@ -24,10 +24,17 @@ void SceneList::RenderWindow() {
 
                 selectableEntityList[entity.id()] = true;
                 selectCallback(entity);
-            } else {
-                selectableEntityList[entity.id()] = isSelected;
+            }
+
+            // Right click context menu for deleting
+            if (ImGui::BeginPopupContextItem()) {
+                if (ImGui::MenuItem("Delete")) {
+                  Scene::DestroyEntity(entity);
+                }
+                ImGui::EndPopup();
             }
         }
     }
     ImGui::End();
 }
+

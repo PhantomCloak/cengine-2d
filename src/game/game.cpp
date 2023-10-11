@@ -27,8 +27,6 @@ void Game::Initialize() {
 
 int selectedTextureId;
 void Game::Setup() {
-    // Setup Systems
-
     std::vector<std::string> files = FileSys::GetFilesInDirectory("./assets/tile_maps");
 
     for(auto file : files)

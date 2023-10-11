@@ -5,16 +5,18 @@
 #include <string>
 
 struct Sprite {
-    int texture;
+    std::string textureId;
     int zIndex;
     bool isFixed;
     CommancheRect srcRect;
     CommancheColorRGBA color;
+    int texture;
 
-    Sprite(int texture = -1, int zIndex = 0, float srcRectX = 0, float srcRectY = 0, float srcWidth = 0, float srcHeight = 0) {
-        this->texture = texture;
+    Sprite(std::string textureStr = "", int zIndex = 0, float srcRectX = 0, float srcRectY = 0, float srcWidth = 0, float srcHeight = 0) {
+        this->textureId = textureStr;
         this->zIndex = zIndex;
         this->srcRect = { srcRectX, srcRectY, srcWidth, srcHeight };
+        texture = 0;
         color = CommancheColorRGBA { 255, 255, 255, 255 };
     }
 };

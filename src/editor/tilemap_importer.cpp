@@ -34,6 +34,10 @@ std::set<int> clickedTileIndices;
 void TileMapImporter::OpenImporter(std::function<void(bool)> successCallback) {
 
     FileSys::OpenFilePickerDialog([](std::string filePath) {
+        if (filePath.empty()) {
+            return;
+        }
+
         filePathResult = filePath;
         fileNameResult = FileSys::GetFileName(filePath);
         fileExtensionResult = FileSys::GetFileExtension(filePath);

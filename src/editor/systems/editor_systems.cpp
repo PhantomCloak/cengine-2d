@@ -24,9 +24,9 @@ void EditorSystems::Init(flecs::world& world, Editor* editor) {
         DraggableSystem(world, entity, transform, comp);
     });
 
-    // world.system<RectTransformC, Sprite>().each([&world](flecs::entity entity, RectTransformC& transform, Sprite& sprite) {
-    //     ClickInspectSystem(world, entity, transform, sprite);
-    // });
+     //world.system<RectTransformC, Sprite>().each([&world](flecs::entity entity, RectTransformC& transform, Sprite& sprite) {
+     //    ClickInspectSystem(world, entity, transform, sprite);
+     //});
 
     Scene::ecs.system<RectTransformC, Sprite>().order_by<Sprite>(compareZIndex).each([](flecs::entity entity, RectTransformC& transform, Sprite& sprite) {
         if (!Cursor::HasLeftCursorClicked())

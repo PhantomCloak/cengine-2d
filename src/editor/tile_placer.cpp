@@ -148,7 +148,7 @@ void TilePlacer::RenderWindow() {
         if (ImGui::ImageButton(identifier.c_str(), (void*)&selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
             flecs::entity piece = Scene::CreateEntity("tile" + std::to_string(zIndexStart));
 
-            piece.set<Sprite>({ selectedTextureId, zIndexStart, static_cast<float>(currentColumn * tileSizeW), static_cast<float>(currentRow * tileSizeH), (float)tileSizeH, (float)tileSizeW });
+            piece.set<Sprite>({ selectedItem, zIndexStart, static_cast<float>(currentColumn * tileSizeW), static_cast<float>(currentRow * tileSizeH), (float)tileSizeH, (float)tileSizeW });
             piece.set<DragableComponent>({ true });
             piece.set<RectTransformC>({ glm::vec2(0, 0), glm::vec2(5, 5) });
             zIndexStart++;

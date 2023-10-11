@@ -44,7 +44,7 @@ void RegisterTypes(flecs::world& world) {
     .member<int>("rotation");
 
     world.component<Sprite>()
-    .member<int>("texture")
+    .member<std::string>("textureId")
     .member<int>("zIndex")
     .member<bool>("isFixed")
     .member<CommancheRect>("srcRect");
@@ -64,7 +64,7 @@ void EngineSerializer::SerializeSceneToFile(const std::string& path, flecs::worl
     snapshot.take();
 
     const ecs_world_to_json_desc_t desc = { 0 };
-    const char* json_1 = ecs_world_to_json(world.c_ptr(), &desc); std::cout << json_1;
+    const char* json_1 = ecs_world_to_json(world.c_ptr(), &desc);
 
     std::string json(json_1);
 
