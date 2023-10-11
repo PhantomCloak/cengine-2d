@@ -1,6 +1,5 @@
 
 #include "../assetmgr/AssetManager.h"
-#include "../game/game.h"
 #include "../io/cursor.h"
 #include "../io/keyboard.h"
 #include "../libs/imgui/imgui.h"
@@ -11,7 +10,6 @@
 #include "imgui_internal.h"
 #include "nfd.h"
 #include "systems/editor_systems.h"
-#include "tilemap_importer.h"
 
 #if RENDER_BACKEND_RAYLIB
 #include "raylib.h"

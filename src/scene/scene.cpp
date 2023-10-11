@@ -6,6 +6,7 @@
 #include "../scripting/lua_manager.h"
 #include "../systems/systems.h"
 #include "../assetmgr/AssetManager.h"
+#include "../editor/editor.h"
 
 CommancheRenderer* Scene::renderer = nullptr;
 std::string Scene::currentScenePath = "";

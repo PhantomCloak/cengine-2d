@@ -1,6 +1,5 @@
 #include "game.h"
 #include "../common/common.h"
-#include "../editor/editor.h"
 #include "../assetmgr/AssetManager.h"
 #include "../io/cursor.h"
 #include "../io/keyboard.h"
@@ -8,10 +7,7 @@
 #include "../scene/scene.h"
 #include "../scripting/lua_manager.h"
 #include "../physics/physics.h"
-#include "raylib.h"
 #include "../io/filesystem.h"
-#include <filesystem>
-#include <iostream>
 
 Game::Game() {
     isRunning = false;

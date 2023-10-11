@@ -1,12 +1,8 @@
 #pragma once
-#include "../core/util.h"
 #include "glm/glm.hpp"
-#include <iostream>
-#include <sol/sol.hpp>
-#include <string>
 #include "flecs.h"
+#include "../render/render.h"
 
-#include "../editor/editor.h"
 
 class Scene {
     public:

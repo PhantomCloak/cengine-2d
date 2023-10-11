@@ -1,4 +1,5 @@
 #include "editor_menu_bar.h"
+#include "../editor/editor.h"
 #include "../ecs/serializer.h"
 #include "../io/filesystem.h"
 #include "../scene/scene.h"
