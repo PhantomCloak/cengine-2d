@@ -1,7 +1,6 @@
 #include "serializer.h"
 #include "../assetmgr/AssetManager.h"
 #include "../core/util.h"
-#include "../ecs/world.h"
 #include "../game/components.h"
 #include "../render/render_primitives.h"
 #include <fstream>

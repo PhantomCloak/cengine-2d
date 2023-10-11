@@ -1,7 +1,5 @@
 #pragma once
 #include "../core/util.h"
-#include "../ecs/world.h"
-#include "../game/commanche2d.h"
 #include "glm/glm.hpp"
 #include <iostream>
 #include <sol/sol.hpp>

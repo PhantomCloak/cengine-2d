@@ -1,14 +1,15 @@
 #include "game.h"
 #include "../common/common.h"
 #include "../editor/editor.h"
+#include "../assetmgr/AssetManager.h"
 #include "../io/cursor.h"
 #include "../io/keyboard.h"
 #include "../log/log.h"
 #include "../scene/scene.h"
 #include "../scripting/lua_manager.h"
+#include "../physics/physics.h"
 #include "raylib.h"
 #include "../io/filesystem.h"
-#include "wapper.h"
 #include <filesystem>
 #include <iostream>
 

@@ -2,8 +2,10 @@
 #include "../ecs/serializer.h"
 #include "../game/game.h"
 #include "../io/cursor.h"
+#include "../io/keyboard.h"
 #include "../scripting/lua_manager.h"
 #include "../systems/systems.h"
+#include "../assetmgr/AssetManager.h"
 
 CommancheRenderer* Scene::renderer = nullptr;
 std::string Scene::currentScenePath = "";

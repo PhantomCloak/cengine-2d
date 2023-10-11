@@ -1,11 +1,9 @@
 #pragma once
 
-#include "../ecs/world.h"
 #include "../eventmgr/EventBus.h"
 #include "../render/render_primitives.h"
 #include "../render/render.h"
 #include "../components/Camera.h"
-#include "../game/map.h"
 #include "../events/KeyPressedEvent.h"
 #include "editor_menu_bar.h"
 #include "fileview.h"

@@ -1,6 +1,4 @@
 #pragma once
-#include "../ecs/world.h"
-#include "commanche2d.h"
 #include "glm/glm.hpp"
 #include <iostream> 
 #include <sol/sol.hpp>
@@ -26,5 +24,4 @@ class Game {
     private:
     int tickLastFrame;
     sol::state lua;
-    EventBus* bus;
 };

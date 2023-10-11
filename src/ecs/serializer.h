@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../game/entities.h"
 #include "../game/components.h"
-#include "../game/systems.h"
 #include "flecs.h"
 
 enum {
