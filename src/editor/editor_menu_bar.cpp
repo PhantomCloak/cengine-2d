@@ -1,17 +1,13 @@
 #include "editor_menu_bar.h"
 #include "../ecs/serializer.h"
-#include "../scene/scene.h"
 #include "../io/filesystem.h"
+#include "../scene/scene.h"
 #include "flecs.h"
 #include "imgui.h"
 
-#define EDITOR_SHOW_MAP_EDITOR 1
-#define EDITOR_SHOW_SAVE_DIALOG 2
-#define EDITOR_SHOW_LOAD_DIALOG 3
-#define EDITOR_SYSTEM_EXPLORER_DIALOG 4
-
-
-std::unordered_map<int, bool> windowFlags;
+EditorMenuBar::EditorMenuBar(std::shared_ptr<Editor> editor) {
+    editorInstance = editor;
+}
 
 void EditorMenuBar::LoadDialog() {
     ImGui::Begin("Load Menu");
@@ -33,7 +29,7 @@ void EditorMenuBar::LoadDialog() {
     ImGui::Spacing();
     if (ImGui::Button("OK")) {
         EngineSerializer::DeserializeFileToScene(names[ctx], Scene::ecs);
-        windowFlags[EDITOR_SHOW_LOAD_DIALOG] = false;
+        enabledWindows[EDITOR_SHOW_LOAD_DIALOG] = false;
     }
     ImGui::End();
 }
@@ -48,7 +44,7 @@ void EditorMenuBar::SaveDialog() {
     ImGui::Spacing();
     if (ImGui::Button("OK")) {
         EngineSerializer::SerializeSceneToFile("./assets/maps/" + std::string(mapNameBuff) + ".json", Scene::ecs);
-        windowFlags[EDITOR_SHOW_SAVE_DIALOG] = false;
+        enabledWindows[EDITOR_SHOW_SAVE_DIALOG] = false;
     }
     ImGui::End();
 }
@@ -56,10 +52,10 @@ void EditorMenuBar::SaveDialog() {
 void EditorMenuBar::FileMenu() {
     if (ImGui::BeginMenu("File")) {
         if (ImGui::MenuItem("Save Map")) {
-            windowFlags[EDITOR_SHOW_SAVE_DIALOG] = true;
+            enabledWindows[EDITOR_SHOW_SAVE_DIALOG] = true;
         }
         if (ImGui::MenuItem("Load Map")) {
-            windowFlags[EDITOR_SHOW_LOAD_DIALOG] = true;
+            enabledWindows[EDITOR_SHOW_LOAD_DIALOG] = true;
         }
 
         ImGui::EndMenu();
@@ -85,22 +81,22 @@ void EditorMenuBar::AssetsMenu() {
 
     if (ImGui::BeginMenu("Assets")) {
         if (ImGui::MenuItem("Map Editor")) {
-            windowFlags[EDITOR_SHOW_MAP_EDITOR] = true;
+            enabledWindows[EDITOR_SHOW_MAP_EDITOR] = true;
         }
         if (ImGui::MenuItem("Refresh Asset Database")) {
-            // windowFlags[EDITOR_SHOW_MAP_EDITOR] = true;
+            enabledWindows[EDITOR_SHOW_MAP_EDITOR] = true;
         }
         if (ImGui::MenuItem("Import Asset")) {
-            // Editor::Instance->importer->OpenImporter([](int textureId) {
-            //     showImporter = false;
-            // });
+              editorInstance->importer->OpenImporter([](int textureId) {
+                showImporter = false;
+            });
             showImporter = true;
         }
         ImGui::EndMenu();
     }
 
     if (showImporter) {
-        // Editor::Instance->importer->RenderWindow();
+        editorInstance->importer->RenderWindow();
     }
 }
 
@@ -141,7 +137,7 @@ void EditorMenuBar::RenderWindow() {
 
         float fps = GetFPS();
         ImGui::SameLine();
-        ImGui::Text("FPS: %.1f", fps);
+        ImGui::Text("FPS: %.1f", (float)60);
     }
     ImGui::EndMainMenuBar();
 }

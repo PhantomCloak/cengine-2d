@@ -3,7 +3,7 @@
 #include "flecs.h"
 
 class Entity;
-class EntityInspector : EditorWindow {
+class EntityInspector : public EditorWindow {
   public:
     static void SetEntity(flecs::entity entity);
     void RenderWindow() override;

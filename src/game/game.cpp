@@ -48,18 +48,6 @@ void Game::Setup() {
     Physics::Initialize(Scene::ecs);
     Log::Warn("Physics Initialized");
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/after_load");
-
-    flecs::entity obj = Scene::CreateEntity("door_tile2");
-    selectedTextureId = AssetManager::GetTexture("desert");
-
-    obj.set<RectTransformC>({ glm::vec2(50, 28), glm::vec2(100, 56.25) });
-    obj.set<Sprite>({ selectedTextureId, 20, 0, 0, 1920, 1080 });
-
-    selectedTextureId = AssetManager::GetTexture("box");
-    flecs::entity floor = Scene::CreateEntity("floor");
-    floor.set<RectTransformC>({ glm::vec2(50, 40), glm::vec2(2, 10), glm::vec2(1, 1), 90 });
-    floor.set<Sprite>({ selectedTextureId, 20, 0, 0, 64, 64 });
-    floor.set<RigidBody>({ true, 0.25, true });
 }
 
 void Game::Update() {
@@ -72,8 +60,6 @@ void Game::Update() {
     tickLastFrame = getTime();
 
     Scene::Update();
-    DrawFPS(100, 100);
-
 
     Keyboard::FlushPressedKeys();
 }

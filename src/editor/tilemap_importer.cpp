@@ -47,14 +47,18 @@ void TileMapImporter::OpenImporter(std::function<void(bool)> successCallback) {
     textureIdImp = textureId;
 
     TextureInf selectedMafInf = AssetManager::GetTextureInf(AssetManager::GetTexture(textureId));
+
     textureWidth = selectedMafInf.width;
     textureHeight = selectedMafInf.height;
+
+    tileHeight = selectedMafInf.height;
+    tileWidth = selectedMafInf.width;
 
     originalWidth = selectedMafInf.width;
     originalHeight = selectedMafInf.height;
 
     if(successCallback != nullptr)
-    textureImportCallback = successCallback;
+      textureImportCallback = successCallback;
 }
 
 void TileMapImporter::RenderWindow() {
@@ -86,8 +90,7 @@ void TileMapImporter::RenderWindow() {
         ImGui::Spacing();
 
         ImVec2 p = ImGui::GetCursorScreenPos();
-        static int textureId = textureIdImp;
-        ImGui::Image((void*)&textureId, ImVec2(textureWidth, textureHeight));
+        ImGui::Image((void*)&textureIdImp, ImVec2(textureWidth, textureHeight));
 
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
 

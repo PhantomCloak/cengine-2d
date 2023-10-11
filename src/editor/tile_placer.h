@@ -2,7 +2,7 @@
 #include "editor_window.h"
 #include "json.hpp"
 
-class TilePlacer : EditorWindow {
+class TilePlacer : public EditorWindow {
   public:
     void RenderWindow() override;
 };

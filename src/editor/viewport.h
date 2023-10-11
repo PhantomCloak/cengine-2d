@@ -2,7 +2,7 @@
 #include "editor_window.h"
 #include "glm/glm.hpp"
 
-class EditorViewPort : EditorWindow {
+class EditorViewPort : public EditorWindow {
   public:
     void RenderWindow() override;
     glm::vec2 ViewportCursorPos;

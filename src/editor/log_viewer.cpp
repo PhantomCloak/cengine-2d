@@ -48,6 +48,8 @@ LogView::LogView(std::shared_ptr<LogSink> sink) {
         logs.push_back(entry);
         FilterLogs();
     });
+
+    Log::AddSink(sink);
 }
 
 void LogView::RenderWindow() {

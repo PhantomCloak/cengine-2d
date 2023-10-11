@@ -3,7 +3,7 @@
 #include "../log/log.h"
 #include "log_sinks/editor_sink.h"
 
-class LogView : EditorWindow {
+class LogView : public EditorWindow {
   public:
     LogView(std::shared_ptr<LogSink> editorSink = NULL);
     void RenderWindow() override;

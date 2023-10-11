@@ -106,10 +106,18 @@ void TilePlacer::RenderWindow() {
     ImGui::Checkbox("Collider   ", &collider);
     ImGui::Spacing();
     ImGui::Spacing();
-    int tileSize = 16;
+    int tileSizeH = tileHeight;
+    int tileSizeW = tileHeight;
 
-    int columns = selectedMafInf.width / tileSize;
-    int rows = selectedMafInf.height / tileSize;
+
+    if(tileSizeH == 0 || tileSizeW == 0)
+    {
+      tileSizeH = 16;
+      tileSizeW = 16;
+    }
+
+    int columns = selectedMafInf.width / tileSizeH;
+    int rows = selectedMafInf.height / tileSizeW;
     int totalScanArea = columns * rows;
 
 
@@ -133,14 +141,14 @@ void TilePlacer::RenderWindow() {
             ImGui::NewLine();
         }
 
-        ImVec2 uv0 = ImVec2(EditorUtils::pixelCordToUvX2(currentColumn * tileSize, selectedMafInf.width), EditorUtils::pixelCordToUvY2(currentRow * tileSize, selectedMafInf.height));
-        ImVec2 uv1 = ImVec2(EditorUtils::pixelCordToUvX2((currentColumn + 1) * tileSize, selectedMafInf.width), EditorUtils::pixelCordToUvY2((currentRow + 1) * tileSize, selectedMafInf.height));
+        ImVec2 uv0 = ImVec2(EditorUtils::pixelCordToUvX2(currentColumn * tileSizeW, selectedMafInf.width), EditorUtils::pixelCordToUvY2(currentRow * tileSizeH, selectedMafInf.height));
+        ImVec2 uv1 = ImVec2(EditorUtils::pixelCordToUvX2((currentColumn + 1) * tileSizeW, selectedMafInf.width), EditorUtils::pixelCordToUvY2((currentRow + 1) * tileSizeH, selectedMafInf.height));
 
 
         if (ImGui::ImageButton(identifier.c_str(), (void*)&selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
             flecs::entity piece = Scene::CreateEntity("tile" + std::to_string(zIndexStart));
 
-            piece.set<Sprite>({ selectedTextureId, zIndexStart, static_cast<float>(currentColumn * tileSize), static_cast<float>(currentRow * tileSize), 16, 16 });
+            piece.set<Sprite>({ selectedTextureId, zIndexStart, static_cast<float>(currentColumn * tileSizeW), static_cast<float>(currentRow * tileSizeH), (float)tileSizeH, (float)tileSizeW });
             piece.set<DragableComponent>({ true });
             piece.set<RectTransformC>({ glm::vec2(0, 0), glm::vec2(5, 5) });
             zIndexStart++;

@@ -24,14 +24,14 @@ class Editor {
     static glm::vec2 GetCursorPosition();
     static glm::vec2 GetViewPortSize();
     void Render();
+    std::unique_ptr<TileMapImporter> importer;
     private:
-    static std::unique_ptr<Editor> Instance;
+    static std::shared_ptr<Editor> Instance;
     void Keybindings();
     FileView* fileView;
     SystemExplorer* explorer;
     std::unique_ptr<TilePlacer> tilePlacer;
     std::unique_ptr<SceneList> sceneList;
-    std::unique_ptr<TileMapImporter> importer;
     std::unique_ptr<EditorViewPort> viewport;
     std::unique_ptr<LogView> logView;
     std::unique_ptr<EntityInspector> entityInspector;

@@ -1,41 +1,32 @@
 
 #include "../assetmgr/AssetManager.h"
-#include "../components/Sprite.h"
-#include "../components/Transform.h"
-#include "../ecs/serializer.h"
 #include "../ecs/world.h"
 #include "../game/game.h"
-#include "../game/map_serializer.h"
 #include "../io/cursor.h"
-#include "../io/filesystem.h"
 #include "../libs/imgui/imgui.h"
 #include "../scene/scene.h"
 #include "editor_style.h"
 #include "editor_utils.h"
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 #include "imgui_internal.h"
 #include "nfd.h"
 #include "systems/editor_systems.h"
 #include "tilemap_importer.h"
-#include <filesystem>
-#include <functional>
-#include <memory>
-#include <stdio.h>
-#include <unordered_map>
 
 #if RENDER_BACKEND_RAYLIB
 #include "raylib.h"
 #include "rlImGui.h"
+#else
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #endif
 
-std::unique_ptr<Editor> Editor::Instance;
+std::shared_ptr<Editor> Editor::Instance;
 
 void Editor::Init(CommancheRenderer* renderer) {
     Log::Inf("Editor booting...");
 
-    Instance = std::unique_ptr<Editor>(this);
+    Instance = std::shared_ptr<Editor>(this);
 
     entityInspector = std::make_unique<EntityInspector>();
     logView = std::make_unique<LogView>();
@@ -43,7 +34,7 @@ void Editor::Init(CommancheRenderer* renderer) {
     tilePlacer = std::make_unique<TilePlacer>();
     viewport = std::make_unique<EditorViewPort>();
     sceneList = std::make_unique<SceneList>();
-    menuBar = std::make_unique<EditorMenuBar>();
+    menuBar = std::make_unique<EditorMenuBar>(Instance);
 
     sceneList->SetSelectCallback([this](const flecs::entity entity) {
         entityInspector->SetEntity(entity);
@@ -76,26 +67,6 @@ void Editor::Init(CommancheRenderer* renderer) {
     EditorSystems::Init(Scene::ecs, this);
 }
 
-
-
-
-static std::string _labelPrefix(const char* const label) {
-    float width = ImGui::CalcItemWidth();
-
-    float x = ImGui::GetCursorPosX();
-    ImGui::Text(label);
-    ImGui::SameLine();
-    ImGui::SetCursorPosX(x + width * 0.5f + ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::SetNextItemWidth(-1);
-
-    std::string labelID = "##";
-    labelID += label;
-
-    return labelID;
-}
-
-
-
 void Editor::Keybindings() {
     if (Keyboard::IsKeyPressing(KeyCode::Key_RArrow)) {
         CommancheRenderer::Instance->OffsetCamera(25, 0);
@@ -113,10 +84,10 @@ void Editor::Keybindings() {
     }
 }
 
-ImGuiWindowFlags window_flags = 0;
 
 void renderDockingSpace() {
     static bool opt_fullscreen = true;
+    static ImGuiWindowFlags window_flags = 0;
     static bool p_open = true;
     static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
@@ -167,15 +138,9 @@ void Editor::Render() {
     renderDockingSpace();
 
 
-    //if (windowFlags[EDITOR_SHOW_MAP_EDITOR]) {
-    //    tilePlacer->RenderWindow();
-    //}
-    //if (windowFlags[EDITOR_SHOW_SAVE_DIALOG]) {
-    //    SaveDialog();
-    //}
-    //if (windowFlags[EDITOR_SHOW_LOAD_DIALOG]) {
-    //    LoadDialog();
-    //}
+    if (menuBar->enabledWindows[EDITOR_SHOW_MAP_EDITOR]) {
+        tilePlacer->RenderWindow();
+    }
 
     sceneList->RenderWindow();
     entityInspector->RenderWindow();
