@@ -14,38 +14,33 @@ cengine-2d is a cross-platform OpenGL 2D game engine.
 | FLAG | DESC  
 | :---:   | :---: |
 | -DENGINE_EDITOR | Compile with editor & tools   | 
-| --DRENDER_BACKEND_RAYLIB=1 | Set rendering backend to raylib  | 
-| --DRENDER_BACKEND_OPENGL=1 | Set rendering backend to OpenGL  |
-| --DCUSTOMIZE_BUILD=1 -DOPENGL_VERSION="ES 2.0" | hint raylib to use (Angle)[https://github.com/google/angle] |
+| --DRENDER_BACKEND_RAYLIB=1 | Set Rendering Backend to raylib  | 
+| --DRENDER_BACKEND_OPENGL=1 | Set Rendering Backend to OpenGL  |
+| --DRAYLIB_ANGLE_SUPPORT=1 | Enable Angle Support [Angle](https://github.com/google/angle) |
 
-## Installation UNIX
+## Installation
 
+
+### UNIX
 ```sh
  (mkdir build && cd build)
  cmake ..
  make
 ```
 
-### Windows Dependencies
+### Windows (Visual Studio)
 ```
-Visual Studio 2017 or Newer
-vcpkg
-```
-
-### Linux Dependencies
-```
-TODO:
+Visual Studio -> Open -> CMake -> CMakeLists.txt
+Visual Studio -> Project -> CMake Settings for Commanche2D -> CMake Variables -> Pick OpenGL or Raylib backend
 ```
 
-### OS X Dependencies
-
+### VCPKG Dependencie
 ```
-brew install glfw
-brew install lua
-brew install luarocks
-luarocks install dkjson
-brew install pkg-config
-brew install glm
+vcpkg install lua
+vcpkg install sol2
+vcpkg install glm
+vcpkg install glfw3 -- if OpenGL
+vcpkg install freetype - if OpenGL
 ```
 ## Features
 
