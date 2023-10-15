@@ -59,6 +59,10 @@ void LoadTileAsset(const char* selectedItem) {
     Log::Inf("blacklistedTiles = " + std::to_string(blacklistedTiles.size()));
 }
 
+bool TilePlacer::IsFocused() {
+    return ImGui::IsWindowFocused();
+}
+
 void TilePlacer::RenderWindow() {
     ImGui::Begin("Tile Editor");
 
@@ -146,6 +150,7 @@ void TilePlacer::RenderWindow() {
 
 
         if (ImGui::ImageButton(identifier.c_str(), (void*)&selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
+            Log::Warn("Clicked on tile " + identifier);
             flecs::entity piece = Scene::CreateEntity("tile" + std::to_string(zIndexStart));
 
             piece.set<Sprite>({ selectedItem, zIndexStart, static_cast<float>(currentColumn * tileSizeW), static_cast<float>(currentRow * tileSizeH), (float)tileSizeH, (float)tileSizeW });

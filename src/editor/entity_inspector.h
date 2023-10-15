@@ -6,6 +6,7 @@ class Entity;
 class EntityInspector : public EditorWindow {
   public:
     static void SetEntity(flecs::entity entity);
+    bool IsFocused() override;
     void RenderWindow() override;
   private:
     static flecs::entity e;

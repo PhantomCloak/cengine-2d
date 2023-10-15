@@ -4,4 +4,5 @@
 class FileView : public EditorWindow {
   public:
     void RenderWindow() override;
+    bool IsFocused() override;
 };

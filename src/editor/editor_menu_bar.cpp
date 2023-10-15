@@ -10,6 +10,10 @@ EditorMenuBar::EditorMenuBar(std::shared_ptr<Editor> editor) {
     editorInstance = editor;
 }
 
+bool EditorMenuBar::IsFocused() {
+    return ImGui::IsWindowFocused();
+}
+
 void EditorMenuBar::LoadDialog() {
     ImGui::Begin("Load Menu");
 

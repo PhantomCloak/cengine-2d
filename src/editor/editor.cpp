@@ -26,13 +26,13 @@ void Editor::Init(CommancheRenderer* renderer) {
 
     Instance = std::shared_ptr<Editor>(this);
 
-    entityInspector = std::make_unique<EntityInspector>();
-    logView = std::make_unique<LogView>();
-    importer = std::make_unique<TileMapImporter>();
-    tilePlacer = std::make_unique<TilePlacer>();
-    viewport = std::make_unique<EditorViewPort>();
-    sceneList = std::make_unique<SceneList>();
-    menuBar = std::make_unique<EditorMenuBar>(Instance);
+    entityInspector = std::make_shared<EntityInspector>();
+    logView = std::make_shared<LogView>();
+    importer = std::make_shared<TileMapImporter>();
+    tilePlacer = std::make_shared<TilePlacer>();
+    viewport = std::make_shared<EditorViewPort>();
+    sceneList = std::make_shared<SceneList>();
+    menuBar = std::make_shared<EditorMenuBar>(Instance);
 
     sceneList->SetSelectCallback([this](const flecs::entity entity) {
         entityInspector->SetEntity(entity);
@@ -59,6 +59,8 @@ void Editor::Init(CommancheRenderer* renderer) {
 
 
     EditorStyle::Init();
+
+    AssetManager::AddTexture("axis", "./assets/editor/axis.png");
 
     Log::Inf("Editor started");
 

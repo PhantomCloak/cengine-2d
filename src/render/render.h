@@ -15,7 +15,7 @@ class CommancheRenderer {
     void SetPPM(int val);
     bool IsTextureValid(int textureId);
     bool IsShaderValid(int shaderId);
-    void DrawRectRangle(float x, float y, float width, float height, float rotation);
+    void DrawRectRangle(float x, float y, float width, float height, float rotation, CommancheColorRGBA color = { 255, 255, 255, 255 });
     void CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight, CommancheColorRGBA color);
     void CDrawText(int fontId, std::string message, int x, int y, int size, CommancheColorRGB color = { 255, 255, 255 });
     void CDrawLine(float startx, float starty, float endx, float endy, CommancheColorRGB color = { 255, 255, 255 });
@@ -26,6 +26,7 @@ class CommancheRenderer {
     CommancheTextureInfo GetTextureInfo(int id);
     int LoadFont(const std::string& path, int size);
     void OffsetCamera(float vertical, float horizontal);
+    void SetCameraZoom(float zoom);
     void DrawGrids();
     void RenderStart();
     void RenderEnd();

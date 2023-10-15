@@ -5,4 +5,5 @@
 class TilePlacer : public EditorWindow {
   public:
     void RenderWindow() override;
+    bool IsFocused() override;
 };

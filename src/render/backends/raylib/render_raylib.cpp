@@ -6,8 +6,7 @@
 #include "glm/glm.hpp"
 #include "raylib.h"
 #include "rlImGui.h"
-#include "rlgl.h"
-#include <GLFW/glfw3.h>
+#include "rlgl.h" #include < GLFW / glfw3.h>
 #include <filesystem>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -40,7 +39,7 @@ void CommancheRenderer::UpdateRenderTexture(glm::vec2 size) {
     viewTexture = LoadRenderTexture(size.x, size.y);
 
     camX.target = (Vector2){ size.x / 2.0f, size.y / 2.0f };
-    camX.offset = (Vector2){ size.x / 2.0f, size.y / 2.0f };
+    // camX.offset = (Vector2){ size.x / 2.0f, size.y / 2.0f };
     camX.zoom = 1.0f;
 }
 void CommancheRenderer::Initialize(const std::string& title, int windowWidth, int windowHeight) {
@@ -63,64 +62,69 @@ int CommancheRenderer::GetFrame() {
 
 void CommancheRenderer::DrawGrids() {
     static bool isInit = false;
-    static Vector2 vertices[81 * 4];
     static int lastScreenWidth = -1;
-    static int lastScreenHeight = -1; 
+    static int lastScreenHeight = -1;
 
 
-    const int gridSize = 80;
-    float gridWidth = 5;
-    float gridHeight = 5;
+    float gridWidth = 25;
+    float gridHeight = 25;
 
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
+    // Calculate visible area bounds
+    float visibleLeft = 0;
+    float visibleTop = 0;
+    float visibleRight = (camX.target.x * 2);
+    float visibleBottom = (camX.target.y * 2);
 
-    CoordinateCalculator::ConvertMetersToPixels(gridWidth, gridHeight);
+    // CoordinateCalculator::ConvertMetersToPixels(gridWidth, gridHeight);
 
-    if (!isInit || screenWidth != lastScreenWidth || screenHeight != lastScreenHeight) { 
-        int index = 0;
+    // Calculate how many grid lines to draw based on visible area
+    int gridCountX = (int)((visibleRight - visibleLeft) / gridWidth) + 1;
+    int gridCountY = (int)((visibleBottom - visibleTop) / gridHeight) + 1;
 
-        for (int i = 0; i <= gridSize; i++) {
-            // Horizontal lines
-            vertices[index].x = 0;
-            vertices[index].y = i * gridHeight;
-            index++;
-            vertices[index].x = screenWidth;
-            vertices[index].y = i * gridHeight;
-            index++;
+    // Ensure we have enough vertices memory
+    Vector2 vertices[(gridCountX + gridCountY + 2) * 2];
 
-            // Vertical lines
-            vertices[index].x = i * gridWidth;
-            vertices[index].y = 0;
-            index++;
-            vertices[index].x = i * gridWidth;
-            vertices[index].y = screenHeight;
-            index++;
-        }
-
-        lastScreenWidth = screenWidth;
-        lastScreenHeight = screenHeight;
-        isInit = true;
+    int index = 0;
+    for (int i = 0; i <= gridCountY; i++) {
+        // Horizontal lines
+        vertices[index].x = visibleLeft;
+        vertices[index].y = i * gridHeight + visibleTop;
+        index++;
+        vertices[index].x = visibleRight;
+        vertices[index].y = i * gridHeight + visibleTop;
+        index++;
+    }
+    for (int i = 0; i <= gridCountX; i++) {
+        // Vertical lines
+        vertices[index].x = i * gridWidth + visibleLeft;
+        vertices[index].y = visibleTop;
+        index++;
+        vertices[index].x = i * gridWidth + visibleLeft;
+        vertices[index].y = visibleBottom;
+        index++;
     }
 
     Color gridColor = { 0, 0, 0, 77 };
 
-    for (int i = 0; i < (gridSize + 1) * 4; i += 2) {
-        DrawLineV(vertices[i], vertices[i + 1], gridColor);
-    }
+    for (int i = 0; i < (gridCountX + gridCountY + 1) * 2; i += 2) {
+    DrawLineV(
+        { vertices[i].x - camX.offset.x + camX.target.x, vertices[i].y - camX.offset.y + camX.target.y },
+        { vertices[i + 1].x - camX.offset.x + camX.target.x, vertices[i + 1].y - camX.offset.y + camX.target.y },
+        gridColor
+    );
 }
-
+}
 
 float CommancheRenderer::GetFps() {
-  return GetFPS();
+    return GetFPS();
 }
 
-void CommancheRenderer::DrawRectRangle(float x, float y, float width, float height, float rotation) {
-    CoordinateCalculator::ConvertMetersToPixels(x, y);
+void CommancheRenderer::DrawRectRangle(float x, float y, float width, float height, float rotation, CommancheColorRGBA color) {
+    // CoordinateCalculator::ConvertMetersToPixels(x, y);
 
     Rectangle destRec = { x, y, width, height };
     Vector2 origin = { width / 2.0f, height / 2.0f };
-    DrawRectanglePro(destRec, origin, rotation, RED);
+    DrawRectanglePro(destRec, origin, rotation, Color({ static_cast<unsigned char>(color.r), static_cast<unsigned char>(color.g), static_cast<unsigned char>(color.b), static_cast<unsigned char>(color.a) }));
 }
 
 void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight, CommancheColorRGBA color) {
@@ -187,6 +191,10 @@ void CommancheRenderer::OffsetCamera(float vertical, float horizontal) {
     camX.offset.y -= horizontal;
     // vo += vertical;
     // ho += horizontal;
+}
+
+void CommancheRenderer::SetCameraZoom(float zoom) {
+    camX.zoom = zoom;
 }
 
 void CommancheRenderer::BeginDraw() {

@@ -1,19 +1,19 @@
 #include "editor_systems.h"
+#include "../../components/editor_highlight.h"
 #include "../../core/coordinate_system.h"
 #include "../../io/cursor.h"
 #include "../../scene/scene.h"
 #include "../editor_utils.h"
+#include <set>
 
 Editor* EditorSystems::editorRef;
+flecs::entity_t lastSelectedEntity = 0;
+
 bool entitySelected = false; // Flag to indicate if an entity was already selected
 
 
 int compareZIndex(flecs::entity_t e1, const Sprite* s1, flecs::entity_t e2, const Sprite* s2) {
-    if (s1->zIndex < s2->zIndex)
-        return -1;
-    if (s1->zIndex > s2->zIndex)
-        return 1;
-    return 0;
+    return s2->zIndex - s1->zIndex;
 }
 
 void EditorSystems::Init(flecs::world& world, Editor* editor) {
@@ -24,39 +24,15 @@ void EditorSystems::Init(flecs::world& world, Editor* editor) {
         DraggableSystem(world, entity, transform, comp);
     });
 
-     //world.system<RectTransformC, Sprite>().each([&world](flecs::entity entity, RectTransformC& transform, Sprite& sprite) {
-     //    ClickInspectSystem(world, entity, transform, sprite);
-     //});
 
-    Scene::ecs.system<RectTransformC, Sprite>().order_by<Sprite>(compareZIndex).each([](flecs::entity entity, RectTransformC& transform, Sprite& sprite) {
-        if (!Cursor::HasLeftCursorClicked())
-            return false;
-        return false;
-
-        if (entitySelected) {
-            return false; // Skip this entity since another was already selected
-        }
-
-        auto worldCursorPos = Cursor::GetCursorWorldPosition(Editor::GetCursorPosition(), CommancheRenderer::Instance->camX);
-        printf("cursor pos: %f, %f\n", worldCursorPos.x, worldCursorPos.y);
-
-        // Compute AABB for entity
-        float minX = transform.pos.x;
-        float minY = transform.pos.y;
-        float maxX = transform.pos.x + transform.size.x;
-        float maxY = transform.pos.y + transform.size.y;
-
-        // AABB check
-        if (worldCursorPos.x >= minX && worldCursorPos.x <= maxX &&
-        worldCursorPos.y >= minY && worldCursorPos.y <= maxY) {
-            sprite.color = CommancheColorRGBA({ 0, 255, 0, 255 });
-            entitySelected = true;
-            return false; // Stop iteration once an entity is selected
-        }
-
-        return true; // Continue iteration
+    world.system<RectTransformC, Sprite>().order_by(compareZIndex).each([](flecs::entity entity, RectTransformC& transform, Sprite& sprite) {
+        ClickInspectSystem(Scene::ecs, entity, transform, sprite);
     });
 
+    world.system<RectTransformC, Sprite, EditorHighlight>().each([](flecs::entity entity, RectTransformC& transform, Sprite& sprite, EditorHighlight& highlight) {
+        if (highlight.Selected)
+            sprite.color.a = 200;
+    });
 
     editorRef = editor;
 }
@@ -74,7 +50,56 @@ void EditorSystems::DraggableSystem(flecs::world& world, flecs::entity entity, R
     }
 }
 
+bool isPointInsideRotatedRect(const glm::vec2& point, const glm::vec2& center, const glm::vec2& size, float rotation) {
+    rotation = rotation * M_PI / 180.0f;
+    glm::vec2 translatedPoint = point - center;
 
-void EditorSystems::ClickInspectSystem(flecs::world& world, flecs::entity entity, RectTransformC& transform, Sprite& sprite){
+    float s = sin(-rotation);
+    float c = cos(-rotation);
+    glm::vec2 rotatedPoint = glm::vec2(translatedPoint.x * c - translatedPoint.y * s, translatedPoint.x * s + translatedPoint.y * c);
 
+    return abs(rotatedPoint.x) <= size.x && abs(rotatedPoint.y) <= size.y;
+}
+
+
+void EditorSystems::ClickInspectSystem(flecs::world& world, flecs::entity entity, RectTransformC& transform, Sprite& sprite) {
+
+    if (!Cursor::HasLeftCursorClicked()) {
+        entitySelected = false;
+        return;
+    }
+
+    if(!editorRef->viewport->IsFocused())
+        return;
+
+    return;
+
+    auto worldCursorPos = Cursor::GetCursorWorldPosition(Editor::GetCursorPosition(), CommancheRenderer::Instance->camX);
+
+
+    if (isPointInsideRotatedRect(worldCursorPos, transform.pos, transform.size, transform.rotation)) {
+        if (!entitySelected) {
+            printf("entity selected id %llu\n", entity.id());
+            entity.set<EditorHighlight>({ true });
+
+            if (lastSelectedEntity != 0 && lastSelectedEntity != entity.id()) {
+                printf("last selected entity id %llu\n", lastSelectedEntity);
+                auto lastSelectedEntityRef = Scene::ecs.entity(lastSelectedEntity);
+                auto sp = lastSelectedEntityRef.get_ref<Sprite>();
+                auto hl = lastSelectedEntityRef.get_ref<EditorHighlight>();
+                hl->Selected = false;
+                sp->color.a = 255;
+                lastSelectedEntityRef.remove<EditorHighlight>();
+                editorRef->sceneList->SelectEntity(lastSelectedEntity);
+            }
+            lastSelectedEntity = entity;
+
+
+            entitySelected = true;
+            return;
+        }
+    }
 };
+
+void EditorSystems::Update() {
+}

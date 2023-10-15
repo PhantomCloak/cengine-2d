@@ -19,17 +19,17 @@ class Editor {
     static glm::vec2 GetCursorPosition();
     static glm::vec2 GetViewPortSize();
     void Render();
-    std::unique_ptr<TileMapImporter> importer;
+    std::shared_ptr<TileMapImporter> importer;
+    std::shared_ptr<EditorViewPort> viewport;
+    std::shared_ptr<SceneList> sceneList;
     private:
     static std::shared_ptr<Editor> Instance;
     void Keybindings();
     FileView* fileView;
     SystemExplorer* explorer;
-    std::unique_ptr<TilePlacer> tilePlacer;
-    std::unique_ptr<SceneList> sceneList;
-    std::unique_ptr<EditorViewPort> viewport;
-    std::unique_ptr<LogView> logView;
-    std::unique_ptr<EntityInspector> entityInspector;
+    std::shared_ptr<TilePlacer> tilePlacer;
+    std::shared_ptr<LogView> logView;
+    std::shared_ptr<EntityInspector> entityInspector;
     std::unique_ptr<CommancheRenderer> renderer;
-    std::unique_ptr<EditorMenuBar> menuBar;
+    std::shared_ptr<EditorMenuBar> menuBar;
 };

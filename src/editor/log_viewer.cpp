@@ -36,6 +36,10 @@ void FilterLogs() {
     RebuildLog();
 }
 
+bool LogView::IsFocused() {
+    return ImGui::IsWindowFocused();
+}
+
 LogView::LogView(std::shared_ptr<LogSink> sink) {
 
     if (sink == NULL) {

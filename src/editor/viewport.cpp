@@ -57,10 +57,27 @@ void Fit(int image, int width, int height, bool center = false) {
 #endif
 }
 
+bool EditorViewPort::IsFocused() {
+    return isFocused;
+}
+
 void EditorViewPort::RenderWindow() {
     static bool Open = true;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     if (ImGui::Begin("2D View", &Open, ImGuiWindowFlags_NoNav)) {
+
+        isFocused = ImGui::IsWindowHovered();
+        static float zoomValue = 1;
+        static float lastZoomValue = 1;
+
+        if (ImGui::IsWindowFocused())
+            zoomValue += GetMouseWheelMove();
+        if (zoomValue != lastZoomValue) {
+            Log::Inf("Zooming to + " + std::to_string(zoomValue));
+            zoomValue = std::clamp(zoomValue, 1.0f, 10.0f);
+            CommancheRenderer::Instance->SetCameraZoom(zoomValue);
+            lastZoomValue = zoomValue;
+        }
 
         auto rect = ImGui::GetContentRegionAvail();
         glm::vec2 currentRect = glm::vec2(rect.x, rect.y);

@@ -1,16 +1,27 @@
 #include "scene_list.h"
-#include "imgui.h"
 #include "../scene/scene.h"
+#include "imgui.h"
 
 std::function<void(flecs::entity)> selectCallback;
+std::unordered_map<flecs::entity_t, bool> selectableEntityList;
 
+bool SceneList::IsFocused() {
+    return ImGui::IsWindowFocused();
+}
 
-void SceneList::SetSelectCallback(std::function<void(flecs::entity)> callback){
+void SceneList::SetSelectCallback(std::function<void(flecs::entity)> callback) {
     selectCallback = callback;
 }
 
+void SceneList::SelectEntity(flecs::entity_t entity) {
+    for (auto& pair : selectableEntityList) {
+        pair.second = false;
+    }
+    selectableEntityList[entity] = true;
+    selectCallback(Scene::ecs.entity(entity));
+}
+
 void SceneList::RenderWindow() {
-    static std::unordered_map<flecs::entity_t, bool> selectableEntityList;
 
     if (ImGui::Begin("Scene List")) {
         for (auto entity : Scene::GetEntities()) {
@@ -29,7 +40,7 @@ void SceneList::RenderWindow() {
             // Right click context menu for deleting
             if (ImGui::BeginPopupContextItem()) {
                 if (ImGui::MenuItem("Delete")) {
-                  Scene::DestroyEntity(entity);
+                    Scene::DestroyEntity(entity);
                 }
                 ImGui::EndPopup();
             }
@@ -37,4 +48,3 @@ void SceneList::RenderWindow() {
     }
     ImGui::End();
 }
-

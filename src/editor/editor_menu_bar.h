@@ -12,6 +12,7 @@ class EditorMenuBar : public EditorWindow {
   public:
     EditorMenuBar(std::shared_ptr<Editor> editor);
     void RenderWindow() override;
+    bool IsFocused() override;
     std::unordered_map<int, bool> enabledWindows;
   private:
     std::shared_ptr<Editor> editorInstance;

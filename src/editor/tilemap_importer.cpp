@@ -31,6 +31,10 @@ std::string fileExtensionResult;
 
 std::set<int> clickedTileIndices;
 
+bool TileMapImporter::IsFocused() {
+    return ImGui::IsWindowFocused();
+}
+
 void TileMapImporter::OpenImporter(std::function<void(bool)> successCallback) {
 
     FileSys::OpenFilePickerDialog([](std::string filePath) {

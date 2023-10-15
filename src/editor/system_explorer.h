@@ -4,4 +4,5 @@
 class SystemExplorer : public EditorWindow {
   public:
     void RenderWindow() override;
+    bool IsFocused() override;
 };
