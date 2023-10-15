@@ -14,12 +14,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -g")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 set(CMAKE_OBJC_FLAGS "${CMAKE_OBJC_FLAGS} -x objective-c")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
 
 # Additional definitions
 add_definitions(-DPLATFORM_DESKTOP)
 
 # Third party packages
-find_package(PkgConfig REQUIRED)
+#find_package(PkgConfig REQUIRED)
 
 # Include directories
 include_directories(
@@ -57,6 +58,7 @@ file(GLOB ENGINE_SOURCES
     "./src/systems/*.cpp"
     "./src/scene/*.cpp"
     "./src/common/*.cpp"
+    "./libs/flecs/*.c"
     "./src/assetmgr/*.cpp"
     "./src/scripting/*.cpp"
     "./libs/SimpleJSON/*.cpp"
@@ -69,6 +71,7 @@ set(SOURCES ${ENGINE_SOURCES})
 # Subdirectories
 add_subdirectory(libs/nativefiledialog-extended)
 add_subdirectory(libs/native_message_box)
+add_subdirectory(libs/flecs)
 
 if(RENDER_BACKEND_RAYLIB)
     add_definitions(-DRENDER_BACKEND_RAYLIB=1)
@@ -121,11 +124,10 @@ if(ENGINE_EDITOR)
     list(APPEND SOURCES ${EDITOR_SOURCES})
 endif()
 
-file(GLOB FLECS_SOURCES libs/flecs/*.c libs/flecs/*.cpp)
-add_library(flecs STATIC ${FLECS_SOURCES})
+#file(GLOB FLECS_SOURCES libs/flecs/*.c libs/flecs/*.cpp)
 
 # Build targets
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} nfd raylib ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY} lua "-framework IOKit" "-framework Cocoa" flecs ${FREETYPE2_LIBRARIES} ${GLFW3_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} nfd raylib ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY} lua "-framework IOKit" "-framework Appkit" "-framework UniformTypeIdentifiers" "-framework Cocoa" ${FREETYPE2_LIBRARIES} ${GLFW3_LIBRARIES})
 
