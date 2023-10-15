@@ -38,8 +38,9 @@ void CommancheRenderer::UpdateRenderTexture(glm::vec2 size) {
     UnloadRenderTexture(viewTexture);
     viewTexture = LoadRenderTexture(size.x, size.y);
 
-    camX.target = (Vector2){ size.x / 2.0f, size.y / 2.0f };
-    // camX.offset = (Vector2){ size.x / 2.0f, size.y / 2.0f };
+
+    Vector2 targetSize = Vector2({ size.x / 2, size.y / 2 });
+    camX.target = targetSize;
     camX.zoom = 1.0f;
 }
 void CommancheRenderer::Initialize(const std::string& title, int windowWidth, int windowHeight) {
@@ -47,7 +48,7 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
 
     std::string titleStr = title + " - Backend [Raylib]";
     InitWindow(1920, 1080, titleStr.c_str());
-    SetTargetFPS(80);
+    //SetTargetFPS(80);
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     rlImGuiSetup(true);
 }
@@ -66,8 +67,8 @@ void CommancheRenderer::DrawGrids() {
     static int lastScreenHeight = -1;
 
 
-    float gridWidth = 25;
-    float gridHeight = 25;
+    float gridWidth = 5;
+    float gridHeight = 5;
 
     // Calculate visible area bounds
     float visibleLeft = 0;
@@ -75,14 +76,17 @@ void CommancheRenderer::DrawGrids() {
     float visibleRight = (camX.target.x * 2);
     float visibleBottom = (camX.target.y * 2);
 
-    // CoordinateCalculator::ConvertMetersToPixels(gridWidth, gridHeight);
+    CoordinateCalculator::ConvertMetersToPixels(gridWidth, gridHeight);
 
     // Calculate how many grid lines to draw based on visible area
     int gridCountX = (int)((visibleRight - visibleLeft) / gridWidth) + 1;
     int gridCountY = (int)((visibleBottom - visibleTop) / gridHeight) + 1;
 
     // Ensure we have enough vertices memory
-    Vector2 vertices[(gridCountX + gridCountY + 2) * 2];
+    //Vector2 vertices[(gridCountX + gridCountY + 2) * 2];
+    std::vector<Vector2> vertices((gridCountX + gridCountY + 2) * 2);
+
+
 
     int index = 0;
     for (int i = 0; i <= gridCountY; i++) {

@@ -2,6 +2,7 @@
 #include "../io/cursor.h"
 #include "../render/render.h"
 #include "imgui.h"
+#include <algorithm>
 
 void Fit(int image, int width, int height, bool center = false) {
     ImVec2 area = ImGui::GetContentRegionAvail();

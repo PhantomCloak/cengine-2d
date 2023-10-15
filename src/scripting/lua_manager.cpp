@@ -34,21 +34,9 @@ void LuaManager::InitSandbox() {
 
 void LuaManager::LoadLuaFilesInDirectory(std::string path) {
     for (const auto& entry : std::filesystem::directory_iterator(path)) {
-        luaState.script_file(entry.path());
+        std::string entryPath = entry.path().string();
+        luaState.script_file(entryPath);
         continue;
-        sol::load_result luaScript = luaState.load_file(entry.path());
-
-        if (!luaScript.valid()) {
-            sol::error err = luaScript;
-            std::string msg = err.what();
-            Log::Err("error loading lua file: " + msg);
-            continue;
-        }
-        Log::Inf("Lua script at " + entry.path().string() + " has loaded successfully.");
-        sol::protected_function_result result = luaScript();
-        if (!result.valid()) {
-            continue;
-        }
     }
 }
 

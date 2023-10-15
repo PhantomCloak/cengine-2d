@@ -2,7 +2,8 @@
 #include "../scene/scene.h"
 #include "flecs.h"
 #include "imgui.h"
-#include <string>a
+#include <string>
+#include <unordered_map>
 
 bool SystemExplorer::IsFocused() {
     return ImGui::IsWindowFocused();

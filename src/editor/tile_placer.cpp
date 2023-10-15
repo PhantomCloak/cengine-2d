@@ -141,6 +141,9 @@ void TilePlacer::RenderWindow() {
             }
         }
 
+        if (slice <= 0)
+            slice = 1;
+
         if ((placedCount % slice) == 0) {
             ImGui::NewLine();
         }
