@@ -7,13 +7,7 @@ cengine-2d is a cross-platform OpenGL 2D game engine.
 <img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/df993eae-550e-46cd-bef0-a2e40ad93036">
 <img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/240c102e-9437-443b-8b44-8802dadf94ce">
 
-## Setup
 
-```sh
- (mkdir build && cd build)
- cmake ..
- make
-```
 
 ### Compiler Flags
 
@@ -24,7 +18,26 @@ cengine-2d is a cross-platform OpenGL 2D game engine.
 | --DRENDER_BACKEND_OPENGL=1 | Set rendering backend to OpenGL  |
 | --DCUSTOMIZE_BUILD=1 -DOPENGL_VERSION="ES 2.0" | hint raylib to use (Angle)[https://github.com/google/angle] |
 
-### Dependencies MacOS
+## Installation UNIX
+
+```sh
+ (mkdir build && cd build)
+ cmake ..
+ make
+```
+
+### Windows Dependencies
+```
+Visual Studio 2017 or Newer
+vcpkg
+```
+
+### Linux Dependencies
+```
+TODO:
+```
+
+### OS X Dependencies
 
 ```
 brew install glfw
