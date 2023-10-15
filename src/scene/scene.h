@@ -1,16 +1,8 @@
 #pragma once
-#include "../core/util.h"
-#include "../ecs/world.h"
-#include "../game/commanche2d.h"
 #include "glm/glm.hpp"
-#include <iostream>
-#include <sol/sol.hpp>
-#include <string>
 #include "flecs.h"
+#include "../render/render.h"
 
-#if EDITOR
-#include "../editor/editor.h"
-#endif
 
 class Scene {
     public:
@@ -34,10 +26,6 @@ class Scene {
     private:
     static std::string currentScenePath;
     static CommancheRenderer* renderer;
-
-#if EDITOR
-    static Editor* editor;
-#endif
 };
 
 template <typename TSystem, typename... TArgs>

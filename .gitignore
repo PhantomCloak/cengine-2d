@@ -1,0 +1,42 @@
+.cache
+imgui.ini
+*.dSYM
+.DS_Store
+# Ignore build directory
+build/
+
+# Ignore all compiled files and binaries
+*.o
+*.a
+*.so
+*.exe
+*.out
+*.dll
+*.dylib
+
+# Ignore CMake generated files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# Ignore CPack generated files
+CPackConfig.cmake
+CPackSourceConfig.cmake
+
+# Ignore other files
+*.swp
+*.swo
+*.swn
+*.bak
+*~
+
+# Ignore IDE/project files
+.idea/
+*.project
+*.user
+*.vscode/

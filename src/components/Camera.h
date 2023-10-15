@@ -1,11 +1,11 @@
 #pragma once
 
-struct Camera{
+struct Camera2S{
   // in meters
   int fovWidth;
   // in meters
   int fovHeight;
-  Camera(int fovWidth = 0, int fovHeight = 0){
+  Camera2S(int fovWidth = 0, int fovHeight = 0){
     this->fovWidth = fovWidth;
     this->fovWidth = fovWidth;
   }

@@ -1,34 +1,58 @@
 # cengine-2d
 
-check progress at [here](https://www.youtube.com/playlist?list=PL2dQtIx06FzXMnB5aWsK_OJ6UocCFF-Ga)
+cengine-2d is a cross-platform OpenGL 2D game engine.
 
-<img width="2672" alt="image" src="https://user-images.githubusercontent.com/34552014/215361052-f2e86742-1947-4fc5-b710-a89293f40a1f.png">
+[Watch the progress here](https://www.youtube.com/@ph4nt0m33)
 
-## Setup
+<img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/df993eae-550e-46cd-bef0-a2e40ad93036">
+<img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/240c102e-9437-443b-8b44-8802dadf94ce">
 
-### Dependencies MacOS
 
+
+### Compiler Flags
+
+| FLAG | DESC  
+| :---:   | :---: |
+| -DENGINE_EDITOR | Compile with editor & tools   | 
+| --DRENDER_BACKEND_RAYLIB=1 | Set Rendering Backend to raylib  | 
+| --DRENDER_BACKEND_OPENGL=1 | Set Rendering Backend to OpenGL  |
+| --DRAYLIB_ANGLE_SUPPORT=1 | Enable [Angle](https://github.com/google/angle) Support for raylib |
+
+## Installation
+
+
+### UNIX
+```sh
+ (mkdir build && cd build)
+ cmake ..
+ make
 ```
-brew install glfw
-brew install lua
-brew install luarocks
-luarocks install dkjson
-brew install pkg-config
+
+### Windows (Visual Studio)
 ```
-optional (to build editor)
+Visual Studio -> Open -> CMake -> CMakeLists.txt
+Visual Studio -> Project -> CMake Settings for Commanche2D -> CMake Variables -> Pick OpenGL or Raylib backend
 ```
-brew install glm
+
+### VCPKG Dependencie
+```
+vcpkg install lua
+vcpkg install sol2
+vcpkg install glm
+vcpkg install glfw3 -- if OpenGL
+vcpkg install freetype - if OpenGL
 ```
 ## Features
 
 ### Scripting
-Powered by LUA
+Uses LUA for game mechanics and interactions.
 
-#### Entity Component System
-Powered by FLECS
+### Entity Component System
+Built on the FLECS library for managing game entities and components.
 
-#### Physics Engine
-Powered by Box2D
+### Physics Engine
+Implements Box2D for game object physics and collisions.
 
-#### Render & Shading
-Self-made OpenGL 3 Renderer
+### Render & Shading
+- Raylib for rendering, with ANGLE support for platform compatibility.
+- A custom OpenGL renderer for more specific rendering needs.

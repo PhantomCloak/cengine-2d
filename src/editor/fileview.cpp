@@ -49,6 +49,10 @@ bool createFileTile(std::string name, int& ordinal, bool* stateSet, int stateSet
     return result;
 }
 
+bool FileView::IsFocused() {
+    return ImGui::IsWindowFocused();
+}
+
 void FileView::RenderWindow() {
     static std::string currentPath = ".";
 

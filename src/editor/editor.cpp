@@ -1,69 +1,51 @@
-#include "editor.h"
+
 #include "../assetmgr/AssetManager.h"
-#include "../components/Sprite.h"
-#include "../components/Transform.h"
-#include "../ecs/serializer.h"
-#include "../ecs/world.h"
-#include "../game/game.h"
-#include "../game/map_serializer.h"
 #include "../io/cursor.h"
-#include "../io/filesystem.h"
+#include "../io/keyboard.h"
 #include "../libs/imgui/imgui.h"
 #include "../scene/scene.h"
 #include "editor_style.h"
 #include "editor_utils.h"
 #include "imgui.h"
+#include "imgui_internal.h"
+#include "nfd.h"
+#include "systems/editor_systems.h"
+
+#if RENDER_BACKEND_RAYLIB
+#include "raylib.h"
+#include "rlImGui.h"
+#else
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "systems/editor_systems.h"
-#include <filesystem>
-#include <functional>
-#include <memory>
-#include <stdio.h>
-#include <unordered_map>
+#endif
 
-
-#define EDITOR_SHOW_MAP_EDITOR 1
-#define EDITOR_SHOW_SAVE_DIALOG 2
-#define EDITOR_SHOW_LOAD_DIALOG 3
-#define EDITOR_SYSTEM_EXPLORER_DIALOG 4
-
-std::unordered_map<int, bool> windowFlags;
-bool tileSetIsInit = false;
-
-static int zIndexStart = 8000;
-glm::vec2 Editor::ScreenSize;
-
-flecs::id draggableEntity;
-
-std::vector<std::string> logs;            // The original list of logs
-std::vector<std::string> filteredLogs;    // The logs after applying the search filter
-std::string combinedLog;                  // Combined logs in one string for display
-char searchBuffer[256] = { 0 };           // Buffer to hold the search text
-
+std::shared_ptr<Editor> Editor::Instance;
 
 void Editor::Init(CommancheRenderer* renderer) {
     Log::Inf("Editor booting...");
 
-    logs.push_back("merhaba");
-    logs.push_back("henlo ");
-    logs.push_back("hewla");
-    logs.push_back("dkasodjksaodas");
-    logs.push_back("yea hello yea");
-    logs.push_back("mutnity");
-    logs.push_back("trypoi");
-    logs.push_back("hell World");
-    logs.push_back("crack world");
-    logs.push_back("missing");
-    logs.push_back("fucking");
-    logs.push_back("hjex");
-    logs.push_back("Hello World");
-    logs.push_back("Hello World");
-    logs.push_back("Hello World");
-    logs.push_back("Hello World");
+    Instance = std::shared_ptr<Editor>(this);
+
+    entityInspector = std::make_shared<EntityInspector>();
+    logView = std::make_shared<LogView>();
+    importer = std::make_shared<TileMapImporter>();
+    tilePlacer = std::make_shared<TilePlacer>();
+    viewport = std::make_shared<EditorViewPort>();
+    sceneList = std::make_shared<SceneList>();
+    menuBar = std::make_shared<EditorMenuBar>(Instance);
+
+    sceneList->SetSelectCallback([this](const flecs::entity entity) {
+        entityInspector->SetEntity(entity);
+    });
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+
+#if RENDER_BACKEND_OPENGL
+    ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)renderer->wnd, true);
+    ImGui_ImplOpenGL3_Init("#version 330 core");
+#endif
 
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
@@ -76,20 +58,9 @@ void Editor::Init(CommancheRenderer* renderer) {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 
-    ImGui::StyleColorsDark();
     EditorStyle::Init();
 
-    ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)renderer->wnd, true);
-    ImGui_ImplOpenGL3_Init("#version 330 core");
-
-    this->renderer = renderer;
-
-    AssetManager::AddTexture("folder", "./assets/editor/folder-icon.png");
-    AssetManager::AddTexture("file", "./assets/editor/file-icon.png");
-
-    fileView = new FileView();
-    explorer = new SystemExplorer();
-    entityInspector = new EntityInspector();
+    AssetManager::AddTexture("axis", "./assets/editor/axis.png");
 
     Log::Inf("Editor started");
 
@@ -225,141 +196,25 @@ void LoadDialog() {
 
 void Editor::Keybindings() {
     if (Keyboard::IsKeyPressing(KeyCode::Key_RArrow)) {
-        renderer->OffsetCamera(25, 0);
+        CommancheRenderer::Instance->OffsetCamera(25, 0);
     }
 
     if (Keyboard::IsKeyPressing(KeyCode::Key_LArrow)) {
-        renderer->OffsetCamera(-25, 0);
+        CommancheRenderer::Instance->OffsetCamera(-25, 0);
     }
 
     if (Keyboard::IsKeyPressing(KeyCode::Key_UArrow)) {
-        renderer->OffsetCamera(0, -25);
+        CommancheRenderer::Instance->OffsetCamera(0, -25);
     }
     if (Keyboard::IsKeyPressing(KeyCode::Key_DArrow)) {
-        renderer->OffsetCamera(0, 25);
+        CommancheRenderer::Instance->OffsetCamera(0, 25);
     }
 }
 
-void MapEditor() {
-    static bool isOpen = false;
-    ImGui::Begin("Tile Editor", &isOpen);
-
-    static const std::vector<std::string>& loadedAssets = AssetManager::GetLoadedTextures();
-    static const char* selectedItem = loadedAssets[0].c_str();
-    static TextureInf selectedMafInf = AssetManager::GetTextureInf(selectedItem);
-    static int selectedTextureId = AssetManager::GetTexture(selectedItem);
-
-    ImGui::Text("Drag & drop textures");
-    ImGui::Text("atlas size = %d x %d", selectedMafInf.width, selectedMafInf.height);
-    ImGui::Text("grid size = %d x %d", 64, 64);
-
-    static bool collider = false;
-
-    ImGui::Spacing();
-    ImGui::Spacing();
-
-    if (ImGui::BeginCombo("combo", selectedItem)) {
-
-        for (int i = 0; i < AssetManager::GetLoadedTextures().size(); ++i) {
-            bool isSelected = (selectedItem == loadedAssets[i].c_str());
-            if (ImGui::Selectable(loadedAssets[i].c_str(), isSelected)) {
-                selectedItem = loadedAssets[i].c_str();
-                selectedTextureId = AssetManager::GetTexture(std::string(selectedItem));
-                selectedMafInf = AssetManager::GetTextureInf(std::string(selectedItem));
-            }
-
-            if (isSelected) {
-                ImGui::SetItemDefaultFocus();
-            }
-        }
-        ImGui::EndCombo();
-    }
-    ImGui::Spacing();
-    ImGui::Spacing();
-    ImGui::Checkbox("Collider   ", &collider);
-    ImGui::Spacing();
-    ImGui::Spacing();
-    int tileSize = 16;
-
-    int columns = selectedMafInf.width / tileSize;
-    int rows = selectedMafInf.height / tileSize;
-    int totalScanArea = columns * rows;
-
-
-    ImVec2 availRegion = ImGui::GetContentRegionAvail();
-    int slice = availRegion.x / 64;
-
-    for (int i = 0; i < totalScanArea; i++) {
-        auto identifier = std::to_string(i);
-
-        if ((i % slice) == 0) {
-            ImGui::NewLine();
-        }
-
-        int currentColumn = i % columns;
-        int currentRow = i / columns;
-
-        ImVec2 uv0 = ImVec2(EditorUtils::pixelCordToUvX2(currentColumn * tileSize, selectedMafInf.width), EditorUtils::pixelCordToUvY2(currentRow * tileSize, selectedMafInf.height));
-        ImVec2 uv1 = ImVec2(EditorUtils::pixelCordToUvX2((currentColumn + 1) * tileSize, selectedMafInf.width), EditorUtils::pixelCordToUvY2((currentRow + 1) * tileSize, selectedMafInf.height));
-
-
-        if (ImGui::ImageButton(identifier.c_str(), (void*)(intptr_t)selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
-            flecs::entity piece = Scene::CreateEntity("tile" + std::to_string(zIndexStart));
-
-            piece.set<Sprite>({ selectedTextureId, zIndexStart, static_cast<float>(currentColumn * tileSize), static_cast<float>(currentRow * tileSize), 16, 16 });
-            piece.set<DragableComponent>({ true });
-            piece.set<RectTransform>({ glm::vec2(0, 0), glm::vec2(100, 100) });
-            zIndexStart++;
-        }
-        ImGui::SameLine();
-    }
-
-    ImGui::End();
-}
-
-void AssetsMenu() {
-    if (ImGui::BeginMenu("Assets")) {
-        if (ImGui::MenuItem("Map Editor")) {
-            windowFlags[EDITOR_SHOW_MAP_EDITOR] = true;
-        }
-        ImGui::EndMenu();
-    }
-}
-
-
-static flecs::entity selectedEntityId;
-
-
-void SceneList() {
-    static std::unordered_map<flecs::entity_t, bool> selectableEntityList;
-
-    if (ImGui::Begin("Scene List")) {
-        for (auto entity : Scene::GetEntities()) {
-            std::string txt = entity.name().c_str() + std::string(" : ") + std::to_string(entity.id());
-
-            bool isSelected = selectableEntityList[entity.id()];
-            if (ImGui::Selectable(txt.c_str(), &isSelected)) {
-                // Clear all previous selections
-                for (auto& pair : selectableEntityList) {
-                    pair.second = false;
-                }
-
-                // Set the current entity as selected
-                selectableEntityList[entity.id()] = true;
-                selectedEntityId = entity;
-            } else {
-                selectableEntityList[entity.id()] = isSelected; // Update the map with the current state
-            }
-        }
-        ImGui::End();
-    }
-}
-
-
-ImGuiWindowFlags window_flags = 0;
 
 void renderDockingSpace() {
     static bool opt_fullscreen = true;
+    static ImGuiWindowFlags window_flags = 0;
     static bool p_open = true;
     static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
@@ -379,107 +234,56 @@ void renderDockingSpace() {
     if (opt_fullscreen)
         ImGui::PopStyleVar(2);
 
-    ImGuiIO& io = ImGui::GetIO();
-
     ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 
     ImGui::End();
 }
 
-void WindowController(Editor* instance) {
+glm::vec2 Editor::GetCursorPosition() {
+    return Instance->viewport->ViewportCursorPos;
+}
 
-    if (windowFlags[EDITOR_SHOW_MAP_EDITOR]) {
-        MapEditor();
-    }
-    if (windowFlags[EDITOR_SHOW_SAVE_DIALOG]) {
-        SaveDialog();
-    }
-    if (windowFlags[EDITOR_SHOW_LOAD_DIALOG]) {
-        LoadDialog();
-    }
-    ImGui::Begin("Bottom Bar");
-
-    if (windowFlags[EDITOR_SYSTEM_EXPLORER_DIALOG]) {
-        instance->explorer->RenderWindow();
-    }
-
-    ImGui::End();
+glm::vec2 Editor::GetViewPortSize() {
+    return Instance->viewport->ViewportSize;
 }
 
 void Editor::Render() {
     Keybindings();
+
+#if RENDER_BACKEND_OPENGL
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+#endif
+
+#if RENDER_BACKEND_RAYLIB
+    rlImGuiBegin();
+#endif
+
+    menuBar->RenderWindow();
     renderDockingSpace();
 
-    WindowController(this);
 
-    static bool tff = true;
-
-    if (Keyboard::IsKeyPressing(KeyCode::Key_U) && tff) {
-        tff = false;
-        EngineSerializer::DeserializeFileToScene("./assets/maps/brew.json", Scene::ecs);
+    if (menuBar->enabledWindows[EDITOR_SHOW_MAP_EDITOR]) {
+        tilePlacer->RenderWindow();
     }
 
-    if (ImGui::BeginMainMenuBar()) {
-        FileMenu();
-        EntitiesMenu();
-        AssetsMenu();
-        ImGui::EndMainMenuBar();
-    }
+    sceneList->RenderWindow();
+    entityInspector->RenderWindow();
+    logView->RenderWindow();
 
-    if (ImGui::Begin("Properties")) {
-        if (selectedEntityId != -1) {
-            EntityInspector::SetEntity(selectedEntityId);
-            entityInspector->RenderWindow();
-        }
-        ImGui::End();
-    }
+    viewport->RenderWindow();
 
-    SceneList();
-    Draw();
-    fileView->RenderWindow();
-
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    if (ImGui::Begin("Viewport", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
-
-        if (ScreenSize != EditorUtils::GetWindowSize()) {
-            ScreenSize = EditorUtils::GetWindowSize();
-            renderer->SetFrameSize(ScreenSize.x, ScreenSize.y);
-        }
-
-        auto tex = renderer->GetFrame();
-
-        static ImVec2 uv0 = { 0, 1 };
-        static ImVec2 uv1 = { 1, 0 };
-        ImVec2 avail = ImGui::GetContentRegionAvail();
-
-
-        ImGui::Image((void*)tex, avail, uv0, uv1);
-
-        // auto entity = Scene::ecs->entity(draggableEntity);
-        // if (entity.is_valid()) {
-
-        //    auto mPos = Cursor::GetCursorPosition();
-        //    ViewportPos = glm::vec2(ImGui::GetMainViewport()->WorkPos.x, ImGui::GetMainViewport()->WorkPos.y);
-
-        //    glm::vec2 local_mouse_pos(mPos.x - ViewportPos.x, mPos.y - ViewportPos.y);
-        //    glm::vec2 worldPos = EditorUtils::InterpolateToGrid(Cursor::GetCursorWorldPosition(local_mouse_pos), gridSize);
-
-        //    //draggableTransform->pos = worldPos;
-        //    //entity.get_ref<RectTransform>()->pos = worldPos;
-        //}
-
-        ImGui::End();
-        ImGui::PopStyleVar();
-        ImGui::EndFrame();
-    }
-
+#if RENDER_BACKEND_RAYLIB
+    rlImGuiEnd();
+#endif
+#if RENDER_BACKEND_OPENGL
     ImGui::Render();
 
     ImGui::UpdatePlatformWindows();
     ImGui::RenderPlatformWindowsDefault();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+#endif
 }

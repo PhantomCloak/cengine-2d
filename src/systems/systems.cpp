@@ -1,52 +1,43 @@
 #include "systems.h"
+#include "../assetmgr/AssetManager.h"
+#include "../editor/editor.h"
+#include "../io/cursor.h"
 #include "../render/render.h"
+#include <numeric>
+//flecs::query<RectTransformC, Sprite> sortedQuery;
 
-struct RenderObject {
-    std::shared_ptr<RectTransform> transform;
-    std::shared_ptr<Sprite> sprite;
-};
-
-void Systems::Init(flecs::world& ref){
-       ref.component<RectTransform>();
-       ref.component<Sprite>();
-       ref.system<RectTransform, Sprite>("RenderSystem")
-               .iter(&Systems::RenderSystem);
+void Systems::Init(flecs::world& ref) {
+    ref.component<RectTransformC>();
+    ref.component<Sprite>();
+    ref.system<RectTransformC&, Sprite&>("RenderSystem")
+    .iter(&Systems::RenderSystem);
 }
 
-void Systems::RenderSystem(flecs::iter& it, RectTransform* transform, Sprite* sprite) {
-    std::vector<RenderObject> renderSortList;
+
+void Systems::RenderSystem(flecs::iter& it, RectTransformC* transform, Sprite* sprite) {
 
     for (auto i = 0; i < it.count(); i++) {
-        if (it.entity(i).has<DebugTile>()) {
+        if (!it.entity(i).is_alive()) {
             continue;
         }
 
-        RenderObject renderObj = {
-            .sprite = std::make_unique<Sprite>(sprite[i]),
-            .transform = std::make_unique<RectTransform>(transform[i])
-        };
+        // Ensure texture is loaded
+        if (sprite[i].texture == 0) {
+            sprite[i].texture = AssetManager::GetTexture(sprite[i].textureId);
+        }
 
-        renderSortList.push_back(renderObj);
-    }
-
-    std::sort(renderSortList.begin(), renderSortList.end(), [](const RenderObject& a, const RenderObject& b) {
-        return a.sprite->zIndex < b.sprite->zIndex;
-    });
-
-    for (RenderObject& renderObj : renderSortList) {
-            CommancheRenderer::Instance->CDrawImage(renderObj.sprite->texture,
-                            renderObj.transform->pos.x,
-                            renderObj.transform->pos.y,
-                            renderObj.transform->size.x,
-                            renderObj.transform->size.y,
-                            renderObj.transform->rotation,
-                            renderObj.sprite->srcRect.x,
-                            renderObj.sprite->srcRect.y,
-                            renderObj.sprite->srcRect.width,
-                            renderObj.sprite->srcRect.height);
+        CommancheRenderer::Instance->CDrawImage(sprite[i].texture,
+        transform[i].pos.x,
+        transform[i].pos.y,
+        transform[i].size.x,
+        transform[i].size.y,
+        transform[i].rotation,
+        sprite[i].srcRect.x,
+        sprite[i].srcRect.y,
+        sprite[i].srcRect.width,
+        sprite[i].srcRect.height,
+        sprite[i].color);
     }
 
     CommancheRenderer::Instance->DrawGrids();
 }
-
-

@@ -1,7 +1,10 @@
 #include "scene.h"
+#include "../assetmgr/AssetManager.h"
 #include "../ecs/serializer.h"
+#include "../editor/editor.h"
 #include "../game/game.h"
 #include "../io/cursor.h"
+#include "../io/keyboard.h"
 #include "../scripting/lua_manager.h"
 #include "../systems/systems.h"
 
@@ -9,28 +12,15 @@ CommancheRenderer* Scene::renderer = nullptr;
 std::string Scene::currentScenePath = "";
 
 flecs::world Scene::ecs;
-
 #if EDITOR
-Editor* Scene::editor = nullptr;
+Editor* editor = nullptr;
 #endif
 
 void Scene::Init() {
-    ecs.system("RenderStart")
-    .kind(flecs::PreUpdate)
-    .iter([](flecs::iter it) {
-        renderer->RenderStart();
-    });
-
-    ecs.system("RenderEnd")
-    .kind(flecs::PostUpdate)
-    .iter([](flecs::iter it) {
-        renderer->RenderEnd();
-    });
     renderer = new CommancheRenderer();
-
     AssetManager::Initialize(renderer);
+    Systems::Init(ecs);
     LuaManager::InitSandbox();
-
     if (currentScenePath.size() <= 0) {
         Log::Inf("No active scene deteced creating new scene on assets/default.json");
         currentScenePath = "assets/default.json";
@@ -39,8 +29,8 @@ void Scene::Init() {
     LuaManager::RegisterCppToLuaFunc("addTexture", &AssetManager::AddTexture);
 
     LuaManager::LoadLuaFile("./assets/scripts/config.lua");
-    sol::table initCfg = LuaManager::LoadLuaTable("config");
 
+    sol::table initCfg = LuaManager::LoadLuaTable("config");
     sol::table displayCfg = LuaManager::LoadLuaTable("config");
 
     int screenW = displayCfg["resolution"]["width"];
@@ -49,14 +39,13 @@ void Scene::Init() {
     renderer->Initialize("Twelve Villages", screenW, screenH);
     renderer->InitializeShaders("./src/shaders");
 
-    Systems::Init(ecs);
-
 #if EDITOR
+    renderer->isTextureModeEnabled = false;
     editor = new Editor();
     editor->Init(renderer);
 #endif
 
-    Keyboard::Setup(renderer->wnd);
+    Keyboard::Setup();
     Cursor::Setup(renderer->wnd);
 }
 
@@ -77,26 +66,22 @@ void Scene::Destroy() {
 }
 
 void Scene::Render() {
-    // renderer->RenderStart();
-    //  Scene::GetSystem<RenderSystem>().Update();
-    //  Scene::GetSystem<RenderText2D>().Update();
-    //  Scene::GetSystem<PhysicsController>().Update();
-    //  ecs->system<RectTransform, Sprite>("RenderSystem").kind(0).iter(&Systems::RenderSystem);
-    //  Scene::Update();
-    ////ecs->progress();
-    // renderer->RenderEnd();
-
 #if EDITOR
     editor->Render();
 #endif
-
-    renderer->RenderApply();
 }
 
 std::vector<flecs::entity> Scene::GetEntities() {
     std::vector<flecs::entity> entities;
-    ecs.each([&](flecs::entity e, RectTransform& transform) {
+    static auto q = ecs.query_builder<RectTransformC>()
+                    .order_by(0, [](flecs::entity_t e1, const void* ptr1, flecs::entity_t e2, const void* ptr2) {
+                        return (e1 > e2) - (e1 < e2);
+                    })
+                    .build();
+
+    q.each([&](const flecs::entity& e, RectTransformC& transform) {
         entities.push_back(e);
     });
+
     return entities;
 }

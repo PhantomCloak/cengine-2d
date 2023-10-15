@@ -1,9 +1,9 @@
 [submodule "deps/lua-headers"]
 	path = deps/lua-headers
-	url = git@github.com:luapower/lua-headers.git
+	url = https://github.com/luapower/lua-headers.git
 [submodule "deps/sol"]
 	path = deps/sol
-	url = git@github.com:Rapptz/sol.git
+	url = https://github.com/Rapptz/sol.git
 [submodule "libs/imgui"]
 	url = https://github.com/PhantomCloak/imgui
 	path = libs/imgui
@@ -12,7 +12,26 @@
 	url = https://github.com/erincatto/box2d
 [submodule "libs/stb"]
 	path = libs/stb
-	url = git@github.com:nothings/stb.git
+	url = https://github.com/nothings/stb.git
 [submodule "libs/flecs"]
 	path = libs/flecs
-	url = git@github.com:SanderMertens/flecs.git
+	url = https://github.com/SanderMertens/flecs.git
+[submodule "libs/rlImGui"]
+	path = libs/rlImGui
+	url = https://github.com/raylib-extras/rlImGui.git
+[submodule "libs/raylib"]
+	path = libs/raylib
+	url = https://github.com/raysan5/raylib.git
+[submodule "libs/angle"]
+	path = libs/angle
+	url = https://github.com/google/angle.git
+[submodule "libs/nativefiledialog-extended"]
+	path = libs/nativefiledialog-extended
+	url = https://github.com/btzy/nativefiledialog-extended.git
+[submodule "libs/SimpleJSON"]
+	path = libs/SimpleJSON
+	url = https://github.com/nbsdx/SimpleJSON.git
+[submodule "libs/native_message_box"]
+	path = libs/native_message_box
+	url = https://github.com/thegabman/native_message_box.git
+
