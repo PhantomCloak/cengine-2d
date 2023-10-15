@@ -1,38 +1,46 @@
 # cengine-2d
 
-cengine-2d is a hobby game engine project, designed with flexibility and simplicity in mind.
+cengine-2d is a cross-platform OpenGL 2D game engine.
 
 [Watch the progress here](https://www.youtube.com/@ph4nt0m33)
 
 <img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/df993eae-550e-46cd-bef0-a2e40ad93036">
+<img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/240c102e-9437-443b-8b44-8802dadf94ce">
 
 
-## Setup
-
-```sh
- (mkdir build && cd build)
- cmake ..
- make
-```
 
 ### Compiler Flags
 
 | FLAG | DESC  
 | :---:   | :---: |
 | -DENGINE_EDITOR | Compile with editor & tools   | 
-| --DRENDER_BACKEND_RAYLIB=1 | Set rendering backend to raylib  | 
-| --DRENDER_BACKEND_OPENGL=1 | Set rendering backend to OpenGL  |
-| --DCUSTOMIZE_BUILD=1 -DOPENGL_VERSION="ES 2.0" | hint raylib to use (Angle)[https://github.com/google/angle] |
+| --DRENDER_BACKEND_RAYLIB=1 | Set Rendering Backend to raylib  | 
+| --DRENDER_BACKEND_OPENGL=1 | Set Rendering Backend to OpenGL  |
+| --DRAYLIB_ANGLE_SUPPORT=1 | Enable [Angle](https://github.com/google/angle) Support for raylib |
 
-### Dependencies MacOS
+## Installation
 
+
+### UNIX
+```sh
+ (mkdir build && cd build)
+ cmake ..
+ make
 ```
-brew install glfw
-brew install lua
-brew install luarocks
-luarocks install dkjson
-brew install pkg-config
-brew install glm
+
+### Windows (Visual Studio)
+```
+Visual Studio -> Open -> CMake -> CMakeLists.txt
+Visual Studio -> Project -> CMake Settings for Commanche2D -> CMake Variables -> Pick OpenGL or Raylib backend
+```
+
+### VCPKG Dependencie
+```
+vcpkg install lua
+vcpkg install sol2
+vcpkg install glm
+vcpkg install glfw3 -- if OpenGL
+vcpkg install freetype - if OpenGL
 ```
 ## Features
 

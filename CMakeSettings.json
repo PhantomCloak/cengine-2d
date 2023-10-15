@@ -1,0 +1,27 @@
+﻿{
+  "configurations": [
+    {
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeCommandArgs": " -DCMAKE_TOOLCHAIN_FILE=C:/Users/Test/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "variables": [
+        {
+          "name": "RENDER_BACKEND_RAYLIB",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "ENGINE_EDITOR",
+          "value": "True",
+          "type": "BOOL"
+        }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 #define LOGGER_H
 
 #include <vector>
+#include <memory>
 #include <string>
 
 enum LogType {

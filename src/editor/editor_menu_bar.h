@@ -1,5 +1,7 @@
 #pragma once
 #include "editor_window.h"
+#include <memory>
+#include <unordered_map>
 
 #define EDITOR_SHOW_MAP_EDITOR 1
 #define EDITOR_SHOW_SAVE_DIALOG 2
