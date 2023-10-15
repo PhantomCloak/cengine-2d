@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(Commanche2D)
-# Options
+
 option(RENDER_BACKEND_RAYLIB "Use the Raylib backend" OFF)
 option(RENDER_BACKEND_OPENGL "Use the OpenGL backend" OFF)
-option(ENGINE_EDITOR "Enable the engine editor" OFF)
+option(ENGINE_EDITOR "Compile with editor" OFF)
+option(RAYLIB_ANGLE_SUPPORT "Enable ANGLE support in Raylib backend" OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,10 +16,21 @@ if(UNIX)
     set(CMAKE_OBJC_FLAGS "${CMAKE_OBJC_FLAGS} -x objective-c")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
 endif()
-# Additional definitions
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        set(CMAKE_OBJC_FLAGS "${CMAKE_OBJC_FLAGS} -x objective-c")
+    endif()
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    add_definitions(/W4)
+    add_definitions(/WX)
+    add_definitions(/EHsc)
+endif()
+
 add_definitions(-DPLATFORM_DESKTOP)
 
-# Find glm package using vcpkg
 find_package(glm CONFIG REQUIRED)
 find_package(lua CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
@@ -39,12 +51,6 @@ include_directories(
     "./libs/flecs/include"
     "./libs/nativefiledialog-extended/src/include"
     "./libs/native_message_box/include"
-)
-
-# Linker directories
-link_directories(
-  /opt/homebrew/lib
-  "./libs"
 )
 
 # Source files
@@ -77,11 +83,16 @@ add_subdirectory(libs/flecs)
 
 if(RENDER_BACKEND_RAYLIB)
     add_definitions(-DRENDER_BACKEND_RAYLIB=1)
-    add_subdirectory(libs/raylib)
 
-    set(ANGLE_LIBRARY_DIR libs/angle/out/Release)
-    find_library(ANGLE_GLESv2_LIBRARY libGLESv2.dylib PATHS ${ANGLE_LIBRARY_DIR})
-    find_library(ANGLE_EGL_LIBRARY libEGL.dylib PATHS ${ANGLE_LIBRARY_DIR})
+    if(RAYLIB_ANGLE_SUPPORT)
+        set(ANGLE_LIBRARY_DIR libs/angle/out/Release)
+
+        find_library(ANGLE_GLESv2_LIBRARY NAMES GLESv2 PATHS ${ANGLE_LIBRARY_DIR})
+        find_library(ANGLE_EGL_LIBRARY NAMES EGL PATHS ${ANGLE_LIBRARY_DIR})
+        add_definitions(-DCUSTOMIZE_BUILD=1 -DOPENGL_VERSION="ES 2.0")
+    endif()
+
+    add_subdirectory(libs/raylib)
 
     file(GLOB RAYLIB_SOURCES 
             "./src/io/backends/raylib/*.cpp"
@@ -94,19 +105,12 @@ if(RENDER_BACKEND_RAYLIB)
     list(APPEND SOURCES ${RAYLIB_SOURCES} ${IMGUI_SOURCES})
 endif()
 
+
 if(RENDER_BACKEND_OPENGL)
     add_definitions(-DRENDER_BACKEND_OPENGL=1)
     
-    if(WIN32)
-        # Use vcpkg to handle GLFW3 and Freetype on Windows
-        find_package(glfw3 CONFIG REQUIRED)
-        find_package(freetype CONFIG REQUIRED)
-    else()
-        # Use pkg-config on non-Windows platforms
-        find_package(PkgConfig REQUIRED)
-        pkg_check_modules(GLFW3 REQUIRED glfw3)
-        pkg_check_modules(FREETYPE2 REQUIRED freetype2)
-    endif()
+    find_package(glfw3 CONFIG REQUIRED)
+    find_package(freetype CONFIG REQUIRED)
 endif()
 
 if(ENGINE_EDITOR)
@@ -130,9 +134,14 @@ endif()
 # Build targets
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+
 if(WIN32)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} PRIVATE nfd raylib glm::glm lua glfw sol2 ${LUA_LIBRARIES})
-else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE nfd raylib ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY} lua "-framework IOKit" "-framework Appkit" "-framework UniformTypeIdentifiers" "-framework Cocoa" ${FREETYPE2_LIBRARIES} ${GLFW3_LIBRARIES})
+elseif(UNIX)
+    if(RAYLIB_ANGLE_SUPPORT)
+        target_link_libraries(${PROJECT_NAME} PRIVATE nfd raylib ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY} lua sol2 "-framework IOKit" "-framework Appkit" "-framework UniformTypeIdentifiers" "-framework Cocoa" ${FREETYPE2_LIBRARIES} ${GLFW3_LIBRARIES} ${LUA_LIBRARIES})
+    else()
+        target_link_libraries(${PROJECT_NAME} PRIVATE nfd raylib lua sol2 "-framework IOKit" "-framework Appkit" "-framework UniformTypeIdentifiers" "-framework Cocoa" ${FREETYPE2_LIBRARIES} ${GLFW3_LIBRARIES} ${LUA_LIBRARIES})
+    endif()
 endif()
