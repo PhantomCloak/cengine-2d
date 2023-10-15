@@ -29,16 +29,16 @@ void Game::Initialize() {
 
 int selectedTextureId;
 void Game::Setup() {
-    std::vector<std::string> files = FileSys::GetFilesInDirectory("./assets/tile_maps");
+    //std::vector<std::string> files = FileSys::GetFilesInDirectory("./assets/tile_maps");
 
-    std::cout << "Size of Sprite: " << sizeof(Sprite) << std::endl;
+    //std::cout << "Size of Sprite: " << sizeof(Sprite) << std::endl;
 
-    for (auto file : files) {
-        if (FileSys::GetFileExtension(file) != "png")
-            continue;
+    //for (auto file : files) {
+    //    if (FileSys::GetFileExtension(file) != "png")
+    //        continue;
 
-        AssetManager::AddTexture(FileSys::GetFileName(file), file);
-    }
+    //    AssetManager::AddTexture(FileSys::GetFileName(file), file);
+    //}
 
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/pre_load");
     Log::Warn("Engine is starting");
@@ -70,7 +70,7 @@ void Game::Update() {
     int timeToWait = FRAME_TIME_LENGTH - (getTime() - tickLastFrame);
 
     if (timeToWait > 0 && timeToWait <= FRAME_TIME_LENGTH) {
-        sleepProgram(timeToWait / 4);
+        //sleepProgram(timeToWait / 4);
     }
 
     tickLastFrame = getTime();

@@ -5,7 +5,9 @@
 #include "../../scene/scene.h"
 #include "../editor_utils.h"
 #include <set>
-
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 Editor* EditorSystems::editorRef;
 flecs::entity_t lastSelectedEntity = 0;
 

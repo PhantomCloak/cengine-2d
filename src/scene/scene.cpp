@@ -20,21 +20,24 @@ void Scene::Init() {
     renderer = new CommancheRenderer();
     AssetManager::Initialize(renderer);
     Systems::Init(ecs);
-    LuaManager::InitSandbox();
+    //LuaManager::InitSandbox();
     if (currentScenePath.size() <= 0) {
         Log::Inf("No active scene deteced creating new scene on assets/default.json");
         currentScenePath = "assets/default.json";
     }
 
-    LuaManager::RegisterCppToLuaFunc("addTexture", &AssetManager::AddTexture);
+    //LuaManager::RegisterCppToLuaFunc("addTexture", &AssetManager::AddTexture);
 
-    LuaManager::LoadLuaFile("./assets/scripts/config.lua");
+    //LuaManager::LoadLuaFile("./assets/scripts/config.lua");
 
-    sol::table initCfg = LuaManager::LoadLuaTable("config");
-    sol::table displayCfg = LuaManager::LoadLuaTable("config");
+    //sol::table initCfg = LuaManager::LoadLuaTable("config");
+    //sol::table displayCfg = LuaManager::LoadLuaTable("config");
 
-    int screenW = displayCfg["resolution"]["width"];
-    int screenH = displayCfg["resolution"]["height"];
+    //int screenW = displayCfg["resolution"]["width"];
+    //int screenH = displayCfg["resolution"]["height"];
+
+    int screenW = 1920;
+    int screenH = 1080;
 
     renderer->Initialize("Twelve Villages", screenW, screenH);
     renderer->InitializeShaders("./src/shaders");

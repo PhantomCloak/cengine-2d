@@ -38,8 +38,9 @@ void CommancheRenderer::UpdateRenderTexture(glm::vec2 size) {
     UnloadRenderTexture(viewTexture);
     viewTexture = LoadRenderTexture(size.x, size.y);
 
-    camX.target = (Vector2){ size.x / 2.0f, size.y / 2.0f };
-    // camX.offset = (Vector2){ size.x / 2.0f, size.y / 2.0f };
+
+    Vector2 targetSize = Vector2({ size.x / 2, size.y / 2 });
+    camX.target = targetSize;
     camX.zoom = 1.0f;
 }
 void CommancheRenderer::Initialize(const std::string& title, int windowWidth, int windowHeight) {
@@ -47,7 +48,7 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
 
     std::string titleStr = title + " - Backend [Raylib]";
     InitWindow(1920, 1080, titleStr.c_str());
-    SetTargetFPS(80);
+    //SetTargetFPS(80);
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     rlImGuiSetup(true);
 }
@@ -82,7 +83,10 @@ void CommancheRenderer::DrawGrids() {
     int gridCountY = (int)((visibleBottom - visibleTop) / gridHeight) + 1;
 
     // Ensure we have enough vertices memory
-    Vector2 vertices[(gridCountX + gridCountY + 2) * 2];
+    //Vector2 vertices[(gridCountX + gridCountY + 2) * 2];
+    std::vector<Vector2> vertices((gridCountX + gridCountY + 2) * 2);
+
+
 
     int index = 0;
     for (int i = 0; i <= gridCountY; i++) {

@@ -78,7 +78,7 @@ void FileSys::OpenFilePickerDialog(std::function<void(std::string filePath)> cal
     NFD_Quit();
 }
 
-void FileSys::CopyFile(std::string source, std::string destination) {
+void FileSys::CopyFileC(std::string source, std::string destination) {
     std::ifstream src(source, std::ios::binary);
     std::ofstream dst(destination, std::ios::binary);
     dst << src.rdbuf();

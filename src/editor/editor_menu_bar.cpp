@@ -142,7 +142,7 @@ void EditorMenuBar::RenderWindow() {
 
         float fps = GetFPS();
         ImGui::SameLine();
-        ImGui::Text("FPS: %.1f", (float)60);
+        ImGui::Text("FPS: %.1f", fps);
     }
     ImGui::EndMainMenuBar();
 

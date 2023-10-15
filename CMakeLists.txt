@@ -1,25 +1,27 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(Commanche2D)
-
 # Options
 option(RENDER_BACKEND_RAYLIB "Use the Raylib backend" OFF)
 option(RENDER_BACKEND_OPENGL "Use the OpenGL backend" OFF)
 option(ENGINE_EDITOR "Enable the engine editor" OFF)
 
-# Set the C++ standard and compiler flags
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -g")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
-set(CMAKE_OBJC_FLAGS "${CMAKE_OBJC_FLAGS} -x objective-c")
 
+if(UNIX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -g")
+    set(CMAKE_OBJC_FLAGS "${CMAKE_OBJC_FLAGS} -x objective-c")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
+endif()
 # Additional definitions
 add_definitions(-DPLATFORM_DESKTOP)
 
-# Third party packages
-find_package(PkgConfig REQUIRED)
+# Find glm package using vcpkg
+find_package(glm CONFIG REQUIRED)
+find_package(lua CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 
 # Include directories
 include_directories(
@@ -57,6 +59,7 @@ file(GLOB ENGINE_SOURCES
     "./src/systems/*.cpp"
     "./src/scene/*.cpp"
     "./src/common/*.cpp"
+    "./libs/flecs/*.c"
     "./src/assetmgr/*.cpp"
     "./src/scripting/*.cpp"
     "./libs/SimpleJSON/*.cpp"
@@ -69,6 +72,7 @@ set(SOURCES ${ENGINE_SOURCES})
 # Subdirectories
 add_subdirectory(libs/nativefiledialog-extended)
 add_subdirectory(libs/native_message_box)
+add_subdirectory(libs/flecs)
 
 if(RENDER_BACKEND_RAYLIB)
     add_definitions(-DRENDER_BACKEND_RAYLIB=1)
@@ -91,16 +95,17 @@ endif()
 
 if(RENDER_BACKEND_OPENGL)
     add_definitions(-DRENDER_BACKEND_OPENGL=1)
-    pkg_check_modules(GLFW3 REQUIRED glfw3)
-    pkg_check_modules(FREETYPE2 REQUIRED freetype2)
-
-    file(GLOB OPENGL_SOURCES 
-            "./libs/glad/src/glad.c"
-            "./src/io/backends/opengl/*.cpp"
-            "./src/render/backends/opengl/*.cpp"
-            "./src/assetmgr/backends/opengl/*.cpp")
-
-    list(APPEND SOURCES ${OPENGL_SOURCES})
+    
+    if(WIN32)
+        # Use vcpkg to handle GLFW3 and Freetype on Windows
+        find_package(glfw3 CONFIG REQUIRED)
+        find_package(freetype CONFIG REQUIRED)
+    else()
+        # Use pkg-config on non-Windows platforms
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(GLFW3 REQUIRED glfw3)
+        pkg_check_modules(FREETYPE2 REQUIRED freetype2)
+    endif()
 endif()
 
 if(ENGINE_EDITOR)
@@ -121,11 +126,12 @@ if(ENGINE_EDITOR)
     list(APPEND SOURCES ${EDITOR_SOURCES})
 endif()
 
-file(GLOB FLECS_SOURCES libs/flecs/*.c libs/flecs/*.cpp)
-add_library(flecs STATIC ${FLECS_SOURCES})
-
 # Build targets
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} nfd raylib ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY} lua "-framework IOKit" "-framework Cocoa" flecs ${FREETYPE2_LIBRARIES} ${GLFW3_LIBRARIES})
-
+if(WIN32)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} PRIVATE nfd raylib glm::glm lua glfw ${LUA_LIBRARIES})
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE nfd raylib ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY} lua "-framework IOKit" "-framework Appkit" "-framework UniformTypeIdentifiers" "-framework Cocoa" ${FREETYPE2_LIBRARIES} ${GLFW3_LIBRARIES})
+endif()
