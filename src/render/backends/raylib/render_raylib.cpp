@@ -67,8 +67,8 @@ void CommancheRenderer::DrawGrids() {
     static int lastScreenHeight = -1;
 
 
-    float gridWidth = 25;
-    float gridHeight = 25;
+    float gridWidth = 5;
+    float gridHeight = 5;
 
     // Calculate visible area bounds
     float visibleLeft = 0;
@@ -76,7 +76,7 @@ void CommancheRenderer::DrawGrids() {
     float visibleRight = (camX.target.x * 2);
     float visibleBottom = (camX.target.y * 2);
 
-    // CoordinateCalculator::ConvertMetersToPixels(gridWidth, gridHeight);
+    CoordinateCalculator::ConvertMetersToPixels(gridWidth, gridHeight);
 
     // Calculate how many grid lines to draw based on visible area
     int gridCountX = (int)((visibleRight - visibleLeft) / gridWidth) + 1;

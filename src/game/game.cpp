@@ -29,28 +29,28 @@ void Game::Initialize() {
 
 int selectedTextureId;
 void Game::Setup() {
-    //std::vector<std::string> files = FileSys::GetFilesInDirectory("./assets/tile_maps");
+    std::vector<std::string> files = FileSys::GetFilesInDirectory("C:\\Users\\Test\\Desktop\\cengine\\cengine-2d\\assets\\tile_maps");
 
-    //std::cout << "Size of Sprite: " << sizeof(Sprite) << std::endl;
+    std::cout << "Size of Sprite: " << sizeof(Sprite) << std::endl;
 
-    //for (auto file : files) {
-    //    if (FileSys::GetFileExtension(file) != "png")
-    //        continue;
+    for (auto file : files) {
+        if (FileSys::GetFileExtension(file) != "png")
+            continue;
 
-    //    AssetManager::AddTexture(FileSys::GetFileName(file), file);
-    //}
+        AssetManager::AddTexture(FileSys::GetFileName(file), file);
+    }
 
-    LuaManager::LoadLuaFilesInDirectory("./assets/scripts/pre_load");
+    LuaManager::LoadLuaFilesInDirectory("C:\\Users\\Test\\Desktop\\cengine\\cengine-2d\\assets\\scripts\\pre_load");
     Log::Warn("Engine is starting");
 
     Physics::Initialize(Scene::ecs);
     Log::Warn("Physics Initialized");
-    LuaManager::LoadLuaFilesInDirectory("./assets/scripts/after_load");
+    LuaManager::LoadLuaFilesInDirectory("C:\\Users\\Test\\Desktop\\cengine\\cengine-2d\\assets\\scripts\\after_load");
 
     flecs::entity obj = Scene::CreateEntity("door_tile2");
-    ////selectedTextureId = AssetManager::GetTexture("desert");
+    selectedTextureId = AssetManager::GetTexture("desert");
 
-    obj.set<RectTransformC>({ glm::vec2(50, 28), glm::vec2(500, 500) });
+    obj.set<RectTransformC>({ glm::vec2(50, 28), glm::vec2(120, 80) });
     obj.set<Sprite>({ "desert", 20, 0, 0, 1920, 1080 });
 
     //selectedTextureId = AssetManager::GetTexture("box");
@@ -70,7 +70,7 @@ void Game::Update() {
     int timeToWait = FRAME_TIME_LENGTH - (getTime() - tickLastFrame);
 
     if (timeToWait > 0 && timeToWait <= FRAME_TIME_LENGTH) {
-        //sleepProgram(timeToWait / 4);
+        sleepProgram(timeToWait / 4);
     }
 
     tickLastFrame = getTime();

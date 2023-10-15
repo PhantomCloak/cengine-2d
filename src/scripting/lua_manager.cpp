@@ -33,6 +33,11 @@ void LuaManager::InitSandbox() {
 }
 
 void LuaManager::LoadLuaFilesInDirectory(std::string path) {
+    for (const auto& entry : std::filesystem::directory_iterator(path)) {
+        std::string entryPath = entry.path().string();
+        luaState.script_file(entryPath);
+        continue;
+    }
 }
 
 void LuaManager::LoadLuaFile(const std::string path) {

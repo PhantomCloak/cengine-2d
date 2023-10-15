@@ -26,7 +26,7 @@ void Scene::Init() {
         currentScenePath = "assets/default.json";
     }
 
-    //LuaManager::RegisterCppToLuaFunc("addTexture", &AssetManager::AddTexture);
+    LuaManager::RegisterCppToLuaFunc("addTexture", &AssetManager::AddTexture);
 
     //LuaManager::LoadLuaFile("./assets/scripts/config.lua");
 

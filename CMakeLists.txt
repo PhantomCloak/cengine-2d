@@ -22,6 +22,7 @@ add_definitions(-DPLATFORM_DESKTOP)
 find_package(glm CONFIG REQUIRED)
 find_package(lua CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
+find_package(sol2 CONFIG REQUIRED)
 
 # Include directories
 include_directories(
@@ -131,7 +132,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 if(WIN32)
     target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} PRIVATE nfd raylib glm::glm lua glfw ${LUA_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} PRIVATE nfd raylib glm::glm lua glfw sol2 ${LUA_LIBRARIES})
 else()
     target_link_libraries(${PROJECT_NAME} PRIVATE nfd raylib ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY} lua "-framework IOKit" "-framework Appkit" "-framework UniformTypeIdentifiers" "-framework Cocoa" ${FREETYPE2_LIBRARIES} ${GLFW3_LIBRARIES})
 endif()
