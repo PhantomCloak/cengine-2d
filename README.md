@@ -1,6 +1,6 @@
 # cengine-2d
 
-cengine-2d is a hobby game engine project, designed with flexibility and simplicity in mind.
+cengine-2d is a cross-platform OpenGL 2D game engine.
 
 [Watch the progress here](https://www.youtube.com/@ph4nt0m33)
 
