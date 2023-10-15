@@ -29,7 +29,7 @@ void Game::Initialize() {
 
 int selectedTextureId;
 void Game::Setup() {
-    std::vector<std::string> files = FileSys::GetFilesInDirectory("C:\\Users\\Test\\Desktop\\cengine\\cengine-2d\\assets\\tile_maps");
+    std::vector<std::string> files = FileSys::GetFilesInDirectory("./assets/tile_maps");
 
     std::cout << "Size of Sprite: " << sizeof(Sprite) << std::endl;
 
@@ -40,12 +40,12 @@ void Game::Setup() {
         AssetManager::AddTexture(FileSys::GetFileName(file), file);
     }
 
-    LuaManager::LoadLuaFilesInDirectory("C:\\Users\\Test\\Desktop\\cengine\\cengine-2d\\assets\\scripts\\pre_load");
+    LuaManager::LoadLuaFilesInDirectory("./assets/scripts/pre_load");
     Log::Warn("Engine is starting");
 
     Physics::Initialize(Scene::ecs);
     Log::Warn("Physics Initialized");
-    LuaManager::LoadLuaFilesInDirectory("C:\\Users\\Test\\Desktop\\cengine\\cengine-2d\\assets\\scripts\\after_load");
+    LuaManager::LoadLuaFilesInDirectory("./assets/scripts/after_load");
 
     flecs::entity obj = Scene::CreateEntity("door_tile2");
     selectedTextureId = AssetManager::GetTexture("desert");
@@ -53,17 +53,17 @@ void Game::Setup() {
     obj.set<RectTransformC>({ glm::vec2(50, 28), glm::vec2(120, 80) });
     obj.set<Sprite>({ "desert", 20, 0, 0, 1920, 1080 });
 
-    //selectedTextureId = AssetManager::GetTexture("box");
-    //flecs::entity floor = Scene::CreateEntity("floor");
-    //floor.set<RectTransformC>({ glm::vec2(50, 40), glm::vec2(2, 10), glm::vec2(1, 1), 90 });
-    //floor.set<Sprite>({ "box", 21, 0, 0, 64, 64 });
-    //floor.set<RigidBody>({ true, 0.25, true });
+    // selectedTextureId = AssetManager::GetTexture("box");
+    // flecs::entity floor = Scene::CreateEntity("floor");
+    // floor.set<RectTransformC>({ glm::vec2(50, 40), glm::vec2(2, 10), glm::vec2(1, 1), 90 });
+    // floor.set<Sprite>({ "box", 21, 0, 0, 64, 64 });
+    // floor.set<RigidBody>({ true, 0.25, true });
 
 
-    //flecs::entity floor2 = Scene::CreateEntity("floor2");
-    //floor2.set<RectTransformC>({ glm::vec2(60, 30), glm::vec2(2, 10), glm::vec2(1, 1), 0 });
-    //floor2.set<Sprite>({ "box", 22, 0, 0, 64, 64 });
-    //floor2.set<RigidBody>({ true, 0.25, true });
+    // flecs::entity floor2 = Scene::CreateEntity("floor2");
+    // floor2.set<RectTransformC>({ glm::vec2(60, 30), glm::vec2(2, 10), glm::vec2(1, 1), 0 });
+    // floor2.set<Sprite>({ "box", 22, 0, 0, 64, 64 });
+    // floor2.set<RigidBody>({ true, 0.25, true });
 }
 
 void Game::Update() {
@@ -75,9 +75,7 @@ void Game::Update() {
 
     tickLastFrame = getTime();
 
-    if(Keyboard::IsKeyPressed(KEY_D))
-    {
-
+    if (Keyboard::IsKeyPressed(KEY_D)) {
     }
 
     Scene::Update();
