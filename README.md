@@ -4,7 +4,8 @@ cengine-2d is a hobby game engine project, designed with flexibility and simplic
 
 [Watch the progress here](https://www.youtube.com/@ph4nt0m33)
 
-![image](https://github.com/PhantomCloak/cengine-2d/assets/34552014/dacf1fcd-3116-49ef-ad8c-ef6c88228ac0)
+<img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/df993eae-550e-46cd-bef0-a2e40ad93036">
+
 
 ## Setup
 
