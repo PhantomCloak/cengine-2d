@@ -155,7 +155,7 @@ void TileMapImporter::RenderWindow() {
 
         std::string fileCopyPathDestination = AssetManager::GetAssetRootPath() + "tile_maps/" + fileNameResult;
 
-        FileSys::CopyFileC(filePathResult, fileCopyPathDestination);
+        FileSys::CCopyFile(filePathResult, fileCopyPathDestination);
 
         FileSys::OpenFileSaveDialog(fileNameResult + ".json", FileSys::GetParentDirectory(fileCopyPathDestination), [&](std::string filePath) {
             std::ofstream file(filePath);
