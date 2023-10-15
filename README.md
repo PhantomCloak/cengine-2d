@@ -16,7 +16,7 @@ cengine-2d is a cross-platform OpenGL 2D game engine.
 | -DENGINE_EDITOR | Compile with editor & tools   | 
 | --DRENDER_BACKEND_RAYLIB=1 | Set Rendering Backend to raylib  | 
 | --DRENDER_BACKEND_OPENGL=1 | Set Rendering Backend to OpenGL  |
-| --DRAYLIB_ANGLE_SUPPORT=1 | Enable Angle Support [Angle](https://github.com/google/angle) |
+| --DRAYLIB_ANGLE_SUPPORT=1 | Enable [Angle](https://github.com/google/angle) Support for raylib |
 
 ## Installation
 
