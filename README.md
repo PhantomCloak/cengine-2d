@@ -55,3 +55,6 @@ Implements Box2D for game object physics and collisions.
 ### Render & Shading
 - Raylib for rendering, with ANGLE support for platform compatibility.
 - A custom OpenGL renderer for more specific rendering needs.
+
+#### Animations (WIP)
+Native animation designer
