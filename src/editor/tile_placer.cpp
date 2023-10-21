@@ -141,6 +141,9 @@ void TilePlacer::RenderWindow() {
             }
         }
 
+        if (slice <= 0)
+            slice = 1;
+
         if ((placedCount % slice) == 0) {
             ImGui::NewLine();
         }
@@ -149,7 +152,11 @@ void TilePlacer::RenderWindow() {
         ImVec2 uv1 = ImVec2(EditorUtils::pixelCordToUvX2((currentColumn + 1) * tileSizeW, selectedMafInf.width), EditorUtils::pixelCordToUvY2((currentRow + 1) * tileSizeH, selectedMafInf.height));
 
 
+#if RENDER_BACKEND_RAYLIB
         if (ImGui::ImageButton(identifier.c_str(), (void*)&selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
+#elif RENDER_BACKEND_OPENGL
+        if (ImGui::ImageButton(identifier.c_str(), (void*)selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
+#endif
             Log::Warn("Clicked on tile " + identifier);
             flecs::entity piece = Scene::CreateEntity("tile" + std::to_string(zIndexStart));
 

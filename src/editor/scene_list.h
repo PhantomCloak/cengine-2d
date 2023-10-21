@@ -1,6 +1,7 @@
 #pragma once
 #include "editor_window.h"
 #include "flecs.h"
+#include <functional>
 
 class SceneList : public EditorWindow {
   public:

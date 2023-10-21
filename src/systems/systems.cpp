@@ -3,6 +3,7 @@
 #include "../editor/editor.h"
 #include "../io/cursor.h"
 #include "../render/render.h"
+#include "../io/keyboard.h"
 #include <numeric>
 //flecs::query<RectTransformC, Sprite> sortedQuery;
 
@@ -39,5 +40,12 @@ void Systems::RenderSystem(flecs::iter& it, RectTransformC* transform, Sprite* s
         sprite[i].color);
     }
 
-    CommancheRenderer::Instance->DrawGrids();
+    static bool drawGrid = false;
+    if(Keyboard::IsKeyPressed(Key_C)) {
+      Log::Inf("C key pressed");
+      drawGrid = !drawGrid;
+    }
+
+    if(drawGrid)
+      CommancheRenderer::Instance->DrawGrids();
 }

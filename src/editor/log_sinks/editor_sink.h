@@ -1,5 +1,6 @@
 #pragma once
 #include "../../log/log.h"
+#include <functional>
 
 class EditorSink : public LogSink {
     public:

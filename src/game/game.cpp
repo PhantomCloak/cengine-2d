@@ -47,38 +47,31 @@ void Game::Setup() {
     Log::Warn("Physics Initialized");
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/after_load");
 
+    flecs::entity objC = Scene::CreateEntity("door_tile3");
+    objC.set<RectTransformC>({ glm::vec2(0, 0), glm::vec2(192 * 2, 108 * 2) });
+    objC.set<Sprite>({ "box", 20, 0, 0, 16, 16 });
+
     flecs::entity obj = Scene::CreateEntity("door_tile2");
-    ////selectedTextureId = AssetManager::GetTexture("desert");
-
-    obj.set<RectTransformC>({ glm::vec2(50, 28), glm::vec2(500, 500) });
+    obj.set<RectTransformC>({ glm::vec2(0, 0), glm::vec2(175, 87) });
     obj.set<Sprite>({ "desert", 20, 0, 0, 1920, 1080 });
-
-    //selectedTextureId = AssetManager::GetTexture("box");
-    //flecs::entity floor = Scene::CreateEntity("floor");
-    //floor.set<RectTransformC>({ glm::vec2(50, 40), glm::vec2(2, 10), glm::vec2(1, 1), 90 });
-    //floor.set<Sprite>({ "box", 21, 0, 0, 64, 64 });
-    //floor.set<RigidBody>({ true, 0.25, true });
-
-
-    //flecs::entity floor2 = Scene::CreateEntity("floor2");
-    //floor2.set<RectTransformC>({ glm::vec2(60, 30), glm::vec2(2, 10), glm::vec2(1, 1), 0 });
-    //floor2.set<Sprite>({ "box", 22, 0, 0, 64, 64 });
-    //floor2.set<RigidBody>({ true, 0.25, true });
 }
 
 void Game::Update() {
     int timeToWait = FRAME_TIME_LENGTH - (getTime() - tickLastFrame);
-
+    static int fps = 0;
+    static int fpsLastCheck = 0;
+    fps++;
     if (timeToWait > 0 && timeToWait <= FRAME_TIME_LENGTH) {
-        sleepProgram(timeToWait / 4);
+        sleepProgram(timeToWait);
+    }
+
+    if ((getTime() - fpsLastCheck) > 1000) {
+        printf("FPS: %d\n", fps);
+        fps = 0;
+        fpsLastCheck = getTime();
     }
 
     tickLastFrame = getTime();
-
-    if(Keyboard::IsKeyPressed(KEY_D))
-    {
-
-    }
 
     Scene::Update();
 

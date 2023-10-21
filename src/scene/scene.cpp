@@ -28,13 +28,8 @@ void Scene::Init() {
 
     LuaManager::RegisterCppToLuaFunc("addTexture", &AssetManager::AddTexture);
 
-    LuaManager::LoadLuaFile("./assets/scripts/config.lua");
-
-    sol::table initCfg = LuaManager::LoadLuaTable("config");
-    sol::table displayCfg = LuaManager::LoadLuaTable("config");
-
-    int screenW = displayCfg["resolution"]["width"];
-    int screenH = displayCfg["resolution"]["height"];
+    int screenW = 1920;
+    int screenH = 1080;
 
     renderer->Initialize("Twelve Villages", screenW, screenH);
     renderer->InitializeShaders("./src/shaders");

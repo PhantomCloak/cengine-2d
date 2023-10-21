@@ -4,11 +4,13 @@
 #include "vao.h"
 #include "vbo.h"
 #include <glm/glm.hpp>
+#include "../../../render_primitives.h"
 
 
 class GLShape {
     public:
     GLShape(float vertices[], int verticesSize, Shader* shader);
+    ~GLShape();
     // void SetTexture(int texturId);
     void SetProjection(glm::mat4& projection);
     void Translate(glm::vec2 pos);

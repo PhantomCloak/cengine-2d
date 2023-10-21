@@ -63,10 +63,9 @@ std::string AssetManager::GetTexture(int textureId) {
 
 TextureInf AssetManager::GetTextureInf(const std::string& assetId) {
     Texture2D texture = textureMap[assetId];
-    TextureInf inf = {
-        .width = texture.width,
-        .height = texture.height
-    };
+    TextureInf inf;
+    inf.height = texture.height;
+    inf.width = texture.width;
     return inf;
 }
 

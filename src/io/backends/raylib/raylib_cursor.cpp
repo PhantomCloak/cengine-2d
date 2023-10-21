@@ -4,9 +4,9 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-GLFWwindow* Cursor::wnd;
+//GLFWwindow* Cursor::wnd;
 void Cursor::Setup(void* window) {
-    wnd = (GLFWwindow*)window;
+    //wnd = (GLFWwindow*)window;
 }
 
 glm::vec2 Cursor::GetCursorPosition() {

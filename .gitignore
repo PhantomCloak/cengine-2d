@@ -41,3 +41,4 @@ CPackSourceConfig.cmake
 *.project
 *.user
 *.vscode/
+.vs/

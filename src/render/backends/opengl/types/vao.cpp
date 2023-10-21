@@ -15,6 +15,20 @@ void VAO::LinkAttrib(VBO* VBO, GLuint layout, GLuint numComponents, GLenum type,
     Unbind();
 }
 
+void VAO::LinkAttrib(VBO* VBO, VertexLayout layout) {
+    Bind();
+    VBO->Bind();
+
+    const auto& descriptors = layoutDescriptors.at(layout);
+    for (const auto& desc : descriptors) {
+        glVertexAttribPointer(desc.layout, desc.numComponents, desc.type, GL_FALSE, desc.stride, desc.offset);
+        glEnableVertexAttribArray(desc.layout);
+    }
+
+    VBO->Unbind();
+    Unbind();
+}
+
 // Binds the VAO
 void VAO::Bind() {
     glBindVertexArray(ID);

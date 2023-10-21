@@ -2,26 +2,33 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Commanche2D)
 
-# Options
 option(RENDER_BACKEND_RAYLIB "Use the Raylib backend" OFF)
 option(RENDER_BACKEND_OPENGL "Use the OpenGL backend" OFF)
-option(ENGINE_EDITOR "Enable the engine editor" OFF)
+option(ENGINE_EDITOR "Compile with editor" OFF)
+option(RAYLIB_ANGLE_SUPPORT "Enable ANGLE support in Raylib backend" OFF)
 
-# Set the C++ standard and compiler flags
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -g")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
-set(CMAKE_OBJC_FLAGS "${CMAKE_OBJC_FLAGS} -x objective-c")
 
-# Additional definitions
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        set(CMAKE_OBJC_FLAGS "${CMAKE_OBJC_FLAGS} -x objective-c")
+    endif()
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    add_definitions(/W4)
+    add_definitions(/EHsc)
+endif()
+
 add_definitions(-DPLATFORM_DESKTOP)
 
-# Third party packages
-find_package(PkgConfig REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(lua CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+find_package(sol2 CONFIG REQUIRED)
 
-# Include directories
 include_directories(
     "./libs"
     "./libs/lua"
@@ -38,13 +45,6 @@ include_directories(
     "./libs/native_message_box/include"
 )
 
-# Linker directories
-link_directories(
-  /opt/homebrew/lib
-  "./libs"
-)
-
-# Source files
 file(GLOB ENGINE_SOURCES
     "./src/*.cpp"
     "./src/game/*.cpp"
@@ -57,6 +57,7 @@ file(GLOB ENGINE_SOURCES
     "./src/systems/*.cpp"
     "./src/scene/*.cpp"
     "./src/common/*.cpp"
+    "./libs/flecs/*.c"
     "./src/assetmgr/*.cpp"
     "./src/scripting/*.cpp"
     "./libs/SimpleJSON/*.cpp"
@@ -66,17 +67,22 @@ file(GLOB ENGINE_SOURCES
 
 set(SOURCES ${ENGINE_SOURCES})
 
-# Subdirectories
 add_subdirectory(libs/nativefiledialog-extended)
 add_subdirectory(libs/native_message_box)
+add_subdirectory(libs/flecs)
 
 if(RENDER_BACKEND_RAYLIB)
     add_definitions(-DRENDER_BACKEND_RAYLIB=1)
-    add_subdirectory(libs/raylib)
 
-    set(ANGLE_LIBRARY_DIR libs/angle/out/Release)
-    find_library(ANGLE_GLESv2_LIBRARY libGLESv2.dylib PATHS ${ANGLE_LIBRARY_DIR})
-    find_library(ANGLE_EGL_LIBRARY libEGL.dylib PATHS ${ANGLE_LIBRARY_DIR})
+    if(RAYLIB_ANGLE_SUPPORT)
+        set(ANGLE_LIBRARY_DIR libs/angle/out/Release)
+
+        find_library(ANGLE_GLESv2_LIBRARY NAMES GLESv2 PATHS ${ANGLE_LIBRARY_DIR})
+        find_library(ANGLE_EGL_LIBRARY NAMES EGL PATHS ${ANGLE_LIBRARY_DIR})
+        add_definitions(-DCUSTOMIZE_BUILD=1 -DOPENGL_VERSION="ES 2.0")
+    endif()
+
+    add_subdirectory(libs/raylib)
 
     file(GLOB RAYLIB_SOURCES 
             "./src/io/backends/raylib/*.cpp"
@@ -89,18 +95,12 @@ if(RENDER_BACKEND_RAYLIB)
     list(APPEND SOURCES ${RAYLIB_SOURCES} ${IMGUI_SOURCES})
 endif()
 
+
 if(RENDER_BACKEND_OPENGL)
     add_definitions(-DRENDER_BACKEND_OPENGL=1)
-    pkg_check_modules(GLFW3 REQUIRED glfw3)
-    pkg_check_modules(FREETYPE2 REQUIRED freetype2)
-
-    file(GLOB OPENGL_SOURCES 
-            "./libs/glad/src/glad.c"
-            "./src/io/backends/opengl/*.cpp"
-            "./src/render/backends/opengl/*.cpp"
-            "./src/assetmgr/backends/opengl/*.cpp")
-
-    list(APPEND SOURCES ${OPENGL_SOURCES})
+    
+    find_package(glfw3 CONFIG REQUIRED)
+    find_package(freetype CONFIG REQUIRED)
 endif()
 
 if(ENGINE_EDITOR)
@@ -121,11 +121,16 @@ if(ENGINE_EDITOR)
     list(APPEND SOURCES ${EDITOR_SOURCES})
 endif()
 
-file(GLOB FLECS_SOURCES libs/flecs/*.c libs/flecs/*.cpp)
-add_library(flecs STATIC ${FLECS_SOURCES})
-
-# Build targets
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} nfd raylib ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY} lua "-framework IOKit" "-framework Cocoa" flecs ${FREETYPE2_LIBRARIES} ${GLFW3_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} PRIVATE nfd raylib glm::glm lua glfw sol2 ${LUA_LIBRARIES})
+
+if(APPLE)
+    target_link_libraries(${PROJECT_NAME} PRIVATE "-framework IOKit" "-framework Appkit" "-framework UniformTypeIdentifiers" "-framework Cocoa")
+endif()
+
+if(RAYLIB_ANGLE_SUPPORT)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY})
+endif()
 

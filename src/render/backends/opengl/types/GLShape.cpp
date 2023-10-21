@@ -1,52 +1,64 @@
 #include "GLShape.h"
+#include "primitives.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-static float UV[] = {
+const float UV[] = {
     0.0f, 0.0f,
     0.0f, 1.0f,
     1.0f, 1.0f,
     1.0f, 0.0f
 };
 
+VAO* dataFormatVAO;
+VBO* interleavedVBO;
 
 GLShape::GLShape(float vertices[], int verticesSize, Shader* shaderToUse) {
-
     dataFormatVAO = new VAO();
     dataFormatVAO->Bind();
 
-    this->verticesCount = verticesSize;
-
+    this->verticesCount = verticesSize / 3;
     assert(verticesSize != 0);
 
-    // Initialize GPU memory
-    verticesVBO = new VBO(vertices, verticesSize);
-    uvMapVBO = new VBO(UV, sizeof(UV), GL_DYNAMIC_DRAW);
+    std::vector<GLfloat> interleavedData(this->verticesCount * 5);
 
-    dataFormatVAO->LinkAttrib(verticesVBO, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0); // layer(0): position
-    dataFormatVAO->LinkAttrib(uvMapVBO, 1, 2, GL_FLOAT, 2 * sizeof(float), (void*)0);    // layer(1): texture UV
+    for (int i = 0; i < this->verticesCount; i++) {
+        interleavedData[i * 5] = vertices[i * 3];
+        interleavedData[i * 5 + 1] = vertices[i * 3 + 1];
+        interleavedData[i * 5 + 2] = vertices[i * 3 + 2];
+        interleavedData[i * 5 + 3] = UV[i * 2];
+        interleavedData[i * 5 + 4] = UV[i * 2 + 1];
+    }
 
-    // Unbind memory objects
+    interleavedVBO = new VBO(&interleavedData[0], interleavedData.size() * sizeof(float), GL_DYNAMIC_DRAW);
+    dataFormatVAO->LinkAttrib(interleavedVBO, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+    dataFormatVAO->LinkAttrib(interleavedVBO, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
     dataFormatVAO->Unbind();
-    verticesVBO->Unbind();
-    uvMapVBO->Unbind();
+    interleavedVBO->Unbind();
 
     shader = shaderToUse;
 }
 
+GLShape::~GLShape() {
+    delete dataFormatVAO;
+    delete interleavedVBO;
+}
+
 void GLShape::SetUV(float uStart, float vStart, float uEnd, float vEnd) {
-    float newUV[] = {
-        uStart, vStart,
-        uStart, vEnd,
-        uEnd, vEnd,
-        uEnd, vStart
-    };
-    
-    // Update the entire UV buffer
-    int offset = 0; // Starting from the beginning of the UV buffer
-    int size = sizeof(newUV); // Size of the newUV array
-    
-    uvMapVBO->Update(offset, size, newUV);
+  float newUV[] = {
+    uStart, vStart,
+    uStart, vEnd,
+    uEnd, vEnd,
+    uEnd, vStart
+  };
+
+  int offset = 3 * sizeof(float);
+  int stride = 5 * sizeof(float);
+
+  for (int i = 0; i < 4; i++) {
+    interleavedVBO->Update(i * stride + offset, 2 * sizeof(float), &newUV[i * 2]);
+  }
 }
 
 void GLShape::Scale(glm::vec2 scale) {

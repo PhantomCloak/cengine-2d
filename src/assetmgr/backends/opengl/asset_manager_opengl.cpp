@@ -15,7 +15,7 @@ void AssetManager::Initialize(CommancheRenderer* render) {
 }
 
 void AssetManager::AddShader(const std::string& assetId, const std::string& path) {
-  int shaderId = crender->LoadShader(path, assetId);
+  int shaderId = crender->CLoadShader(path, assetId);
 
   if (!crender->IsShaderValid(shaderId)) {
         Log::Warn("Shader with invalid ID (" + std::to_string(shaderId) + ") has tried to load");
@@ -26,17 +26,19 @@ void AssetManager::AddShader(const std::string& assetId, const std::string& path
     shaders.insert(std::make_pair(assetId, shaderId));
 }
 
-void AssetManager::AddTexture(const std::string& assetId, const std::string& path) {
+int AssetManager::AddTexture(const std::string& assetId, const std::string& path) {
     int textureId = crender->CLoadTexture(path);
 
     if (!crender->IsTextureValid(textureId)) {
         Log::Warn("Texture with invalid ID (" + std::to_string(textureId) + ") has tried to load");
-        return;
+        return -1;
     }
 
     CommancheTextureInfo inf = crender->GetTextureInfo(textureId);
     Log::Inf("Texture has loaded id: " + assetId + " size: " + std::to_string(inf.width) + "x" + std::to_string(inf.height));
     textures.insert(std::make_pair(assetId, textureId));
+
+    return textureId;
 }
 
 void AssetManager::AddFont(const std::string& assetId, const std::string& path, int fontSize) {
