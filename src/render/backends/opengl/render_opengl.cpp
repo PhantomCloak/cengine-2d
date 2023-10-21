@@ -340,17 +340,17 @@ int CommancheRenderer::CLoadShader(const std::string& path, const std::string sh
     std::string fragmentShaderPath;
 
     for (const auto& entry : std::filesystem::directory_iterator(path)) {
-        std::string fileName = std::filesystem::path(entry.path()).stem();
-        std::string extension = std::filesystem::path(entry.path()).extension();
+        std::string fileName = std::filesystem::path(entry.path()).stem().string();
+        std::string extension = std::filesystem::path(entry.path()).extension().string();
 
         if (fileName != shaderName) {
             continue;
         }
 
         if (extension == ".vert") {
-            vertexShaderPath = entry.path();
+            vertexShaderPath = entry.path().string();
         } else if (extension == ".frag") {
-            fragmentShaderPath = entry.path();
+            fragmentShaderPath = entry.path().string();
 
         } else {
             std::cout << "err on shader load no extension" << std::endl;
