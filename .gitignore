@@ -16,7 +16,6 @@ build/
 
 # Ignore CMake generated files
 CMakeCache.txt
-CMakeSettings.json
 CMakeFiles/
 CMakeScripts/
 Testing/
