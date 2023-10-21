@@ -9,7 +9,6 @@ int CoordinateCalculator::referenceHeight = 1080;
 float CoordinateCalculator::meterPixelRatioX = 100;   // X: 1 meter = 100 pixels at 1920x1080
 float CoordinateCalculator::meterPixelRatioY = 56.25; // Y: 1 meter = 56.25 pixels at 1920x1080
 
-extern "C" double getScreenScaleFactor();
 
 void CoordinateCalculator::ConvertMetersToPixels(float& xMeter, float& yMeter) {
     float scale = 1;
