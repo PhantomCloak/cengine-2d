@@ -1,9 +1,7 @@
-#ifndef CURSOR_H
-#define CURSOR_H
+#pragma once
 
 #include "../render/render_primitives.h"
-#include <GLFW/glfw3.h>
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
 
 class Cursor {
 public:
@@ -12,10 +10,4 @@ public:
     static glm::vec2 GetCursorWorldPosition(glm::vec2 screenPoint, CommancheCamera cam);
     static bool HasLeftCursorClicked();
     static bool HasRightCursorClicked();
-                                
-private:
-    static GLFWwindow* wnd;
 };
-
-#endif
-

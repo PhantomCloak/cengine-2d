@@ -1,8 +1,8 @@
 #ifndef VAO_CLASS_H
 #define VAO_CLASS_H
 
+#include "primitives.h"
 #include "vbo.h"
-#include <glad/glad.h>
 
 class VAO {
     public:
@@ -11,7 +11,7 @@ class VAO {
     // Constructor that generates a VAO ID
     VAO();
 
-    // Links a VBO Attribute such as a position or color to the VAO
+    void LinkAttrib(VBO* VBO, VertexLayout layout);
     void LinkAttrib(VBO* VBO, GLuint layout, GLuint numComponents, GLenum type, GLsizeiptr stride, void* offset);
     // Binds the VAO
     void Bind();

@@ -1,4 +1,4 @@
-
+#include "editor.h"
 #include "../assetmgr/AssetManager.h"
 #include "../io/cursor.h"
 #include "../io/keyboard.h"
@@ -27,12 +27,14 @@ void Editor::Init(CommancheRenderer* renderer) {
     Instance = std::shared_ptr<Editor>(this);
 
     entityInspector = std::make_shared<EntityInspector>();
+    animDesigner = std::make_shared<AnimationDesigner>();
     logView = std::make_shared<LogView>();
     importer = std::make_shared<TileMapImporter>();
     tilePlacer = std::make_shared<TilePlacer>();
     viewport = std::make_shared<EditorViewPort>();
     sceneList = std::make_shared<SceneList>();
     menuBar = std::make_shared<EditorMenuBar>(Instance);
+    animationEditor = std::make_shared<AnimationEditor>();
 
     sceneList->SetSelectCallback([this](const flecs::entity entity) {
         entityInspector->SetEntity(entity);
@@ -61,6 +63,9 @@ void Editor::Init(CommancheRenderer* renderer) {
     EditorStyle::Init();
 
     AssetManager::AddTexture("axis", "./assets/editor/axis.png");
+    AssetManager::AddTexture("file", "./assets/editor/file-icon.png");
+    AssetManager::AddTexture("folder", "./assets/editor/folder-icon.png");
+    AssetManager::AddTexture("gear", "./assets/editor/gear.png");
 
     Log::Inf("Editor started");
 
@@ -69,18 +74,18 @@ void Editor::Init(CommancheRenderer* renderer) {
 
 void Editor::Keybindings() {
     if (Keyboard::IsKeyPressing(KeyCode::Key_RArrow)) {
-        CommancheRenderer::Instance->OffsetCamera(25, 0);
+        CommancheRenderer::Instance->OffsetCamera(0, 25);
     }
 
     if (Keyboard::IsKeyPressing(KeyCode::Key_LArrow)) {
-        CommancheRenderer::Instance->OffsetCamera(-25, 0);
+        CommancheRenderer::Instance->OffsetCamera(0, -25);
     }
 
     if (Keyboard::IsKeyPressing(KeyCode::Key_UArrow)) {
-        CommancheRenderer::Instance->OffsetCamera(0, -25);
+        CommancheRenderer::Instance->OffsetCamera(-25, 0);
     }
     if (Keyboard::IsKeyPressing(KeyCode::Key_DArrow)) {
-        CommancheRenderer::Instance->OffsetCamera(0, 25);
+        CommancheRenderer::Instance->OffsetCamera(25, 0);
     }
 }
 
@@ -145,6 +150,8 @@ void Editor::Render() {
     sceneList->RenderWindow();
     entityInspector->RenderWindow();
     logView->RenderWindow();
+    animDesigner->RenderWindow();
+    animationEditor->RenderWindow();
 
     viewport->RenderWindow();
 

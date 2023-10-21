@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 double getTime() {
-  return glfwGetTime();
+  return glfwGetTime() * 1000;
 }
 
 void sleepProgram(long amount){

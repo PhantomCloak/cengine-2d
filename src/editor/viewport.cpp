@@ -51,9 +51,7 @@ void Fit(int image, int width, int height, bool center = false) {
 
 #if RENDER_BACKEND_OPENGL
     ImGui::Image((void*)imgIdx, ImVec2(float(destWidth), float(destHeight)), uv0, uv1);
-#endif
-
-#if RENDER_BACKEND_RAYLIB
+#elif RENDER_BACKEND_RAYLIB
     ImGui::Image((void*)&imgIdx, ImVec2(float(destWidth), float(destHeight)), uv0, uv1);
 #endif
 }
@@ -65,14 +63,15 @@ bool EditorViewPort::IsFocused() {
 void EditorViewPort::RenderWindow() {
     static bool Open = true;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    if (ImGui::Begin("2D View", &Open, ImGuiWindowFlags_NoNav)) {
+    std::string title = "2D View " + std::to_string((int)ViewportSize.x) + "x" + std::to_string((int)ViewportSize.y) + "###2DView";
+    if (ImGui::Begin(title.c_str(), &Open, ImGuiWindowFlags_NoNav)) {
 
         isFocused = ImGui::IsWindowHovered();
         static float zoomValue = 1;
         static float lastZoomValue = 1;
 
-        if (ImGui::IsWindowFocused())
-            zoomValue += GetMouseWheelMove();
+        //if (ImGui::IsWindowFocused())
+        //    zoomValue += GetMouseWheelMove();
         if (zoomValue != lastZoomValue) {
             Log::Inf("Zooming to + " + std::to_string(zoomValue));
             zoomValue = std::clamp(zoomValue, 1.0f, 10.0f);

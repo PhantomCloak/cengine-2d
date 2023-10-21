@@ -5,11 +5,11 @@
 #include <iostream>
 
 
-void reduceFileNameLenght(std::string& str) {
+void reduceFileNameLenghtZ(std::string& str) {
     str = str.substr(0, str.length() > 10 ? 10 : str.length());
 }
 
-bool createFileTile(std::string name, int& ordinal, bool* stateSet, int stateSetSize, bool isFolder) {
+bool createFileTileZ(std::string name, int& ordinal, bool* stateSet, int stateSetSize, bool isFolder) {
     static int folderIcon = AssetManager::GetTexture("folder");
     static int fileIcon = AssetManager::GetTexture("file");
     int icon = isFolder ? folderIcon : fileIcon;
@@ -65,7 +65,7 @@ void FileView::RenderWindow() {
         std::vector<std::string> files = FileSys::GetFilesInDirectory(currentPath);
         std::vector<std::string> directories = FileSys::GetFoldersInDirectory(currentPath);
 
-        if (createFileTile("..", ctx, &hoverList[0], sizeof(hoverList), true)) {
+        if (createFileTileZ("..", ctx, &hoverList[0], sizeof(hoverList), true)) {
             currentPath = FileSys::GetParentDirectory(currentPath);
         }
 
@@ -73,9 +73,9 @@ void FileView::RenderWindow() {
             std::string currentFolder = directories[i];
             std::string fileName = FileSys::GetFileName(currentFolder);
 
-            reduceFileNameLenght(fileName);
+            reduceFileNameLenghtZ(fileName);
 
-            if (createFileTile(fileName, ctx, &hoverList[0], sizeof(hoverList), true)) {
+            if (createFileTileZ(fileName, ctx, &hoverList[0], sizeof(hoverList), true)) {
                 if (fileName == "..")
                     currentPath = FileSys::GetParentDirectory(currentPath);
                 else
@@ -86,14 +86,14 @@ void FileView::RenderWindow() {
         for (int i = 0; i < files.size(); i++) {
             std::string currentFile = files[i];
             std::string fileName = FileSys::GetFileName(currentFile);
-            reduceFileNameLenght(fileName);
+            reduceFileNameLenghtZ(fileName);
 
-            if (createFileTile(fileName, ctx, &hoverList[0], sizeof(hoverList), false)) {
+            if (createFileTileZ(fileName, ctx, &hoverList[0], sizeof(hoverList), false)) {
                 FileSys::OpenFileOSDefaults(currentFile);
             }
         }
 
-        createFileTile("", ctx, &hoverList[0], sizeof(hoverList), false);
+        createFileTileZ("", ctx, &hoverList[0], sizeof(hoverList), false);
     }
     ImGui::End();
 }

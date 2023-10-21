@@ -1,3 +1,4 @@
+#include "../../../core/coordinate_system.h"
 #include "../../render.h"
 #include "types/GLLine.h"
 #include "types/GLShape.h"
@@ -30,10 +31,9 @@ std::unordered_map<int, Shader> glShaders;
 std::unordered_map<int, Texture> glTextures;
 
 CommancheRenderer* CommancheRenderer::Instance;
-
-int PPM = 0;
-
 GLLine* test;
+
+extern "C" double getScreenScaleFactor();
 
 float pixelCordToUvY(float y, int height) {
     return y / height;
@@ -47,7 +47,6 @@ int CommancheRenderer::LoadFont(const std::string& path, int fontSize) {
     return -1;
 }
 
-
 struct Character {
     unsigned int TextureID; // ID handle of the glyph texture
     glm::ivec2 Size;        // Size of glyph
@@ -56,16 +55,29 @@ struct Character {
 };
 
 std::map<char, Character> Characters;
+
 void InitFreeType() {
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    // make sure the viewport matches the new window dimensions; note that width and
-    // height will be significantly larger than specified on retina displays.
     Log::Inf("Window W: " + std::to_string(width) + " H: " + std::to_string(height));
+    CommancheRenderer::screenWidth = width;
+    CommancheRenderer::screenHeight = height;
     glViewport(0, 0, width, height);
 }
 
+
+float CommancheRenderer::GetFps() {
+    return 0;
+}
+
+void CommancheRenderer::SetCameraZoom(float zoom) {
+    camX.SetCameraZoom(zoom);
+}
+
+void CommancheRenderer::OffsetCamera(float vertical, float horizontal) {
+    camX.OffsetCamera(vertical, horizontal);
+}
 
 void CommancheRenderer::Initialize(const std::string& title, int windowWidth, int windowHeight) {
     Instance = this;
@@ -90,22 +102,18 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
 
     glfwMakeContextCurrent(k_window);
     gladLoadGL();
+    glfwSwapInterval(0);
 
     glfwSetFramebufferSizeCallback(
     k_window, [](GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
     });
 
-    const float w = 1920.0f / 2;
-    const float h = 1080.0f / 2;
-
-    screenWidth = w;
-    screenHeight = h;
-    ProjectionMat = glm::ortho(0.0f, w, h, 0.0f, -1.0f, 1.0f);
+    camX.SetTarget({ 0, 1920, 1080, 0 });
+    screenWidth = windowWidth;
+    screenHeight = windowHeight;
 
     glfwSwapInterval(0);
-    // OpenGL state
-    // ------------
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -121,13 +129,10 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
         Log::Err("ERROR::FREETYPE: Failed to load font");
         return;
     } else {
-        // set size to load glyphs as
         FT_Set_Pixel_Sizes(face, 0, 48);
 
-        // disable byte-alignment restriction
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        // load first 128 characters of ASCII set
         for (unsigned char c = 0; c < 128; c++) {
             // Load character glyph
             if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
@@ -148,12 +153,10 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
             GL_RED,
             GL_UNSIGNED_BYTE,
             face->glyph->bitmap.buffer);
-            // set texture options
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            // now store character for later use
             Character character = {
                 texture,
                 glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
@@ -186,7 +189,7 @@ void CommancheRenderer::InitializeShaders(const std::string& defaultShaderPath) 
     Shader solidRenderShader = Shader(solidRenderShaderVert.c_str(), solidRenderShaderFrag.c_str());
 
     defaultFontShader.Activate();
-    glUniformMatrix4fv(glGetUniformLocation(defaultFontShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(ProjectionMat));
+    glUniformMatrix4fv(glGetUniformLocation(defaultFontShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(camX.ProjectionMat));
     defaultFontShader.Deactivate();
 
     assert(defaultShader.compiledSuccessfully);
@@ -200,46 +203,34 @@ void CommancheRenderer::InitializeShaders(const std::string& defaultShaderPath) 
 }
 
 
-void CommancheRenderer::DrawRectRangle(float x, float y, float width, float height, float rotation) {
-    Shader shader = glShaders[DEFAULT_SHADER_SLOT];
-    shader.Activate();
+void CommancheRenderer::DrawRectRangle(float x, float y, float width, float height, float rotation, CommancheColorRGBA color) {
+    static Shader shader = glShaders[DEFAULT_SHADER_SLOT];
+
+    CoordinateCalculator::ConvertMetersToPixels(x, y);
+    CoordinateCalculator::ConvertMetersToPixels(width, height);
 
     GLShape* shape = glShapes[RECT_PRIMITIVE];
-    // Texture texture = glTextures[textureId];
 
-    x *= scaleFactor;
-    y *= scaleFactor;
-    width *= scaleFactor;
-    height *= scaleFactor;
-
+    shader.Activate();
     shape->BindShape();
 
     shape->Scale(glm::vec2(width, height));
-    shape->SetProjection(ProjectionMat);
+    shape->SetProjection(camX.ProjectionMat);
     shape->Translate(glm::vec2(x, y));
     shape->Rotate(rotation);
 
-    // shape->SetOffset(glm::vec2(offsetX, offsetY));
-
-    // texture.Bind();
-
     shape->DrawShape(true);
-
-    // texture.Unbind();
     shader.Deactivate();
 }
 
-void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight) {
-    Shader shader = glShaders[DEFAULT_SHADER_SLOT];
-    shader.Activate();
+void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width, float height, float rotation, float srcX, float srcY, float srcWidth, float srcHeight, CommancheColorRGBA color) {
+    static Shader shader = glShaders[DEFAULT_SHADER_SLOT];
+    static GLShape* shape = glShapes[RECT_PRIMITIVE];
 
-    GLShape* shape = glShapes[RECT_PRIMITIVE];
-    Texture texture = glTextures[textureId];
+    CoordinateCalculator::ConvertMetersToPixels(x, y);
+    CoordinateCalculator::ConvertMetersToPixels(width, height);
 
-    x *= scaleFactor;
-    y *= scaleFactor;
-    width *= scaleFactor;
-    height *= scaleFactor;
+    Texture& texture = glTextures[textureId];
 
     auto inf = GetTextureInfo(textureId);
 
@@ -250,18 +241,15 @@ void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width,
 
     shape->SetUV(uStart, vStart, uEnd, vEnd);
 
-    shape->BindShape();
+    texture.Bind();
 
+    shape->BindShape();
     shape->Scale(glm::vec2(width, height));
-    shape->SetProjection(ProjectionMat);
+    shape->SetProjection(camX.ProjectionMat);
     shape->Translate(glm::vec2(x, y));
     shape->Rotate(rotation);
 
-    texture.Bind();
     shape->DrawShape();
-    texture.Unbind();
-
-    shader.Deactivate();
 }
 
 
@@ -291,7 +279,7 @@ void CommancheRenderer::CDrawLine(float startx, float starty, float endx, float 
     shader.Activate();
 
     test->UpdateLine(glm::vec2(startx, starty), glm::vec2(endx, endy));
-    test->SetProjection(ProjectionMat);
+    test->SetProjection(camX.ProjectionMat);
 
     test->DrawLine();
     shader.Deactivate();
@@ -309,14 +297,12 @@ void CommancheRenderer::CDrawText(int fontId, std::string message, int x, int y,
         isInit = true;
     }
 
-    // activate corresponding render state
     Shader shader = glShaders[DEFAULT_FONT_SHADER_SLOT];
     shader.Activate();
     glUniform3f(glGetUniformLocation(shader.ID, "textColor"), color.r, color.g, color.b);
     glActiveTexture(GL_TEXTURE0);
 
     vao->Bind();
-    // iterate through all characters
     std::string::const_iterator c;
     for (c = message.begin(); c != message.end(); c++) {
         Character ch = Characters[*c];
@@ -326,7 +312,6 @@ void CommancheRenderer::CDrawText(int fontId, std::string message, int x, int y,
 
         float w = ch.Size.x * 1;
         float h = ch.Size.y * 1;
-        // update VBO for each character
         float vertices[6][4] = {
             { xpos, ypos - h, 0.0f, 0.0f },
             { xpos, ypos, 0.0f, 1.0f },
@@ -338,14 +323,10 @@ void CommancheRenderer::CDrawText(int fontId, std::string message, int x, int y,
         };
 
 
-        // render glyph texture over quad
         glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-        // update content of VBO memory
         vbo->Update(0, sizeof(vertices), vertices);
-        // render quad
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-        x += (ch.Advance >> 6) * 1; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+        x += (ch.Advance >> 6) * 1;
     }
     vao->Unbind();
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -397,25 +378,19 @@ void CommancheRenderer::UpdateRenderTexture(glm::vec2 size) {
 
     glDeleteFramebuffers(1, &framebuffer);
 
-    // framebuffer configuration
-    // -------------------------
     framebuffer = 0;
 
-    // Create FBO & Textrue
     glGenFramebuffers(1, &framebuffer);
     glGenTextures(1, &textureColorbuffer);
 
-    // Bind FBO & Texture
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
 
-    // generate texture according to WxH
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // FBO to Texture
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -423,6 +398,17 @@ void CommancheRenderer::UpdateRenderTexture(glm::vec2 size) {
                   << std::endl;
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    float halfWidth = width / 2.0f;
+    float halfHeight = height / 2.0f;
+
+    // Set target rectangle to represent the screen size around the center point
+    camX.SetTarget({
+    -halfWidth, // left
+    halfWidth,  // right
+    halfHeight, // top
+    -halfHeight // bottom
+    });
 }
 
 int CommancheRenderer::CLoadTexture(const std::string& path) {
@@ -458,7 +444,7 @@ void CommancheRenderer::DrawGrids() {
         vao->LinkAttrib(vbo, 0, 2, GL_FLOAT, 2 * sizeof(float), 0);
 
         glUniform4f(glGetUniformLocation(shader.ID, "color"), 0, 0, 0, 0.3f);
-        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(ProjectionMat));
+        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(camX.ProjectionMat));
 
         int index = 0;
 
@@ -501,12 +487,6 @@ CommancheTextureInfo CommancheRenderer::GetTextureInfo(int id) {
     return inf;
 }
 
-void CommancheRenderer::OffsetCamera(float vertical, float horizontal) {
-    vo += vertical;
-    ho += horizontal;
-
-    ProjectionMat = glm::ortho(0.0f + vo, (float)screenWidth + vo, (float)screenHeight + ho, 0.0f + ho, -1.0f, 1.0f);
-}
 
 void CommancheRenderer::RenderStart() {
     glfwPollEvents();

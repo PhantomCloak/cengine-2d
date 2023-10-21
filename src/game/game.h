@@ -22,6 +22,6 @@ class Game {
     bool isRunning;
 
     private:
-    int tickLastFrame;
+    double tickLastFrame = 0;
     sol::state lua;
 };

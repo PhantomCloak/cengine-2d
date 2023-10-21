@@ -43,6 +43,7 @@ class CommancheRenderer {
     static CommancheRenderer* Instance;
     CommancheRenderTexture viewTexture;
     bool isTextureModeEnabled = false;
+    void* WndPtr;
     CommancheCamera camX = { 0 };
 
     private:

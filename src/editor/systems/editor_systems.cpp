@@ -43,8 +43,9 @@ void EditorSystems::DraggableSystem(flecs::world& world, flecs::entity entity, R
     auto mPos = Cursor::GetCursorWorldPosition(Editor::GetCursorPosition(), CommancheRenderer::Instance->camX);
     glm::vec2 pos = glm::vec2(mPos.x, mPos.y);
 
-    transform.pos = EditorUtils::InterpolateToGrid(pos, 2.5);
+    //transform.pos = EditorUtils::InterpolateToGrid(pos, 2.5);
 
+    transform.pos = pos;
     if (Cursor::HasLeftCursorClicked()) {
         world.entity(entity).remove<DragableComponent>();
     } else if (Cursor::HasRightCursorClicked()) {
@@ -71,7 +72,7 @@ void EditorSystems::ClickInspectSystem(flecs::world& world, flecs::entity entity
         return;
     }
 
-    if(!editorRef->viewport->IsFocused())
+    if (!editorRef->viewport->IsFocused())
         return;
 
     return;

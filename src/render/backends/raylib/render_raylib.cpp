@@ -6,7 +6,8 @@
 #include "glm/glm.hpp"
 #include "raylib.h"
 #include "rlImGui.h"
-#include "rlgl.h" #include < GLFW / glfw3.h>
+#include "rlgl.h"
+#include <GLFW/glfw3.h>
 #include <filesystem>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -48,7 +49,7 @@ void CommancheRenderer::Initialize(const std::string& title, int windowWidth, in
 
     std::string titleStr = title + " - Backend [Raylib]";
     InitWindow(1920, 1080, titleStr.c_str());
-    //SetTargetFPS(80);
+    SetTargetFPS(60);
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     rlImGuiSetup(true);
 }
@@ -83,9 +84,8 @@ void CommancheRenderer::DrawGrids() {
     int gridCountY = (int)((visibleBottom - visibleTop) / gridHeight) + 1;
 
     // Ensure we have enough vertices memory
-    //Vector2 vertices[(gridCountX + gridCountY + 2) * 2];
+    // Vector2 vertices[(gridCountX + gridCountY + 2) * 2];
     std::vector<Vector2> vertices((gridCountX + gridCountY + 2) * 2);
-
 
 
     int index = 0;
@@ -111,12 +111,11 @@ void CommancheRenderer::DrawGrids() {
     Color gridColor = { 0, 0, 0, 77 };
 
     for (int i = 0; i < (gridCountX + gridCountY + 1) * 2; i += 2) {
-    DrawLineV(
+        DrawLineV(
         { vertices[i].x - camX.offset.x + camX.target.x, vertices[i].y - camX.offset.y + camX.target.y },
         { vertices[i + 1].x - camX.offset.x + camX.target.x, vertices[i + 1].y - camX.offset.y + camX.target.y },
-        gridColor
-    );
-}
+        gridColor);
+    }
 }
 
 float CommancheRenderer::GetFps() {
@@ -191,10 +190,9 @@ CommancheTextureInfo CommancheRenderer::GetTextureInfo(int id) {
 }
 
 void CommancheRenderer::OffsetCamera(float vertical, float horizontal) {
-    camX.offset.x -= vertical;
-    camX.offset.y -= horizontal;
-    // vo += vertical;
-    // ho += horizontal;
+    camX.offset.x += horizontal;
+    camX.offset.y += vertical;
+    printf("Camera offset is now x:%f y:%f\n", camX.offset.x, camX.offset.y);
 }
 
 void CommancheRenderer::SetCameraZoom(float zoom) {

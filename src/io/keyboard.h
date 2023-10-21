@@ -15,8 +15,6 @@ class Keyboard {
     static std::vector<KeyEvent> GetPressedKeys();
     static void Poll();
     static void FlushPressedKeys();
-
-    private:
 };
 
 
