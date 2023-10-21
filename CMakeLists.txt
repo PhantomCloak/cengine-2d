@@ -11,15 +11,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -g")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
-    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -g -Wno-unused-variable")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         set(CMAKE_OBJC_FLAGS "${CMAKE_OBJC_FLAGS} -x objective-c")
     endif()
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    add_definitions(/W4)
-    add_definitions(/EHsc)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_definitions(/W4 /EHsc)
 endif()
 
 add_definitions(-DPLATFORM_DESKTOP)
@@ -28,6 +26,10 @@ find_package(glm CONFIG REQUIRED)
 find_package(lua CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(sol2 CONFIG REQUIRED)
+
+add_subdirectory(libs/nativefiledialog-extended)
+add_subdirectory(libs/native_message_box)
+add_subdirectory(libs/flecs)
 
 include_directories(
     "./libs"
@@ -45,6 +47,7 @@ include_directories(
     "./libs/native_message_box/include"
 )
 
+# Core Sources
 file(GLOB ENGINE_SOURCES
     "./src/*.cpp"
     "./src/game/*.cpp"
@@ -65,14 +68,20 @@ file(GLOB ENGINE_SOURCES
     "./libs/box2d/src/*/*.cpp"
 )
 
+# Platform specific sources
+if(APPLE)
+        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/platform/osx/*.mm PROPERTIES LANGUAGE OBJCXX)
+        file(GLOB PLATFORM_SOURCES "./src/platform/OSX/*.mm")
+        list(APPEND ENGINE_SOURCES ${PLATFORM_SOURCES})
+endif()
+
 set(SOURCES ${ENGINE_SOURCES})
 
-add_subdirectory(libs/nativefiledialog-extended)
-add_subdirectory(libs/native_message_box)
-add_subdirectory(libs/flecs)
-
+# Rendering Backend
 if(RENDER_BACKEND_RAYLIB)
     add_definitions(-DRENDER_BACKEND_RAYLIB=1)
+    add_subdirectory(libs/raylib)
+    include_directories("./libs/rlImGui")
 
     if(RAYLIB_ANGLE_SUPPORT)
         set(ANGLE_LIBRARY_DIR libs/angle/out/Release)
@@ -82,8 +91,6 @@ if(RENDER_BACKEND_RAYLIB)
         add_definitions(-DCUSTOMIZE_BUILD=1 -DOPENGL_VERSION="ES 2.0")
     endif()
 
-    add_subdirectory(libs/raylib)
-
     file(GLOB RAYLIB_SOURCES 
             "./src/io/backends/raylib/*.cpp"
             "./src/render/backends/raylib/*.cpp"
@@ -91,18 +98,24 @@ if(RENDER_BACKEND_RAYLIB)
     
     file(GLOB IMGUI_SOURCES "./libs/rlImGui/*.cpp")
     
-    include_directories("./libs/rlImGui")
     list(APPEND SOURCES ${RAYLIB_SOURCES} ${IMGUI_SOURCES})
-endif()
-
-
-if(RENDER_BACKEND_OPENGL)
+elseif(RENDER_BACKEND_OPENGL)
     add_definitions(-DRENDER_BACKEND_OPENGL=1)
-    
     find_package(glfw3 CONFIG REQUIRED)
-    find_package(freetype CONFIG REQUIRED)
+    find_package(Freetype REQUIRED)
+    
+    file(GLOB OPENGL_SOURCES 
+            "./src/io/backends/opengl/*.cpp"
+            "./src/render/backends/opengl/*.cpp"
+            "./libs/glad/src/*.c"
+            "./src/render/backends/opengl/types/*.cpp"
+            "./src/assetmgr/backends/opengl/*.cpp")
+
+    list(APPEND SOURCES ${OPENGL_SOURCES})
 endif()
 
+
+# Editor Sources
 if(ENGINE_EDITOR)
     add_definitions(-DEDITOR=1)
     file(GLOB EDITOR_SOURCES
@@ -123,14 +136,28 @@ endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PRIVATE nfd raylib glm::glm lua glfw sol2 ${LUA_LIBRARIES})
+set(COMMON_LIBS nfd glm::glm lua glfw sol2 ${LUA_LIBRARIES})
 
-if(APPLE)
-    target_link_libraries(${PROJECT_NAME} PRIVATE "-framework IOKit" "-framework Appkit" "-framework UniformTypeIdentifiers" "-framework Cocoa")
+if(RENDER_BACKEND_RAYLIB)
+    list(APPEND COMMON_LIBS raylib)
+else()
+    list(APPEND COMMON_LIBS Freetype::Freetype)
 endif()
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${COMMON_LIBS})
+
+if(APPLE)
+    set(APPLE_FRAMEWORKS 
+        "-framework IOKit" 
+        "-framework Appkit" 
+        "-framework UniformTypeIdentifiers" 
+        "-framework Cocoa"
+    )
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${APPLE_FRAMEWORKS})
+endif()
+
+# Libraries for Raylib's ANGLE support
 if(RAYLIB_ANGLE_SUPPORT)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY})
 endif()
-
