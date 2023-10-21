@@ -5,9 +5,8 @@ cengine-2d is a cross-platform OpenGL 2D game engine.
 [Watch the progress here](https://www.youtube.com/@ph4nt0m33)
 
 <img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/df993eae-550e-46cd-bef0-a2e40ad93036">
+<img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/cfa97fb9-b975-4b45-8546-848ff8799d59">
 <img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/240c102e-9437-443b-8b44-8802dadf94ce">
-
-
 
 ### Compiler Flags
 
@@ -56,3 +55,6 @@ Implements Box2D for game object physics and collisions.
 ### Render & Shading
 - Raylib for rendering, with ANGLE support for platform compatibility.
 - A custom OpenGL renderer for more specific rendering needs.
+
+#### Animations (WIP)
+Native animation designer
