@@ -17,9 +17,6 @@ void CoordinateCalculator::ConvertMetersToPixels(float& xMeter, float& yMeter) {
     float scaleX = (Editor::Instance->GetViewPortSize().x * scale) / static_cast<float>(referenceWidth);
     float scaleY = (Editor::Instance->GetViewPortSize().y * scale) / static_cast<float>(referenceHeight);
 
-    printf("ScaleX: %f, ScaleY: %f\n", scaleX, scaleY);
-
-
     xMeter = xMeter * (referenceWidth / meterPixelRatioX) * scaleX;
     yMeter = yMeter * (referenceHeight / meterPixelRatioY) * scaleY;
 }
