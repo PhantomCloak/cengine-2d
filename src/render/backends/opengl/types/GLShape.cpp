@@ -46,12 +46,37 @@ GLShape::~GLShape() {
 }
 
 void GLShape::SetUV(float uStart, float vStart, float uEnd, float vEnd) {
+  static float prevUV[] = {
+    0.0f, 0.0f,
+    0.0f, 1.0f,
+    1.0f, 1.0f,
+    1.0f, 0.0f
+  };
+
   float newUV[] = {
     uStart, vStart,
     uStart, vEnd,
     uEnd, vEnd,
     uEnd, vStart
   };
+
+  if(prevUV[0] == newUV[0] && prevUV[1] == newUV[1] &&
+     prevUV[2] == newUV[2] && prevUV[3] == newUV[3] &&
+     prevUV[4] == newUV[4] && prevUV[5] == newUV[5] &&
+     prevUV[6] == newUV[6] && prevUV[7] == newUV[7]) {
+    return;
+  }
+  else
+  {
+    prevUV[0] = newUV[0];
+    prevUV[1] = newUV[1];
+    prevUV[2] = newUV[2];
+    prevUV[3] = newUV[3];
+    prevUV[4] = newUV[4];
+    prevUV[5] = newUV[5];
+    prevUV[6] = newUV[6];
+    prevUV[7] = newUV[7];
+  }
 
   int offset = 3 * sizeof(float);
   int stride = 5 * sizeof(float);
