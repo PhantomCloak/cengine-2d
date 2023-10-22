@@ -73,7 +73,6 @@ void EditorViewPort::RenderWindow() {
         //if (ImGui::IsWindowFocused())
         //    zoomValue += GetMouseWheelMove();
         if (zoomValue != lastZoomValue) {
-            Log::Inf("Zooming to + " + std::to_string(zoomValue));
             zoomValue = std::clamp(zoomValue, 1.0f, 10.0f);
             CommancheRenderer::Instance->SetCameraZoom(zoomValue);
             lastZoomValue = zoomValue;
@@ -89,7 +88,7 @@ void EditorViewPort::RenderWindow() {
         if (ViewportSize.x != currentRect.x || ViewportSize.y != currentRect.y) {
             ViewportSize = glm::vec2(currentRect.x, currentRect.y);
 
-            CommancheRenderer::Instance->UpdateRenderTexture(currentRect);
+            CommancheRenderer::Instance->UpdateRenderTexture(ViewportSize);
 
             windowSize = ImGui::GetWindowSize();
             contentAvail = ImGui::GetContentRegionAvail();

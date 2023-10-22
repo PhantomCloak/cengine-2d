@@ -60,7 +60,6 @@ void InitFreeType() {
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    Log::Inf("Window W: " + std::to_string(width) + " H: " + std::to_string(height));
     CommancheRenderer::screenWidth = width;
     CommancheRenderer::screenHeight = height;
     glViewport(0, 0, width, height);

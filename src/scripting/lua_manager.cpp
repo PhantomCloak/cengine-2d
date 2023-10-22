@@ -27,7 +27,7 @@ void LuaManager::InitSandbox() {
         luaLibPath = "./assets/scripts/lib";
     }
 
-    Log::Inf("lua path pointing to " + luaLibPath);
+    Log::Inf("lua path pointing to %s", luaLibPath.c_str());
 
     luaState["package"]["path"] = package_path + ";" + luaLibPath;
 }

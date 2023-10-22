@@ -36,7 +36,7 @@ void LoadTileAsset(const char* selectedItem) {
     std::string mapMetaJson = FileSys::ReadFile(assetPathRoot + "tile_maps/" + std::string(selectedItem) + ".json");
 
     if (mapMetaJson == "") {
-        Log::Warn("No map meta data found for " + std::string(selectedItem));
+        Log::Warn("No map meta data found for %s", selectedItem);
         return;
     }
 
@@ -51,12 +51,13 @@ void LoadTileAsset(const char* selectedItem) {
         blacklistedTiles.push_back(tile.ToInt());
     }
 
-    Log::Inf("Loaded map meta data for " + std::string(selectedItem));
-    Log::Inf("tileWidth = " + std::to_string(tileWidth));
-    Log::Inf("tileHeight = " + std::to_string(tileHeight));
-    Log::Inf("tileOffsetX = " + std::to_string(tileOffsetX));
-    Log::Inf("tileOffsetY = " + std::to_string(tileOffsetY));
-    Log::Inf("blacklistedTiles = " + std::to_string(blacklistedTiles.size()));
+    Log::Inf("Loaded map meta data for %s", selectedItem);
+
+    Log::Inf("tileWidth=%d", tileWidth);
+    Log::Inf("tileHeight=%d", tileHeight);
+    Log::Inf("tileOffsetX=%d", tileOffsetX);
+    Log::Inf("tileOffsetY=%d", tileOffsetY);
+    Log::Inf("blacklistedTiles=%d", blacklistedTiles.size());
 }
 
 bool TilePlacer::IsFocused() {
@@ -157,7 +158,6 @@ void TilePlacer::RenderWindow() {
 #elif RENDER_BACKEND_OPENGL
         if (ImGui::ImageButton(identifier.c_str(), (void*)selectedTextureId, ImVec2(64, 64), uv0, uv1)) {
 #endif
-            Log::Warn("Clicked on tile " + identifier);
             flecs::entity piece = Scene::CreateEntity("tile" + std::to_string(zIndexStart));
 
             piece.set<Sprite>({ selectedItem, zIndexStart, static_cast<float>(currentColumn * tileSizeW), static_cast<float>(currentRow * tileSizeH), (float)tileSizeH, (float)tileSizeW });

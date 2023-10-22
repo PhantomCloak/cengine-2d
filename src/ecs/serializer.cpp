@@ -59,7 +59,7 @@ void RegisterTypes(flecs::world& world) {
 }
 
 void EngineSerializer::SerializeSceneToFile(const std::string& path, flecs::world& world) {
-  Log::Warn("Ser scene from file: " + path);
+  Log::Warn("Ser scene from file: %s", path.c_str());
     RegisterTypes(world);
     flecs::snapshot snapshot(world);
     snapshot.take();

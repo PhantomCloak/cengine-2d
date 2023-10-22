@@ -28,9 +28,9 @@ class Log {
         static std::vector<std::shared_ptr<LogSink>> sinks;
         static void AddSink(std::shared_ptr<LogSink> sink);
 
-        static void Inf(const std::string& message);
-        static void Warn(const std::string& message);
-        static void Err(const std::string& message);
+        static void Inf(const char* format, ...);
+        static void Warn(const char* format, ...);
+        static void Err(const char* format, ...);
 };
 
 #endif

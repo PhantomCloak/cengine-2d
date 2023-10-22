@@ -164,7 +164,7 @@ void TileMapImporter::RenderWindow() {
 
             
             NMB::show( "Sucess", "Asset successfully imported.", NMB::Icon::ICON_INFO );
-            Log::Inf("Asset successfully imported to " + filePath);
+            Log::Inf("Asset successfully imported to %s", filePath.c_str());
             textureImportCallback(1);
         });
     }
