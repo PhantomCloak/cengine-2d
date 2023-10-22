@@ -9,7 +9,7 @@
 
 static GLFWwindow* wnd;
 
-extern "C" double getScreenScaleFactor();
+//extern "C" double getScreenScaleFactor();
 
 void Cursor::Setup(void* window) {
     wnd = (GLFWwindow*)window;
@@ -19,7 +19,6 @@ glm::vec2 Cursor::GetCursorPosition() {
     double x = 0;
     double y = 0;
 
-    double a = getScreenScaleFactor();
     glfwGetCursorPos(wnd, &x, &y);
     return glm::vec2(x, y);
 }

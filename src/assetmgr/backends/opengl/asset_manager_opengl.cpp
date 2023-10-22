@@ -87,10 +87,9 @@ TextureInf AssetManager::GetTextureInf(const std::string& assetId) {
     int textureId = textures.at(assetId);
     CommancheTextureInfo infR = crender->GetTextureInfo(textureId);
 
-    TextureInf inf = {
-        .height = infR.height,
-        .width = infR.width
-    };
+    TextureInf inf;
+    inf.height = infR.height;
+    inf.width = infR.width;
 
     return inf;
 }

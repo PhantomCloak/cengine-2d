@@ -76,6 +76,8 @@ void AnimationTree() {
 
         int breakCtx = ImGui::GetWindowWidth() / 60;
 
+        if (breakCtx == 0)
+            breakCtx = 1;
         if (ctx % breakCtx == 0)
             ImGui::NewLine();
 
