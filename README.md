@@ -6,7 +6,7 @@ cengine-2d is a cross-platform OpenGL 2D game engine.
 
 <img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/df993eae-550e-46cd-bef0-a2e40ad93036">
 <img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/cfa97fb9-b975-4b45-8546-848ff8799d59">
-<img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/240c102e-9437-443b-8b44-8802dadf94ce">
+<img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/f5cbecf4-cb2e-4c1b-86f2-cd5ca591eacc">
 
 ### Compiler Flags
 
