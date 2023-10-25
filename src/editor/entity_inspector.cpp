@@ -60,13 +60,32 @@ void EntityInspector::RenderWindow() {
                     comp->color = CommancheColorRGBA({ static_cast<int>(pickedColor.x * 255), static_cast<int>(pickedColor.y * 255), static_cast<int>(pickedColor.z * 255), static_cast<int>(pickedColor.w * 255) });
                 }
                 ImGui::InputInt(_labelPrefix("z index:").c_str(), &comp->zIndex);
-                //ImGui::InputInt(_labelPrefix("texture id:").c_str(), &comp->texture);
+                // ImGui::InputInt(_labelPrefix("texture id:").c_str(), &comp->texture);
                 ImGui::Spacing();
                 ImGui::InputFloat(_labelPrefix("src x:").c_str(), &comp->srcRect.x);
                 ImGui::InputFloat(_labelPrefix("src y:").c_str(), &comp->srcRect.y);
                 ImGui::EndGroupPanel();
             }
-            if (e != 0 && e.has<CharacterController>()) {
+            if (e != 0 && e.has<Label>()) {
+                ImGui::BeginGroupPanel("Label");
+                flecs::ref<Label> comp = e.get_ref<Label>();
+
+                char textBuffer[128];
+                strncpy(textBuffer, comp->text.c_str(), sizeof(textBuffer));
+                textBuffer[sizeof(textBuffer) - 1] = 0; // Ensure null-termination
+
+                if (ImGui::InputText(_labelPrefix("text:").c_str(), textBuffer, sizeof(textBuffer))) {
+                    comp->text = textBuffer;
+                }
+
+
+                ImGui::InputInt(_labelPrefix("font size:").c_str(), &comp->size);
+                static ImVec4 pickedColor = ImVec4((float)comp->textColor.r, (float)comp->textColor.g, (float)comp->textColor.b, 0); // initial color
+                if (ImGui::ColorEdit4(_labelPrefix("color: ").c_str(), (float*)&pickedColor)) {
+                    comp->textColor = CommancheColorRGB({ static_cast<int>(pickedColor.x * 255) , static_cast<int>(pickedColor.y * 255), static_cast<int>(pickedColor.z * 255) });
+                }
+
+                ImGui::EndGroupPanel();
             }
             if (e != 0 && e.has<Health>()) {
             }
@@ -81,6 +100,9 @@ void EntityInspector::RenderWindow() {
 
                 if (ImGui::MenuItem("RigidBody")) {
                     Scene::AddComponentToEntity<RigidBody>(e);
+                }
+                if (ImGui::MenuItem("Text")) {
+                    Scene::AddComponentToEntity<Label>(e);
                 }
                 ImGui::EndPopup();
             }

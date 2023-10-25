@@ -71,9 +71,10 @@ void EditorMenuBar::FileMenu() {
 void EditorMenuBar::EntitiesMenu() {
     if (ImGui::BeginMenu("Entity")) {
         if (ImGui::MenuItem("New")) {
-            flecs::entity e = Scene::CreateEntity("chewbacca");
+            static int ctx = 0 ;
+            ctx++;
+            flecs::entity e = Scene::CreateEntity("entity" + std::to_string(ctx));
             e.add<RectTransformC>();
-            Log::Inf("CHEWBACCA CALLED");
         }
         ImGui::EndMenu();
     }

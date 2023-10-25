@@ -247,7 +247,7 @@ void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width,
     shape->SetProjection(camX.ProjectionMat);
     shape->Translate(glm::vec2(x, y));
     shape->Rotate(rotation);
-    shape->SetTint(glm::vec4(color.r, color.g , color.b, color.a));
+    shape->SetTint(glm::vec4(color.r, color.g, color.b, color.a));
 
     shape->DrawShape();
 }
@@ -285,7 +285,9 @@ void CommancheRenderer::CDrawLine(float startx, float starty, float endx, float 
     shader.Deactivate();
 };
 
-void CommancheRenderer::CDrawText(int fontId, std::string message, int x, int y, int size, CommancheColorRGB color) {
+void CommancheRenderer::CDrawText(int fontId, std::string message, float x, float y, float size, CommancheColorRGB color) {
+
+    CoordinateCalculator::ConvertMetersToPixels(x, y);
     static bool isInit = false;
     static VAO* vao;
     static VBO* vbo;
@@ -299,7 +301,7 @@ void CommancheRenderer::CDrawText(int fontId, std::string message, int x, int y,
 
     Shader shader = glShaders[DEFAULT_FONT_SHADER_SLOT];
     shader.Activate();
-    glUniform3f(glGetUniformLocation(shader.ID, "textColor"), color.r, color.g, color.b);
+    glUniform3f(glGetUniformLocation(shader.ID, "textColor"), (float)color.r / 255, (float)color.g / 255, (float)color.b / 255);
     glActiveTexture(GL_TEXTURE0);
 
     vao->Bind();
@@ -400,10 +402,10 @@ void CommancheRenderer::UpdateRenderTexture(glm::vec2 size) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     camX.SetTarget({
-    0, // left
+    0,      // left
     width,  // right
     height, // top
-    0 // bottom
+    0       // bottom
     });
 }
 
@@ -456,18 +458,18 @@ void CommancheRenderer::DrawGrids() {
 
     for (int i = 0; i <= gridSize; i++) {
         // Horizontal lines
-        vertices[index][0] = startHorizontal; // start x
+        vertices[index][0] = startHorizontal;                  // start x
         vertices[index][1] = startVertical + (i * gridHeight); // start y
         index++;
         vertices[index][0] = startHorizontal + (gridSize * gridWidth); // end x
-        vertices[index][1] = startVertical + (i * gridHeight); // end y
+        vertices[index][1] = startVertical + (i * gridHeight);         // end y
         index++;
 
         // Vertical lines
-        vertices[index][0] = startHorizontal +  (i * gridWidth); // start x
-        vertices[index][1] = startVertical; // start y
+        vertices[index][0] = startHorizontal + (i * gridWidth); // start x
+        vertices[index][1] = startVertical;                     // start y
         index++;
-        vertices[index][0] = startHorizontal + (i * gridWidth); // end x
+        vertices[index][0] = startHorizontal + (i * gridWidth);       // end x
         vertices[index][1] = startVertical + (gridSize * gridHeight); // end y
         index++;
 
