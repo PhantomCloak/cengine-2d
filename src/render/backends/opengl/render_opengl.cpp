@@ -218,7 +218,7 @@ void CommancheRenderer::DrawRectRangle(float x, float y, float width, float heig
     shape->Translate(glm::vec2(x, y));
     shape->Rotate(rotation);
 
-    shape->DrawShape(true);
+    shape->DrawShape(false);
     shader.Deactivate();
 }
 
@@ -247,6 +247,7 @@ void CommancheRenderer::CDrawImage(int textureId, float x, float y, float width,
     shape->SetProjection(camX.ProjectionMat);
     shape->Translate(glm::vec2(x, y));
     shape->Rotate(rotation);
+    shape->SetTint(glm::vec4(color.r, color.g , color.b, color.a));
 
     shape->DrawShape();
 }
@@ -398,15 +399,11 @@ void CommancheRenderer::UpdateRenderTexture(glm::vec2 size) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    float halfWidth = width / 2.0f;
-    float halfHeight = height / 2.0f;
-
-    // Set target rectangle to represent the screen size around the center point
     camX.SetTarget({
-    -halfWidth, // left
-    halfWidth,  // right
-    halfHeight, // top
-    -halfHeight // bottom
+    0, // left
+    width,  // right
+    height, // top
+    0 // bottom
     });
 }
 
@@ -425,48 +422,56 @@ int CommancheRenderer::CLoadTexture(const std::string& path) {
 }
 
 void CommancheRenderer::DrawGrids() {
-    static bool isInit = false;
-    static VAO* vao;
-    static VBO* vbo;
-
     Shader shader = glShaders[SOLID_RENDER_SHADER];
     shader.Activate();
 
     const int gridSize = 80;
-    float gridWidth = 25;
-    float gridHeight = 25;
+    float gridWidth = 2.5;
+    float gridHeight = 2.5;
+
+    CoordinateCalculator::ConvertMetersToPixels(gridWidth, gridHeight);
+
+    float top = 0, left = 0, bottom = 0, right = 0;
+    camX.GetCameraBoundaries(top, left, bottom, right);
+
+    float extension = fmax(gridWidth, gridHeight);
+    top += extension;
+    bottom -= extension;
+    left -= extension;
+    right += extension;
+
+    float startHorizontal = floor(left / gridWidth) * gridWidth;
+    float startVertical = floor(bottom / gridHeight) * gridHeight;
+
     static float vertices[(gridSize + 1) * 4][2];
+    static VAO* vao = new VAO();
+    static VBO* vbo = new VBO(NULL, sizeof(float) * (gridSize * gridSize) * 2, GL_DYNAMIC_DRAW);
 
-    if (!isInit) {
-        vao = new VAO();
-        vbo = new VBO(NULL, sizeof(float) * (gridSize * gridSize) * 2, GL_DYNAMIC_DRAW);
-        vao->LinkAttrib(vbo, 0, 2, GL_FLOAT, 2 * sizeof(float), 0);
+    vao->LinkAttrib(vbo, 0, 2, GL_FLOAT, 2 * sizeof(float), 0);
 
-        glUniform4f(glGetUniformLocation(shader.ID, "color"), 0, 0, 0, 0.3f);
-        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(camX.ProjectionMat));
+    glUniform4f(glGetUniformLocation(shader.ID, "color"), 0, 0, 0, 0.3f);
+    glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(camX.ProjectionMat));
 
-        int index = 0;
+    int index = 0;
 
-        for (int i = 0; i <= gridSize; i++) {
-            // Horizontal lines
-            vertices[index][0] = 0;
-            vertices[index][1] = i * gridHeight;
-            index++;
-            vertices[index][0] = screenWidth;
-            vertices[index][1] = i * gridHeight;
-            index++;
+    for (int i = 0; i <= gridSize; i++) {
+        // Horizontal lines
+        vertices[index][0] = startHorizontal; // start x
+        vertices[index][1] = startVertical + (i * gridHeight); // start y
+        index++;
+        vertices[index][0] = startHorizontal + (gridSize * gridWidth); // end x
+        vertices[index][1] = startVertical + (i * gridHeight); // end y
+        index++;
 
-            // Vertical lines
-            vertices[index][0] = i * gridWidth;
-            vertices[index][1] = 0;
-            index++;
-            vertices[index][0] = i * gridWidth;
-            vertices[index][1] = screenHeight;
-            index++;
-        }
+        // Vertical lines
+        vertices[index][0] = startHorizontal +  (i * gridWidth); // start x
+        vertices[index][1] = startVertical; // start y
+        index++;
+        vertices[index][0] = startHorizontal + (i * gridWidth); // end x
+        vertices[index][1] = startVertical + (gridSize * gridHeight); // end y
+        index++;
 
         vbo->Update(0, sizeof(vertices), vertices);
-        isInit = true;
     }
 
     vao->Bind();
@@ -475,6 +480,7 @@ void CommancheRenderer::DrawGrids() {
 
     vao->Unbind();
 }
+
 
 CommancheTextureInfo CommancheRenderer::GetTextureInfo(int id) {
     Texture texture = glTextures[id];

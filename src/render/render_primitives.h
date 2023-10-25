@@ -77,6 +77,14 @@ struct glCamera {
         UpdateProjection();
     }
 
+    void GetCameraBoundaries(float& top, float& left, float& bottom, float& right) {
+      float mul = 1;
+        top = target.top * mul;
+        left = target.left * mul;
+        right = target.right * mul;
+        bottom = target.bottom * mul;
+    }
+
     void UpdateProjection() {
         ProjectionMat = glm::ortho(target.left, target.right, target.top, target.bottom, -1.0f, 1.0f);
     }

@@ -17,6 +17,7 @@ class GLShape {
     void Scale(glm::vec2 scale);
     void Rotate(float rad);
     void SetOffset(glm::vec2 offset);
+    void SetTint(glm::vec4 tint);
     void BindShape();
     void DrawShape(bool wireFrame = false);
     int verticesCount;

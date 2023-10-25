@@ -113,6 +113,11 @@ void GLShape::Rotate(float rad) {
     glUniformMatrix4fv(rotationLocation, 1, GL_TRUE, glm::value_ptr(rot));
 }
 
+void GLShape::SetTint(glm::vec4 tint) {
+  static unsigned int tintLocation = glGetUniformLocation(shader->ID, "tint");
+  glUniform4f(tintLocation, tint.x / 255, tint.y / 255, tint.z / 255, tint.w / 255);
+}
+
 void GLShape::BindShape() {
     shader->Activate();
 }
