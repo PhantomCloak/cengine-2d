@@ -7,8 +7,7 @@ cengine-2d is a cross-platform OpenGL 2D game engine.
 <img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/df993eae-550e-46cd-bef0-a2e40ad93036">
 <img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/cfa97fb9-b975-4b45-8546-848ff8799d59">
 <img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/f5cbecf4-cb2e-4c1b-86f2-cd5ca591eacc">
-<img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/f9cc4ee0-38c8-4559-8878-91349c4c1150">
-
+<img width="3120" alt="image" src="https://github.com/PhantomCloak/cengine-2d/assets/34552014/4d61800f-26d4-4c6a-bdd4-69d663ec9245">
 
 ### Compiler Flags
 
@@ -22,11 +21,11 @@ cengine-2d is a cross-platform OpenGL 2D game engine.
 ## Installation
 
 
-### UNIX
+### UNIX (CMake & Make)
 ```sh
  (mkdir build && cd build)
- cmake ..
- make
+cmake -DENGINE_EDITOR=1 -DRENDER_BACKEND_OPENGL=1 -DCMAKE_TOOLCHAIN_FILE=[vcpkg path]/scripts/buildsystems/vcpkg.cmake  ..      
+ make #-j N for parallel
 ```
 
 ### Windows (Visual Studio)
