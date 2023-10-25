@@ -47,12 +47,8 @@ void Game::Setup() {
     Log::Warn("Physics Initialized");
     LuaManager::LoadLuaFilesInDirectory("./assets/scripts/after_load");
 
-    flecs::entity objC = Scene::CreateEntity("door_tile3");
-    objC.set<RectTransformC>({ glm::vec2(0, 0), glm::vec2(192 * 2, 108 * 2) });
-    objC.set<Sprite>({ "box", 20, 0, 0, 16, 16 });
-
     flecs::entity obj = Scene::CreateEntity("door_tile2");
-    obj.set<RectTransformC>({ glm::vec2(0, 0), glm::vec2(175, 87) });
+    obj.set<RectTransformC>({ glm::vec2(0, 0), glm::vec2(400, 400) });
     obj.set<Sprite>({ "desert", 20, 0, 0, 1920, 1080 });
 }
 
