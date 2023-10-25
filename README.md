@@ -24,7 +24,7 @@ cengine-2d is a cross-platform OpenGL 2D game engine.
 ### UNIX (CMake & Make)
 ```sh
  (mkdir build && cd build)
-cmake -DENGINE_EDITOR=1 -DRENDER_BACKEND_OPENGL=1 -DCMAKE_TOOLCHAIN_FILE=[vcpkg path]/scripts/buildsystems/vcpkg.cmake  ..      
+ cmake -DENGINE_EDITOR=1 -DRENDER_BACKEND_OPENGL=1 -DCMAKE_TOOLCHAIN_FILE=[vcpkg path]/scripts/buildsystems/vcpkg.cmake  ..      
  make #-j N for parallel
 ```
 
