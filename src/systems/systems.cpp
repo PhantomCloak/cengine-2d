@@ -11,16 +11,14 @@
 void Systems::Init(flecs::world& ref) {
     ref.component<RectTransformC>();
     ref.component<Sprite>();
+    ref.component<Label>();
 
     flecs::entity_t position_id = Scene::ecs.entity<Sprite>().id();
 
     ref.system<RectTransformC&, Sprite&>("RenderSystem")
     .iter(&Systems::RenderSystem);
-    // ref.system<RectTransformC&, Sprite&>("RenderSystem")
-    //   .order_by(position_id, [](flecs::entity_t e1, const void* s1, const flecs::entity_t e2, const void* s2) {
-    //     return (((Sprite*)s1)->zIndex > ((Sprite*)s2)->zIndex) - (((Sprite*)s1)->zIndex < ((Sprite*)s2)->zIndex);
-    // })
-    //.iter(&Systems::RenderSystem);
+    ref.system<RectTransformC&, Label&>("RenderTextSystem")
+    .iter(&Systems::RenderTextSystem);
 }
 
 
@@ -71,4 +69,13 @@ void Systems::RenderSystem(flecs::iter& it, RectTransformC* transform, Sprite* s
 
     if (!drawGrid)
         CommancheRenderer::Instance->DrawGrids();
+}
+
+
+void Systems::RenderTextSystem(flecs::iter& it, RectTransformC* transform, Label* label) {
+    for (auto i = 0; i < it.count(); i++) {
+        if (!it.entity(i).is_alive())
+            continue;
+        CommancheRenderer::Instance->CDrawText(0, label[i].text, transform[i].pos.x, transform[i].pos.y, label[i].size, label[i].textColor);
+    }
 }
