@@ -7,6 +7,8 @@ option(RENDER_BACKEND_OPENGL "Use the OpenGL backend" OFF)
 option(ENGINE_EDITOR "Compile with editor" OFF)
 option(RAYLIB_ANGLE_SUPPORT "Enable ANGLE support in Raylib backend" OFF)
 
+set(IMGUI_DEFINE_MATH_OPERATORS ON)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
