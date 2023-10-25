@@ -1,6 +1,7 @@
 #include "game.h"
 #include "../assetmgr/AssetManager.h"
 #include "../common/common.h"
+#include "../components/Label.h"
 #include "../io/cursor.h"
 #include "../io/filesystem.h"
 #include "../io/keyboard.h"
@@ -50,6 +51,15 @@ void Game::Setup() {
     flecs::entity obj = Scene::CreateEntity("door_tile2");
     obj.set<RectTransformC>({ glm::vec2(0, 0), glm::vec2(400, 400) });
     obj.set<Sprite>({ "desert", 20, 0, 0, 1920, 1080 });
+
+    flecs::entity obj2 = Scene::CreateEntity("label");
+    obj2.set<RectTransformC>({ glm::vec2(10, 10), glm::vec2(5, 5) });
+    obj2.set<Label>({ glm::vec2(10, 10), "Hello World", 20, { 255, 255, 255 }, true });
+
+    flecs::entity cube = Scene::CreateEntity("cube");
+    cube.set<RectTransformC>({ glm::vec2(10, 10), glm::vec2(5, 5) });
+    cube.set<Sprite>({ "box", 10, 0, 0, 1920, 1080 });
+
 }
 
 void Game::Update() {
