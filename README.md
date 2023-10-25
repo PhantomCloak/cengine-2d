@@ -45,17 +45,27 @@ vcpkg install freetype - if OpenGL
 ## Features
 
 ### Scripting
-Uses LUA for game mechanics and interactions.
+LUA with C++ bindings.
 
 ### Entity Component System
-Built on the FLECS library for managing game entities and components.
+Built on the FLECS library.
+
+### Serialization
+Default serialization format used in world/entities/physics is JSON.
 
 ### Physics Engine
-Implements Box2D for game object physics and collisions.
+Implements Box2D also supports custom-made physics engines.
 
 ### Render & Shading
-- Raylib for rendering, with ANGLE support for platform compatibility.
-- A custom OpenGL renderer for more specific rendering needs.
+Engine supports two different rendering backend.
+- Raylib with out of box [ANGLE](https://github.com/google/angle) support for platform compatibility such as iOS.
+- Modern OpenGL
 
-#### Animations (WIP)
-Native animation designer
+### Export
+Engine can built itself to following platforms.
+ - MacOS
+ - Linux
+ - Windows
+
+### Animations (WIP)
+Native animation designer with timeline.
