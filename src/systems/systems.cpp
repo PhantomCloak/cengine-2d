@@ -2,27 +2,50 @@
 #include "../assetmgr/AssetManager.h"
 #include "../editor/editor.h"
 #include "../io/cursor.h"
-#include "../render/render.h"
 #include "../io/keyboard.h"
+#include "../render/render.h"
+#include "../scene/scene.h"
 #include <numeric>
-//flecs::query<RectTransformC, Sprite> sortedQuery;
+// flecs::query<RectTransformC, Sprite> sortedQuery;
 
 void Systems::Init(flecs::world& ref) {
     ref.component<RectTransformC>();
     ref.component<Sprite>();
+
+    flecs::entity_t position_id = Scene::ecs.entity<Sprite>().id();
+
     ref.system<RectTransformC&, Sprite&>("RenderSystem")
     .iter(&Systems::RenderSystem);
+    // ref.system<RectTransformC&, Sprite&>("RenderSystem")
+    //   .order_by(position_id, [](flecs::entity_t e1, const void* s1, const flecs::entity_t e2, const void* s2) {
+    //     return (((Sprite*)s1)->zIndex > ((Sprite*)s2)->zIndex) - (((Sprite*)s1)->zIndex < ((Sprite*)s2)->zIndex);
+    // })
+    //.iter(&Systems::RenderSystem);
 }
 
 
 void Systems::RenderSystem(flecs::iter& it, RectTransformC* transform, Sprite* sprite) {
+    static std::vector<std::pair<int, int>> sortedIndices;
+
+    sortedIndices.clear();
 
     for (auto i = 0; i < it.count(); i++) {
         if (!it.entity(i).is_alive()) {
             continue;
         }
+        sortedIndices.emplace_back(i, sprite[i].zIndex);
+    }
 
-        // Ensure texture is loaded
+    std::sort(sortedIndices.begin(), sortedIndices.end(),
+    [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+        return a.second < b.second;
+    });
+
+    for (const auto& [i, _] : sortedIndices) {
+        if (!it.entity(i).is_alive()) {
+            continue;
+        }
+
         if (sprite[i].texture == 0) {
             sprite[i].texture = AssetManager::GetTexture(sprite[i].textureId);
         }
@@ -41,11 +64,11 @@ void Systems::RenderSystem(flecs::iter& it, RectTransformC* transform, Sprite* s
     }
 
     static bool drawGrid = false;
-    if(Keyboard::IsKeyPressed(Key_C)) {
-      Log::Inf("C key pressed");
-      drawGrid = !drawGrid;
+    if (Keyboard::IsKeyPressed(Key_C)) {
+        Log::Inf("C key pressed");
+        drawGrid = !drawGrid;
     }
 
-    if(drawGrid)
-      CommancheRenderer::Instance->DrawGrids();
+    if (!drawGrid)
+        CommancheRenderer::Instance->DrawGrids();
 }
