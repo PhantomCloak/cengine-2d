@@ -73,19 +73,20 @@ void Editor::Init(CommancheRenderer* renderer) {
 }
 
 void Editor::Keybindings() {
+    int offsetAmount = 5;
     if (Keyboard::IsKeyPressing(KeyCode::Key_RArrow)) {
-        CommancheRenderer::Instance->OffsetCamera(0, 25);
+        CommancheRenderer::Instance->OffsetCamera(0, offsetAmount);
     }
 
     if (Keyboard::IsKeyPressing(KeyCode::Key_LArrow)) {
-        CommancheRenderer::Instance->OffsetCamera(0, -25);
+        CommancheRenderer::Instance->OffsetCamera(0, -offsetAmount);
     }
 
     if (Keyboard::IsKeyPressing(KeyCode::Key_UArrow)) {
-        CommancheRenderer::Instance->OffsetCamera(-25, 0);
+        CommancheRenderer::Instance->OffsetCamera(-offsetAmount, 0);
     }
     if (Keyboard::IsKeyPressing(KeyCode::Key_DArrow)) {
-        CommancheRenderer::Instance->OffsetCamera(25, 0);
+        CommancheRenderer::Instance->OffsetCamera(offsetAmount, 0);
     }
 }
 

@@ -5,6 +5,8 @@ const b2Vec2 grav = b2Vec2(0.0f, 27.0f);
 static b2World* world = nullptr;
 static std::map<int, bool> registeredBody;
 
+bool Physics::IsActive = true;
+
 void Physics::Initialize(flecs::world& ecs) {
     if (world == nullptr) {
         world = new b2World(grav);
@@ -116,6 +118,9 @@ bool Physics::HasRegistered(int body) {
 
 
 void Physics::Update() {
+    
+    if(Physics::IsActive == false)
+        return;
     static const float timeStep = 1.0f / 60;
     static const int32 velocityIterations = 1;
     static const int32 positionIterations = 1;

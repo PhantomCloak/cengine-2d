@@ -1,7 +1,8 @@
 #include "editor_menu_bar.h"
-#include "../editor/editor.h"
 #include "../ecs/serializer.h"
+#include "../editor/editor.h"
 #include "../io/filesystem.h"
+#include "../physics/physics.h"
 #include "../scene/scene.h"
 #include "flecs.h"
 #include "imgui.h"
@@ -79,6 +80,19 @@ void EditorMenuBar::EntitiesMenu() {
     if (ImGui::BeginMenu("Scripting")) {
         ImGui::EndMenu();
     }
+    if (ImGui::BeginMenu("Physics")) {
+
+        if (Physics::IsActive) {
+            if (ImGui::MenuItem("Disable Physics")) {
+                Physics::IsActive = false;
+            }
+        } else {
+            if (ImGui::MenuItem("Enable Physics")) {
+                Physics::IsActive = true;
+            }
+        }
+        ImGui::EndMenu();
+    }
 }
 
 void EditorMenuBar::AssetsMenu() {
@@ -92,7 +106,7 @@ void EditorMenuBar::AssetsMenu() {
             enabledWindows[EDITOR_SHOW_MAP_EDITOR] = true;
         }
         if (ImGui::MenuItem("Import Asset")) {
-              editorInstance->importer->OpenImporter([](int textureId) {
+            editorInstance->importer->OpenImporter([](int textureId) {
                 showImporter = false;
             });
             showImporter = true;
@@ -127,7 +141,7 @@ void EditorMenuBar::RenderWindow() {
         ImGui::Dummy(ImVec2(10.0f, 0.0f));
 
         ImGui::SameLine();
-        if (false) {
+        if (Physics::IsActive) {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
             ImGui::Text("Physics Running: Yes");
             ImGui::PopStyleColor();
@@ -146,8 +160,8 @@ void EditorMenuBar::RenderWindow() {
     }
     ImGui::EndMainMenuBar();
 
-    if(enabledWindows[EDITOR_SHOW_LOAD_DIALOG])
+    if (enabledWindows[EDITOR_SHOW_LOAD_DIALOG])
         LoadDialog();
-    else if(enabledWindows[EDITOR_SHOW_SAVE_DIALOG])
+    else if (enabledWindows[EDITOR_SHOW_SAVE_DIALOG])
         SaveDialog();
 }
